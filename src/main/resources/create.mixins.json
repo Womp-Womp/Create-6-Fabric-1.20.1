@@ -53,7 +53,6 @@
     "client.LevelRendererMixin",
     "client.MapRendererMapInstanceMixin",
     "client.PlayerRendererMixin",
-    "client.WindowResizeMixin",
     "compat.JourneyFullscreenMapMixin",
     "fabric.ClientTextTooltipAccessor",
     "fabric.GuiAccessor",
