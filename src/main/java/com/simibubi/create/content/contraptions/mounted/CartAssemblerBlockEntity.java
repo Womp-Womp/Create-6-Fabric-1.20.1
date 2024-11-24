@@ -19,14 +19,15 @@ import com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform;
 import com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.INamedIconOptions;
 import com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.ScrollOptionBehaviour;
 import com.simibubi.create.foundation.gui.AllIcons;
-import com.simibubi.create.foundation.utility.Couple;
-import com.simibubi.create.foundation.utility.Iterate;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.VecHelper;
+import com.simibubi.create.foundation.utility.CreateLang;
 import io.github.fabricators_of_create.porting_lib.util.LazyOptional;
 import io.github.fabricators_of_create.porting_lib.util.MinecartAndRailUtil;
 import io.github.fabricators_of_create.porting_lib.util.NBTSerializer;
 
+import net.createmod.catnip.utility.Couple;
+import net.createmod.catnip.utility.Iterate;
+import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.utility.lang.Lang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -232,7 +233,7 @@ public class CartAssemblerBlockEntity extends SmartBlockEntity implements IDispl
 	@Override
 	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
 		movementMode = new ScrollOptionBehaviour<>(CartMovementMode.class,
-			Lang.translateDirect("contraptions.cart_movement_mode"), this, getMovementModeSlot());
+			CreateLang.translateDirect("contraptions.cart_movement_mode"), this, getMovementModeSlot());
 		behaviours.add(movementMode);
 		registerAwardables(behaviours, AllAdvancements.CONTRAPTION_ACTORS);
 	}

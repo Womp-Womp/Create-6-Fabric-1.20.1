@@ -198,9 +198,8 @@ public class FluidNetwork {
 				if (transfer.isEmpty())
 					return;
 				test.abort();
-			}
+}
 			List<Pair<BlockFace, Storage<FluidVariant>>> availableOutputs = new ArrayList<>(targets);
-
 			while (!availableOutputs.isEmpty() && transfer.getAmount() > 0) {
 				long dividedTransfer = transfer.getAmount() / availableOutputs.size();
 				long remainder = transfer.getAmount() % availableOutputs.size();
@@ -221,11 +220,9 @@ public class FluidNetwork {
 						iterator.remove();
 						continue;
 					}
-
 					FluidStack divided = transfer.copy();
 					divided.setAmount(toTransfer);
 					long fill = targetHandler.insert(divided.getType(), divided.getAmount(), t);
-
 					transfer.setAmount(transfer.getAmount() - fill);
 					transferredAmount += fill;
 					if (fill < toTransfer)

@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -35,6 +36,7 @@ import com.tterrag.registrate.fabric.EnvExecutor;
 import io.github.fabricators_of_create.porting_lib.util.NBTSerializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.createmod.catnip.utility.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -97,6 +99,14 @@ public class Carriage {
 
 	public boolean presentInMultipleDimensions() {
 		return entities.size() > 1;
+	}
+
+	public List<ResourceKey<Level>> getPresentDimensions() {
+		return entities.keySet().stream().distinct().toList();
+	}
+
+	public Optional<BlockPos> getPositionInDimension(ResourceKey<Level> dimension) {
+		return Optional.ofNullable(entities.get(dimension)).map(carriage -> BlockPos.containing(carriage.positionAnchor));
 	}
 
 	public void setContraption(Level level, CarriageContraption contraption) {
@@ -420,6 +430,13 @@ public class Carriage {
 			if (entity != null)
 				return entity;
 		}
+		return null;
+	}
+
+	public Pair<ResourceKey<Level>, DimensionalCarriageEntity> anyAvailableDimensionalCarriage() {
+		for (Entry<ResourceKey<Level>, DimensionalCarriageEntity> entry : entities.entrySet())
+			if (entry.getValue().entity.get() != null)
+				return Pair.of(entry.getKey(), entry.getValue());
 		return null;
 	}
 
@@ -792,6 +809,8 @@ public class Carriage {
 		}
 
 		private void createEntity(Level level, boolean loadPassengers) {
+			if (positionAnchor != null)
+				serialisedEntity.put("Pos", VecHelper.writeNBT(positionAnchor));
 			Entity entity = EntityType.create(serialisedEntity, level)
 				.orElse(null);
 

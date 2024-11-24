@@ -36,7 +36,7 @@ public class SpoutCasting extends BlockSpoutingBehaviour {
 		if (blockEntity == null)
 			return 0;
 
-		ResourceLocation registryName = RegisteredObjects.getKeyOrThrow(blockEntity.getType());
+		ResourceLocation registryName = CatnipServices.REGISTRIES.getKeyOrThrow(blockEntity.getType());
 		if (!registryName.equals(TABLE) && !registryName.equals(BASIN))
 			return 0;
 

@@ -16,10 +16,10 @@ import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import com.simibubi.create.content.contraptions.elevator.ElevatorColumn.ColumnCoords;
 import com.simibubi.create.content.contraptions.pulley.PulleyContraption;
 import com.simibubi.create.content.redstone.contact.RedstoneContactBlock;
-import com.simibubi.create.foundation.utility.Couple;
-import com.simibubi.create.foundation.utility.IntAttached;
-import com.simibubi.create.foundation.utility.Lang;
+import com.simibubi.create.foundation.utility.CreateLang;
 
+import net.createmod.catnip.utility.Couple;
+import net.createmod.catnip.utility.IntAttached;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -104,14 +104,12 @@ public class ElevatorContraption extends PulleyContraption {
 		if (blocks.size() <= 0)
 			return false;
 		if (contacts == 0)
-			throw new AssemblyException(Lang.translateDirect("gui.assembly.exception.no_contacts"));
+			throw new AssemblyException(CreateLang.translateDirect("gui.assembly.exception.no_contacts"));
 		if (contacts > 1)
-			throw new AssemblyException(Lang.translateDirect("gui.assembly.exception.too_many_contacts"));
-
+			throw new AssemblyException(CreateLang.translateDirect("gui.assembly.exception.too_many_contacts"));
 		ElevatorColumn column = ElevatorColumn.get(world, getGlobalColumn());
 		if (column != null && column.isActive())
-			throw new AssemblyException(Lang.translateDirect("gui.assembly.exception.column_conflict"));
-
+			throw new AssemblyException(CreateLang.translateDirect("gui.assembly.exception.column_conflict"));
 		startMoving(world);
 		return true;
 	}

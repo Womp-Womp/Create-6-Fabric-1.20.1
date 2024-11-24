@@ -6,7 +6,7 @@ import static com.simibubi.create.AllTags.NameSpace.MOD;
 import static com.simibubi.create.AllTags.NameSpace.QUARK;
 import static com.simibubi.create.AllTags.NameSpace.TIC;
 
-import com.simibubi.create.foundation.utility.Lang;
+import net.createmod.catnip.utility.lang.Lang;
 
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -92,6 +92,8 @@ public class AllTags {
 		PASSIVE_BOILER_HEATERS,
 		SAFE_NBT,
 		SEATS,
+		POSTBOXES,
+		TABLE_CLOTHS,
 		TOOLBOXES,
 		TRACKS,
 		TREE_ATTACHMENTS,
@@ -167,6 +169,10 @@ public class AllTags {
 		PRESSURIZED_AIR_SOURCES,
 		SANDPAPER,
 		SEATS,
+		POSTBOXES,
+		TABLE_CLOTHS,
+		DYED_TABLE_CLOTHS,
+		PULPIFIABLE,
 		SLEEPERS,
 		TOOLBOXES,
 		TRACKS,

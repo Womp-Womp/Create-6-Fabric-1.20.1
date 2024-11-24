@@ -52,8 +52,8 @@ public class LinkHandler {
 				.add(Vec3.atLowerCornerOf(ray.getDirection()
 					.getNormal())
 					.scale(.25f));
-			fakePlayerChoice = localHit.distanceToSqr(behaviour.firstSlot.getLocalOffset(blockState)) > localHit
-				.distanceToSqr(behaviour.secondSlot.getLocalOffset(blockState));
+			fakePlayerChoice = localHit.distanceToSqr(behaviour.firstSlot.getLocalOffset(world, pos, blockState)) > localHit
+				.distanceToSqr(behaviour.secondSlot.getLocalOffset(world, pos, blockState));
 		}
 
 		for (boolean first : Arrays.asList(false, true)) {

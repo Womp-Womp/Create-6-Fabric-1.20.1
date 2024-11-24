@@ -27,6 +27,7 @@ import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
+import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.nbt.CompoundTag;
@@ -37,6 +38,14 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.material.Fluid;
+import org.jetbrains.annotations.NotNull;
+
+import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -116,7 +125,7 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IReci
 		return (view, tooltip) -> {
 			float chance = output.getChance();
 			if (chance != 1)
-				tooltip.add(1, Lang.translateDirect("recipe.processing.chance", chance < 0.01 ? "<1" : (int) (chance * 100))
+				tooltip.add(1, CreateLang.translateDirect("recipe.processing.chance", chance < 0.01 ? "<1" : (int) (chance * 100))
 					.withStyle(ChatFormatting.GOLD));
 		};
 	}
@@ -182,7 +191,7 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IReci
 			long amountToUse = mbAmount == -1 ? fluidStack.getAmount() : mbAmount;
 			FluidUnit unit = AllConfigs.client().fluidUnitType.get();
 			String amount = FluidTextUtil.getUnicodeMillibuckets(amountToUse, unit, AllConfigs.client().simplifyFluidUnit.get());
-			Component text = Component.literal(String.valueOf(amount)).append(Lang.translateDirect(unit.getTranslationKey())).withStyle(ChatFormatting.GOLD);
+			Component text = Component.literal(String.valueOf(amount)).append(CreateLang.translateDirect(unit.getTranslationKey())).withStyle(ChatFormatting.GOLD);
 			if (tooltip.isEmpty())
 				tooltip.add(0, text);
 			else {
@@ -198,12 +207,12 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IReci
 		return new IDrawable() {
 			@Override
 			public int getWidth() {
-				return texture.width;
+				return texture.getWidth();
 			}
 
 			@Override
 			public int getHeight() {
-				return texture.height;
+				return texture.getHeight();
 			}
 
 			@Override

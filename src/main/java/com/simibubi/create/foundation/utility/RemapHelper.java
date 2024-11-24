@@ -57,6 +57,7 @@ import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.Create;
 import com.simibubi.create.foundation.data.recipe.CompatMetals;
 
+import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
@@ -102,8 +103,8 @@ public class RemapHelper {
 		reMap.put("adjustable_pulse_repeater", PULSE_REPEATER.getId());
 		reMap.put("adjustable_repeater", PULSE_REPEATER.getId());
 
-		reMap.put("copper_block", RegisteredObjects.getKeyOrThrow(Blocks.COPPER_BLOCK));
-		reMap.put("copper_ore", RegisteredObjects.getKeyOrThrow(Blocks.COPPER_ORE));
+		reMap.put("copper_block", CatnipServices.REGISTRIES.getKeyOrThrow(Blocks.COPPER_BLOCK));
+		reMap.put("copper_ore", CatnipServices.REGISTRIES.getKeyOrThrow(Blocks.COPPER_ORE));
 
 		reMap.put("acacia_glass", ACACIA_WINDOW.getId());
 		reMap.put("acacia_glass_pane", ACACIA_WINDOW_PANE.getId());

@@ -42,8 +42,6 @@ import com.simibubi.create.content.trains.entity.Train;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.collision.Matrix3d;
 import com.simibubi.create.foundation.mixin.accessor.ServerLevelAccessor;
-import com.simibubi.create.foundation.utility.AngleHelper;
-import com.simibubi.create.foundation.utility.VecHelper;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -558,9 +556,12 @@ public abstract class AbstractContraptionEntity extends Entity implements IEntit
 		relativeMotion = reverseRotation(relativeMotion, 1);
 		context.relativeMotion = relativeMotion;
 
-		return !BlockPos.containing(previousPosition).equals(gridPosition)
-			|| (context.relativeMotion.length() > 0 || context.contraption instanceof CarriageContraption)
-				&& context.firstMovement;
+		boolean ignoreMotionForFirstMovement =
+			context.contraption instanceof CarriageContraption || actor instanceof PortableStorageInterfaceMovement;
+
+		return !BlockPos.containing(previousPosition)
+			.equals(gridPosition)
+			|| (context.relativeMotion.length() > 0 || ignoreMotionForFirstMovement) && context.firstMovement;
 	}
 
 	public void move(double x, double y, double z) {
@@ -883,7 +884,7 @@ public abstract class AbstractContraptionEntity extends Entity implements IEntit
 		public float yRotation = 0;
 		public float zRotation = 0;
 		public float secondYRotation = 0;
-		
+
 		Matrix3d matrix;
 
 		public Matrix3d asMatrix() {

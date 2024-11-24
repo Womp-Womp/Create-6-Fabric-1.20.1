@@ -6,7 +6,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.AllParticleTypes;
 import com.simibubi.create.foundation.particle.ICustomParticleData;
-import com.simibubi.create.foundation.utility.RegisteredObjects;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
@@ -14,8 +13,8 @@ import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
+import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.client.particle.ParticleProvider;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.network.FriendlyByteBuf;
@@ -58,7 +57,7 @@ public class FluidParticleData implements ParticleOptions, ICustomParticleData<F
 
 	@Override
 	public String writeToString() {
-		return RegisteredObjects.getKeyOrThrow(type) + " " + RegisteredObjects.getKeyOrThrow(fluid.getFluid());
+		return CatnipServices.REGISTRIES.getKeyOrThrow(type) + " " + CatnipServices.REGISTRIES.getKeyOrThrow(fluid.getFluid());
 	}
 
 	public static final Codec<FluidParticleData> CODEC = RecordCodecBuilder.create(i -> i

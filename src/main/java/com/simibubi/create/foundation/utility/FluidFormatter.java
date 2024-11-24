@@ -16,14 +16,14 @@ public class FluidFormatter {
 		if (shorten && amount >= FluidConstants.BUCKET && unit == FluidUnit.MILLIBUCKETS) {
 			return Couple.create(
 					Components.literal(String.format("%.1f" , amount / (double) FluidConstants.BUCKET)),
-					Lang.translateDirect("generic.unit.buckets")
+					CreateLang.translateDirect("generic.unit.buckets")
 			);
 		}
 
 		String amountToDisplay = FluidTextUtil.getUnicodeMillibuckets(amount, unit, true);
 		return Couple.create(
 				Components.literal(amountToDisplay),
-				Lang.translateDirect(unit.getTranslationKey())
+				CreateLang.translateDirect(unit.getTranslationKey())
 		);
 	}
 

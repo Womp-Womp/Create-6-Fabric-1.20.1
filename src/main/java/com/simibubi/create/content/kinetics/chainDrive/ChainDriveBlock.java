@@ -31,7 +31,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraft.world.level.material.PushReaction;
 
 public class ChainDriveBlock extends RotatedPillarKineticBlock
 	implements IBE<KineticBlockEntity>, ITransformableBlock, WeakPowerCheckingBlock {

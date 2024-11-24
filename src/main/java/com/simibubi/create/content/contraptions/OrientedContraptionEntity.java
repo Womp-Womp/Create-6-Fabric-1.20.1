@@ -1,7 +1,6 @@
 package com.simibubi.create.content.contraptions;
 
-import static com.simibubi.create.foundation.utility.AngleHelper.angleLerp;
-import static com.simibubi.create.foundation.utility.AngleHelper.wrapAngle180;
+import static net.createmod.catnip.utility.math.AngleHelper.angleLerp;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -17,10 +16,6 @@ import com.simibubi.create.content.contraptions.minecart.capability.MinecartCont
 import com.simibubi.create.content.contraptions.mounted.CartAssemblerBlockEntity.CartMovementMode;
 import com.simibubi.create.content.contraptions.mounted.MountedContraption;
 import com.simibubi.create.foundation.item.ItemHelper;
-import com.simibubi.create.foundation.utility.AngleHelper;
-import com.simibubi.create.foundation.utility.Couple;
-import com.simibubi.create.foundation.utility.NBTHelper;
-import com.simibubi.create.foundation.utility.VecHelper;
 
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 import io.github.fabricators_of_create.porting_lib.util.MinecartAndRailUtil;
@@ -362,7 +357,7 @@ public class OrientedContraptionEntity extends AbstractContraptionEntity {
 				return false;
 			OrientedContraptionEntity parent = (OrientedContraptionEntity) riding;
 			prevYaw = yaw;
-			yaw = wrapAngle180(getInitialYaw() - parent.getInitialYaw()) - parent.getViewYRot(1);
+			yaw = AngleHelper.wrapAngle180(getInitialYaw() - parent.getInitialYaw()) - parent.getViewYRot(1);
 			return false;
 		}
 

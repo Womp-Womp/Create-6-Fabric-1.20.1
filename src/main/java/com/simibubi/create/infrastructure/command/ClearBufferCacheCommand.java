@@ -25,6 +25,7 @@ public class ClearBufferCacheCommand {
 
 	@Environment(EnvType.CLIENT)
 	private static void execute() {
+		CatnipClient.invalidateRenderers();
 		CreateClient.invalidateRenderers();
 	}
 }

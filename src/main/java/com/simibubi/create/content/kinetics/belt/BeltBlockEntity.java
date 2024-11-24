@@ -31,11 +31,11 @@ import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
 import com.simibubi.create.content.logistics.tunnel.BrassTunnelBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.VersionedInventoryTrackerBehaviour;
-import com.simibubi.create.foundation.utility.NBTHelper;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
+import net.createmod.catnip.utility.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -502,11 +502,16 @@ public class BeltBlockEntity extends KineticBlockEntity implements SidedStorageB
 			.isVertical()) {
 			if (movementFacing != side) {
 				transportedStack.sideOffset = side.getAxisDirection()
-					.getStep() * .35f;
+					.getStep() * .675f;
 				if (side.getAxis() == Axis.X)
 					transportedStack.sideOffset *= -1;
-			} else
-				transportedStack.beltPosition = getDirectionAwareBeltMovementSpeed() > 0 ? index : index + 1;
+			} else {
+				float extraOffset =
+					BeltHelper.getSegmentBE(level, worldPosition.relative(movementFacing.getOpposite())) != null ? .26f
+						: 0;
+				transportedStack.beltPosition =
+					getDirectionAwareBeltMovementSpeed() > 0 ? index - extraOffset : index + 1 + extraOffset;
+			}
 		}
 
 		transportedStack.prevSideOffset = transportedStack.sideOffset;

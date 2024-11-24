@@ -45,6 +45,8 @@ public class ValueSettingsInputHandler {
 		for (BlockEntityBehaviour behaviour : sbe.getAllBehaviours()) {
 			if (!(behaviour instanceof ValueSettingsBehaviour valueSettingsBehaviour))
 				continue;
+			if (valueSettingsBehaviour.bypassesInput(player.getMainHandItem()))
+				continue;
 
 			BlockHitResult ray = RaycastHelper.rayTraceRange(world, player, 10);
 			if (ray == null)
@@ -71,7 +73,7 @@ public class ValueSettingsInputHandler {
 				continue;
 
 			if (!valueSettingsBehaviour.acceptsValueSettings() || fakePlayer) {
-				valueSettingsBehaviour.onShortInteract(player, hand, ray.getDirection());
+				valueSettingsBehaviour.onShortInteract(player, hand, ray.getDirection(), ray);
 				// fabric: https://github.com/Fabricators-of-Create/Create/issues/1553
 				// Fabric api doesn't have a replacement for Forge's Event.Result so we need to hackily set this
 				// to fail so that other code isn't run, this just simulates the same behavior as create forge since we

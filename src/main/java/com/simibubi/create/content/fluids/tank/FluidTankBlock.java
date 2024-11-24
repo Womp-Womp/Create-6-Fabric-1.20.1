@@ -13,7 +13,6 @@ import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.blockEntity.ComparatorUtil;
 import com.simibubi.create.foundation.fluid.FluidHelper;
 import com.simibubi.create.foundation.fluid.FluidHelper.FluidExchange;
-import com.simibubi.create.foundation.utility.Lang;
 
 import io.github.fabricators_of_create.porting_lib.block.CustomSoundTypeBlock;
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
@@ -21,6 +20,7 @@ import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.createmod.catnip.utility.lang.Lang;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -121,7 +121,7 @@ public class FluidTankBlock extends Block implements IWrenchable, IBE<FluidTankB
 //	@Override
 //	public int getLightEmission(BlockState state, BlockGetter world, BlockPos pos) {
 //		FluidTankBlockEntity tankAt = ConnectivityHandler.partAt(getBlockEntityType(), world, pos);
-//		if (tankAt == null)
+//		if (tankAt == null || !tankAt.hasLevel())
 //			return 0;
 //		FluidTankBlockEntity controllerBE = tankAt.getControllerBE();
 //		if (controllerBE == null || !controllerBE.window)

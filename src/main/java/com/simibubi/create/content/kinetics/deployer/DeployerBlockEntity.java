@@ -24,11 +24,7 @@ import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
 import com.simibubi.create.foundation.item.TooltipHelper;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.NBTHelper;
-import com.simibubi.create.foundation.utility.VecHelper;
-import com.simibubi.create.foundation.utility.animation.LerpedFloat;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandlerContainer;
@@ -39,6 +35,10 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
+import net.createmod.catnip.utility.NBTHelper;
+import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.utility.animation.LerpedFloat;
+import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -194,10 +194,6 @@ public class DeployerBlockEntity extends KineticBlockEntity implements SidedStor
 		}
 		if (level.isClientSide)
 			return;
-
-		// https://github.com/Fabricators-of-Create/Create/issues/1139 | Occurs on forge as well
-		// Somehow when paired with Jade player becomes null because owner is null (which shouldn't ever happen)
-		// This allows the block to actually break and drop but not crash the game
 		if (player == null)
 			return;
 
@@ -366,8 +362,12 @@ public class DeployerBlockEntity extends KineticBlockEntity implements SidedStor
 		DeployerHandler.activate(player, center, clickedPos, movementVector, mode);
 		award(AllAdvancements.DEPLOYER);
 
-		if (player != null)
+		if (player != null) {
+			int count = heldItem.getCount();
 			heldItem = player.getMainHandItem();
+			if (count != heldItem.getCount())
+				setChanged();
+		}
 	}
 
 	protected Vec3 getMovementVector() {
@@ -512,15 +512,15 @@ public class DeployerBlockEntity extends KineticBlockEntity implements SidedStor
 
 	@Override
 	public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-		Lang.translate("tooltip.deployer.header")
+		CreateLang.translate("tooltip.deployer.header")
 			.forGoggles(tooltip);
 
-		Lang.translate("tooltip.deployer." + (mode == Mode.USE ? "using" : "punching"))
+		CreateLang.translate("tooltip.deployer." + (mode == Mode.USE ? "using" : "punching"))
 			.style(ChatFormatting.YELLOW)
 			.forGoggles(tooltip);
 
 		if (!heldItem.isEmpty())
-			Lang.translate("tooltip.deployer.contains", Components.translatable(heldItem.getDescriptionId())
+			CreateLang.translate("tooltip.deployer.contains", Components.translatable(heldItem.getDescriptionId())
 				.getString(), heldItem.getCount())
 				.style(ChatFormatting.GREEN)
 				.forGoggles(tooltip);

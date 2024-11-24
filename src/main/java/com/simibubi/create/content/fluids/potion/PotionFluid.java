@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.simibubi.create.AllFluids;
 import com.simibubi.create.content.fluids.VirtualFluid;
-import com.simibubi.create.foundation.utility.RegisteredObjects;
 
+import net.createmod.catnip.platform.CatnipServices;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -33,7 +33,7 @@ public class PotionFluid extends VirtualFluid {
 	}
 
 	public static FluidStack addPotionToFluidStack(FluidStack fs, Potion potion) {
-		ResourceLocation resourcelocation = RegisteredObjects.getKeyOrThrow(potion);
+		ResourceLocation resourcelocation = CatnipServices.REGISTRIES.getKeyOrThrow(potion);
 		if (potion == Potions.EMPTY) {
 			fs.removeChildTag("Potion");
 			return new FluidStack(fs.getFluid(), fs.getAmount(), fs.getTag());

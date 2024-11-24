@@ -9,6 +9,7 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.content.contraptions.ITransformableBlock;
 import com.simibubi.create.content.contraptions.StructureTransform;
 import com.simibubi.create.content.decoration.encasing.EncasedBlock;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
@@ -18,10 +19,10 @@ import com.simibubi.create.content.kinetics.simpleRelays.SimpleKineticBlockEntit
 import com.simibubi.create.content.schematics.requirement.ISpecialBlockItemRequirement;
 import com.simibubi.create.content.schematics.requirement.ItemRequirement;
 import com.simibubi.create.foundation.block.IBE;
-import com.simibubi.create.foundation.utility.Iterate;
-import com.simibubi.create.foundation.utility.VoxelShaper;
 
 import net.fabricmc.fabric.api.block.BlockPickInteractionAware;
+import net.createmod.catnip.utility.Iterate;
+import net.createmod.catnip.utility.VoxelShaper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -110,7 +111,7 @@ public class EncasedCogwheelBlock extends RotatedPillarKineticBlock
 		BlockPos pos = context.getClickedPos();
 		KineticBlockEntity.switchToBlockState(level, pos, state.cycle(context.getClickedFace()
 			.getAxisDirection() == AxisDirection.POSITIVE ? TOP_SHAFT : BOTTOM_SHAFT));
-		playRotateSound(level, pos);
+		IWrenchable.playRotateSound(level, pos);
 		return InteractionResult.SUCCESS;
 	}
 

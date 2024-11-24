@@ -10,7 +10,7 @@ import net.minecraft.server.level.ServerPlayer;
 public class FilterScreenPacket extends SimplePacketBase {
 
 	public enum Option {
-		WHITELIST, WHITELIST2, BLACKLIST, RESPECT_DATA, IGNORE_DATA, UPDATE_FILTER_ITEM, ADD_TAG, ADD_INVERTED_TAG;
+		WHITELIST, WHITELIST2, BLACKLIST, RESPECT_DATA, IGNORE_DATA, UPDATE_FILTER_ITEM, ADD_TAG, ADD_INVERTED_TAG, UPDATE_ADDRESS;
 	}
 
 	private final Option option;
@@ -43,8 +43,7 @@ public class FilterScreenPacket extends SimplePacketBase {
 			if (player == null)
 				return;
 
-			if (player.containerMenu instanceof FilterMenu) {
-				FilterMenu c = (FilterMenu) player.containerMenu;
+			if (player.containerMenu instanceof FilterMenu c) {
 				if (option == Option.WHITELIST)
 					c.blacklist = false;
 				if (option == Option.BLACKLIST)
@@ -59,8 +58,7 @@ public class FilterScreenPacket extends SimplePacketBase {
 							net.minecraft.world.item.ItemStack.of(data.getCompound("Item")));
 			}
 
-			if (player.containerMenu instanceof AttributeFilterMenu) {
-				AttributeFilterMenu c = (AttributeFilterMenu) player.containerMenu;
+			if (player.containerMenu instanceof AttributeFilterMenu c) {
 				if (option == Option.WHITELIST)
 					c.whitelistMode = WhitelistMode.WHITELIST_DISJ;
 				if (option == Option.WHITELIST2)
@@ -71,6 +69,11 @@ public class FilterScreenPacket extends SimplePacketBase {
 					c.appendSelectedAttribute(ItemAttribute.fromNBT(data), false);
 				if (option == Option.ADD_INVERTED_TAG)
 					c.appendSelectedAttribute(ItemAttribute.fromNBT(data), true);
+			}
+			
+			if (player.containerMenu instanceof PackageFilterMenu c) {
+				if (option == Option.UPDATE_ADDRESS)
+					c.address = data.getString("Address");
 			}
 
 		});

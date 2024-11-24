@@ -3,7 +3,6 @@ package com.simibubi.create.content.contraptions.render;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.contraptions.Contraption;
 import com.simibubi.create.content.contraptions.Contraption.RenderedBlocks;
 import com.simibubi.create.content.contraptions.ContraptionWorld;
@@ -15,6 +14,9 @@ import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.model.ModelUtil;
+import net.createmod.catnip.render.ShadedBlockSbbBuilder;
+import net.createmod.catnip.render.SuperByteBuffer;
+import net.createmod.catnip.render.SuperByteBufferCache;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -72,12 +74,12 @@ public class ContraptionRenderInfo {
 	}
 
 	public SuperByteBuffer getBuffer(RenderType renderType) {
-		return CreateClient.BUFFER_CACHE.get(CONTRAPTION, Pair.of(contraption, renderType), () -> buildStructureBuffer(renderType));
+		return SuperByteBufferCache.getInstance().get(CONTRAPTION, Pair.of(contraption, renderType), () -> buildStructureBuffer(renderType));
 	}
 
 	public void invalidate() {
 		for (RenderType renderType : RenderType.chunkBufferLayers()) {
-			CreateClient.BUFFER_CACHE.invalidate(CONTRAPTION, Pair.of(contraption, renderType));
+			SuperByteBufferCache.getInstance().invalidate(CONTRAPTION, Pair.of(contraption, renderType));
 		}
 	}
 
@@ -142,6 +144,6 @@ public class ContraptionRenderInfo {
 	private static class ThreadLocalObjects {
 		public final PoseStack poseStack = new PoseStack();
 		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
-		public final ShadedBlockSbbBuilder sbbBuilder = new ShadedBlockSbbBuilder();
+		public final ShadedBlockSbbBuilder sbbBuilder = ShadedBlockSbbBuilder.create();
 	}
 }

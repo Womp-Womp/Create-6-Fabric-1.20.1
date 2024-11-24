@@ -6,11 +6,12 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.AllSpriteShifts;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
-import com.simibubi.create.foundation.block.render.SpriteShiftEntry;
-import com.simibubi.create.foundation.render.CachedBufferer;
-import com.simibubi.create.foundation.utility.AnimationTickHolder;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
+import net.createmod.catnip.render.CachedBuffers;
+import net.createmod.catnip.render.SpriteShiftEntry;
+import net.createmod.catnip.utility.AnimationTickHolder;
+import net.createmod.ponder.utility.LevelTickHolder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.LightTexture;
@@ -71,7 +72,7 @@ public class AnimatedBlazeBurner extends AnimatedKinetics {
 			- spriteShift.getTarget()
 				.getV0();
 
-		float time = AnimationTickHolder.getRenderTime(Minecraft.getInstance().level);
+		float time = LevelTickHolder.getRenderTime(Minecraft.getInstance().level);
 		float speed = 1 / 32f + 1 / 64f * heatLevel.ordinal();
 
 		double vScroll = speed * time;
@@ -82,7 +83,7 @@ public class AnimatedBlazeBurner extends AnimatedKinetics {
 		uScroll = uScroll - Math.floor(uScroll);
 		uScroll = uScroll * spriteWidth / 2;
 
-		CachedBufferer.partial(AllPartialModels.BLAZE_BURNER_FLAME, Blocks.AIR.defaultBlockState())
+		CachedBuffers.partial(AllPartialModels.BLAZE_BURNER_FLAME, Blocks.AIR.defaultBlockState())
 		.shiftUVScrolling(spriteShift, (float) uScroll, (float) vScroll)
 		.light(LightTexture.FULL_BRIGHT)
 			.renderInto(matrixStack, graphics.bufferSource().getBuffer(RenderType.cutoutMipped()));

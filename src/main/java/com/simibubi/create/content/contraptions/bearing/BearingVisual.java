@@ -8,7 +8,6 @@ import com.mojang.math.Axis;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.BackHalfShaftVisual;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
-import com.simibubi.create.foundation.utility.AngleHelper;
 
 import dev.engine_room.flywheel.api.instance.Instance;
 import dev.engine_room.flywheel.api.visual.DynamicVisual;
@@ -18,6 +17,7 @@ import dev.engine_room.flywheel.lib.instance.OrientedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
+import net.createmod.catnip.utility.math.AngleHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
@@ -31,7 +31,7 @@ public class BearingVisual<B extends KineticBlockEntity & IBearingBlockEntity> e
 		super(context, blockEntity, partialTick);
 
 		Direction facing = blockState.getValue(BlockStateProperties.FACING);
-		rotationAxis = Axis.of(Direction.get(Direction.AxisDirection.POSITIVE, axis).step());
+		rotationAxis = Axis.of(Direction.get(Direction.AxisDirection.POSITIVE, rotationAxis()).step());
 
 		blockOrientation = getBlockStateOrientation(facing);
 

@@ -2,11 +2,11 @@ package com.simibubi.create.content.redstone.displayLink.source;
 
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkContext;
 import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -52,8 +52,8 @@ public class RedstonePowerDisplaySource extends PercentOrProgressBarDisplaySourc
 		if (isFirstLine)
 			return;
 		builder.addSelectionScrollInput(0, 120,
-			(si, l) -> si.forOptions(Lang.translatedOptions("display_source.redstone_power", "number", "progress_bar"))
-				.titled(Lang.translateDirect("display_source.redstone_power.display")),
+			(si, l) -> si.forOptions(CreateLang.translatedOptions("display_source.redstone_power", "number", "progress_bar"))
+				.titled(CreateLang.translateDirect("display_source.redstone_power.display")),
 			"Mode");
 	}
 

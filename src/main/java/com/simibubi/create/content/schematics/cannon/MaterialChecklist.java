@@ -12,14 +12,14 @@ import com.simibubi.create.content.equipment.clipboard.ClipboardOverrides;
 import com.simibubi.create.content.equipment.clipboard.ClipboardOverrides.ClipboardType;
 import com.simibubi.create.content.schematics.requirement.ItemRequirement;
 import com.simibubi.create.content.schematics.requirement.ItemRequirement.ItemUseType;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -98,7 +98,7 @@ public class MaterialChecklist {
 
 		if (blocksNotLoaded) {
 			textComponent = Components.literal("\n" + ChatFormatting.RED);
-			textComponent = textComponent.append(Lang.translateDirect("materialChecklist.blocksNotLoaded"));
+			textComponent = textComponent.append(CreateLang.translateDirect("materialChecklist.blocksNotLoaded"));
 			pages.add(StringTag.valueOf(Component.Serializer.toJson(textComponent)));
 		}
 
@@ -157,7 +157,7 @@ public class MaterialChecklist {
 		tag.putBoolean("readonly", true);
 		tag.putString("author", "Schematicannon");
 		tag.putString("title", ChatFormatting.BLUE + "Material Checklist");
-		textComponent = Lang.translateDirect("materialChecklist")
+		textComponent = CreateLang.translateDirect("materialChecklist")
 			.setStyle(Style.EMPTY.withColor(ChatFormatting.BLUE)
 				.withItalic(Boolean.FALSE));
 		book.getOrCreateTagElement("display")
@@ -176,7 +176,7 @@ public class MaterialChecklist {
 		List<ClipboardEntry> currentPage = new ArrayList<>();
 
 		if (blocksNotLoaded) {
-			currentPage.add(new ClipboardEntry(false, Lang.translateDirect("materialChecklist.blocksNotLoaded")
+			currentPage.add(new ClipboardEntry(false, CreateLang.translateDirect("materialChecklist.blocksNotLoaded")
 				.withStyle(ChatFormatting.RED)));
 		}
 
@@ -234,7 +234,7 @@ public class MaterialChecklist {
 		ClipboardEntry.saveAll(pages, clipboard);
 		ClipboardOverrides.switchTo(ClipboardType.WRITTEN, clipboard);
 		clipboard.getOrCreateTagElement("display")
-			.putString("Name", Component.Serializer.toJson(Lang.translateDirect("materialChecklist")
+			.putString("Name", Component.Serializer.toJson(CreateLang.translateDirect("materialChecklist")
 				.setStyle(Style.EMPTY.withItalic(Boolean.FALSE))));
 		tag.putBoolean("Readonly", true);
 		clipboard.setTag(tag);

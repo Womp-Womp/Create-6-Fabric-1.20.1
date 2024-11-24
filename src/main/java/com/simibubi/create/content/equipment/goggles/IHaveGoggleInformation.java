@@ -3,9 +3,7 @@ package com.simibubi.create.content.equipment.goggles;
 import java.util.List;
 
 import com.simibubi.create.AllItems;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.LangBuilder;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
@@ -15,6 +13,8 @@ import io.github.fabricators_of_create.porting_lib.util.FluidUnit;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.utility.lang.LangBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
@@ -62,8 +62,8 @@ public interface IHaveGoggleInformation {
 			return false;
 		FluidUnit unit = AllConfigs.client().fluidUnitType.get();
 		boolean simplify = AllConfigs.client().simplifyFluidUnit.get();
-		LangBuilder mb = Lang.translate(unit.getTranslationKey());
-		Lang.translate("gui.goggles.fluid_container")
+		LangBuilder mb = CreateLang.translate(unit.getTranslationKey());
+		CreateLang.translate("gui.goggles.fluid_container")
 				.forGoggles(tooltip);
 
 		boolean isEmpty = true;
@@ -78,20 +78,20 @@ public interface IHaveGoggleInformation {
 			if (fluidStack.isEmpty())
 				continue;
 
-			Lang.fluidName(fluidStack)
+			CreateLang.fluidName(fluidStack)
 					.style(ChatFormatting.GRAY)
 					.forGoggles(tooltip, 1);
 
 			String amount = FluidTextUtil.getUnicodeMillibuckets(fluidStack.getAmount(), unit, simplify);
-			Lang.builder()
-					.add(Lang.text(amount)
-							.add(mb)
-							.style(ChatFormatting.GOLD))
-					.text(ChatFormatting.GRAY, " / ")
-					.add(Lang.text(FluidTextUtil.getUnicodeMillibuckets(view.getCapacity(), unit, simplify))
-							.add(mb)
-							.style(ChatFormatting.DARK_GRAY))
-					.forGoggles(tooltip, 1);
+			CreateLang.builder()
+				.add(CreateLang.text(amount)
+					.add(mb)
+					.style(ChatFormatting.GOLD))
+				.text(ChatFormatting.GRAY, " / ")
+				.add(CreateLang.text(FluidTextUtil.getUnicodeMillibuckets(view.getCapacity(), unit, simplify))
+					.add(mb)
+					.style(ChatFormatting.DARK_GRAY))
+				.forGoggles(tooltip, 1);
 
 			isEmpty = false;
 		}
@@ -105,8 +105,8 @@ public interface IHaveGoggleInformation {
 		if (!isEmpty)
 			return true;
 
-		Lang.translate("gui.goggles.fluid_container.capacity")
-				.add(Lang.text(FluidTextUtil.getUnicodeMillibuckets(firstCapacity, unit, simplify))
+		CreateLang.translate("gui.goggles.fluid_container.capacity")
+				.add(CreateLang.text(FluidTextUtil.getUnicodeMillibuckets(firstCapacity, unit, simplify))
 						.add(mb)
 						.style(ChatFormatting.GOLD))
 				.style(ChatFormatting.GRAY)

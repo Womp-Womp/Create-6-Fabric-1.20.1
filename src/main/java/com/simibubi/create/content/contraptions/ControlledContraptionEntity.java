@@ -1,14 +1,10 @@
 package com.simibubi.create.content.contraptions;
 
-import static com.simibubi.create.foundation.utility.AngleHelper.angleLerp;
-
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllEntityTypes;
 import com.simibubi.create.content.contraptions.bearing.BearingContraption;
 import com.simibubi.create.content.contraptions.behaviour.MovementBehaviour;
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
-import com.simibubi.create.foundation.utility.NBTHelper;
-import com.simibubi.create.foundation.utility.VecHelper;
 
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 import net.fabricmc.api.EnvType;
@@ -132,7 +128,7 @@ public class ControlledContraptionEntity extends AbstractContraptionEntity {
 	}
 
 	public float getAngle(float partialTicks) {
-		return partialTicks == 1.0F ? angle : angleLerp(partialTicks, prevAngle, angle);
+		return partialTicks == 1.0F ? angle : AngleHelper.angleLerp(partialTicks, prevAngle, angle);
 	}
 
 	public void setRotationAxis(Axis rotationAxis) {

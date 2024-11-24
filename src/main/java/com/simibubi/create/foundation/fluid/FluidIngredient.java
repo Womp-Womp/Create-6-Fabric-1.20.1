@@ -13,7 +13,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.simibubi.create.foundation.utility.RegisteredObjects;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
@@ -129,7 +128,7 @@ public abstract class FluidIngredient implements Predicate<FluidStack> {
 
 	public static FluidIngredient deserialize(@Nullable JsonElement je) {
 		if (!isFluidIngredient(je))
-			throw new JsonSyntaxException("Invalid fluid ingredient: " + Objects.toString(je));
+			throw new JsonSyntaxException("Invalid fluid ingredient: " + je);
 
 		JsonObject json = je.getAsJsonObject();
 		FluidIngredient ingredient = json.has("fluidTag") ? new FluidTagIngredient() : new FluidStackIngredient();
@@ -188,7 +187,7 @@ public abstract class FluidIngredient implements Predicate<FluidStack> {
 
 		@Override
 		protected void writeInternal(JsonObject json) {
-			json.addProperty("fluid", RegisteredObjects.getKeyOrThrow(fluid)
+			json.addProperty("fluid", CatnipServices.REGISTRIES.getKeyOrThrow(fluid)
 				.toString());
 			json.add("nbt", JsonParser.parseString(tagToMatch.toString()));
 		}

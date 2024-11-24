@@ -1,10 +1,10 @@
 package com.simibubi.create.content.contraptions.render;
 
 import com.simibubi.create.content.contraptions.Contraption;
-import com.simibubi.create.foundation.utility.WorldAttached;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.createmod.catnip.utility.WorldAttached;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.Level;

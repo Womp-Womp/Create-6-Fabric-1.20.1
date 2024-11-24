@@ -2,7 +2,6 @@ package com.simibubi.create.content.redstone.thresholdSwitch;
 
 import com.simibubi.create.Create;
 import com.simibubi.create.foundation.data.SpecialBlockStateGen;
-import com.simibubi.create.foundation.utility.Lang;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 

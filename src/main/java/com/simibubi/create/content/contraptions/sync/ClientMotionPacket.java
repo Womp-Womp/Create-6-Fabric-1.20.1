@@ -5,7 +5,6 @@ import java.util.function.Supplier;
 import com.simibubi.create.foundation.mixin.fabric.ServerGamePacketListenerImplAccessor;
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
-
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.Vec3;

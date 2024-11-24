@@ -23,8 +23,10 @@ import com.simibubi.create.content.contraptions.minecart.CouplingPhysics;
 import com.simibubi.create.content.contraptions.minecart.CouplingRenderer;
 import com.simibubi.create.content.contraptions.minecart.capability.CapabilityMinecartController;
 import com.simibubi.create.content.contraptions.render.ContraptionRenderInfoManager;
+import com.simibubi.create.content.contraptions.wrench.RadialWrenchHandler;
 import com.simibubi.create.content.decoration.girder.GirderWrenchBehavior;
 import com.simibubi.create.content.equipment.armor.BacktankArmorLayer;
+import com.simibubi.create.content.equipment.armor.CardboardArmorStealthOverlay;
 import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
 import com.simibubi.create.content.equipment.armor.NetheriteBacktankFirstPersonRenderer;
 import com.simibubi.create.content.equipment.armor.NetheriteDivingHandler;
@@ -32,17 +34,25 @@ import com.simibubi.create.content.equipment.blueprint.BlueprintOverlayRenderer;
 import com.simibubi.create.content.equipment.clipboard.ClipboardValueSettingsHandler;
 import com.simibubi.create.content.equipment.extendoGrip.ExtendoGripRenderHandler;
 import com.simibubi.create.content.equipment.symmetryWand.SymmetryHandler;
+import com.simibubi.create.content.equipment.hats.CreateHatArmorLayer;
 import com.simibubi.create.content.equipment.toolbox.ToolboxHandlerClient;
 import com.simibubi.create.content.equipment.zapper.ZapperItem;
 import com.simibubi.create.content.equipment.zapper.terrainzapper.WorldshaperRenderHandler;
 import com.simibubi.create.content.kinetics.KineticDebugger;
 import com.simibubi.create.content.kinetics.belt.item.BeltConnectorHandler;
+import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorConnectionHandler;
+import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorInteractionHandler;
+import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorRidingHandler;
 import com.simibubi.create.content.kinetics.fan.AirCurrent;
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPointHandler;
 import com.simibubi.create.content.kinetics.turntable.TurntableHandler;
 import com.simibubi.create.content.logistics.depot.EjectorTargetHandler;
+import com.simibubi.create.content.logistics.displayCloth.DisplayClothOverlayRenderer;
+import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelConnectionHandler;
+import com.simibubi.create.content.logistics.packagePort.PackagePortTargetSelectionHandler;
+import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedClientHandler;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
-import com.simibubi.create.content.redstone.displayLink.DisplayLinkBlockItem;
+import com.simibubi.create.content.redstone.displayLink.ClickToLinkBlockItem;
 import com.simibubi.create.content.redstone.link.LinkRenderer;
 import com.simibubi.create.content.redstone.link.controller.LinkedControllerClientHandler;
 import com.simibubi.create.content.trains.CameraDistanceModifier;
@@ -50,7 +60,6 @@ import com.simibubi.create.content.trains.TrainHUD;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.content.trains.entity.CarriageCouplingRenderer;
 import com.simibubi.create.content.trains.entity.TrainRelocator;
-import com.simibubi.create.content.trains.schedule.hat.TrainHatArmorLayer;
 import com.simibubi.create.content.trains.schedule.hat.TrainHatInfoReloadListener;
 import com.simibubi.create.content.trains.track.CurvedTrackInteraction;
 import com.simibubi.create.content.trains.track.TrackBlockItem;
@@ -69,10 +78,8 @@ import com.simibubi.create.foundation.ponder.PonderTooltipHandler;
 import com.simibubi.create.foundation.render.StitchedSprite;
 import com.simibubi.create.foundation.render.SuperRenderTypeBuffer;
 import com.simibubi.create.foundation.sound.SoundScapes;
-import com.simibubi.create.foundation.utility.AnimationTickHolder;
 import com.simibubi.create.foundation.utility.CameraAngleAnimationService;
 import com.simibubi.create.foundation.utility.ServerSpeedProvider;
-import com.simibubi.create.foundation.utility.worldWrappers.WrappedClientWorld;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.gui.OpenCreateMenuButton;
 
@@ -154,7 +161,6 @@ public class ClientEvents {
 		Level world = Minecraft.getInstance().level;
 
 		SoundScapes.tick();
-		AnimationTickHolder.tick();
 
 		CreateClient.SCHEMATIC_SENDER.tick();
 		CreateClient.SCHEMATIC_AND_QUILL_HANDLER.tick();
@@ -189,16 +195,14 @@ public class ClientEvents {
 		// fabric: fix #608, see above
 //		ArmInteractionPointHandler.tick();
 		EjectorTargetHandler.tick();
-		PlacementHelpers.tick();
-		CreateClient.OUTLINER.tickOutlines();
-		CreateClient.GHOST_BLOCKS.tickGhosts();
 		ContraptionRenderInfoManager.tickFor(world);
 		BlueprintOverlayRenderer.tick();
 		ToolboxHandlerClient.clientTick();
+		RadialWrenchHandler.clientTick();
 		TrackTargetingClient.clientTick();
 		TrackPlacement.clientTick();
 		TrainRelocator.clientTick();
-		DisplayLinkBlockItem.clientTick();
+		ClickToLinkBlockItem.clientTick();
 		CurvedTrackInteraction.clientTick();
 		CameraDistanceModifier.tick();
 		CameraAngleAnimationService.tick();
@@ -208,6 +212,14 @@ public class ClientEvents {
 		ScrollValueHandler.tick();
 		NetheriteBacktankFirstPersonRenderer.clientTick();
 		ContraptionPlayerPassengerRotation.tick();
+		ChainConveyorInteractionHandler.clientTick();
+		ChainConveyorRidingHandler.clientTick();
+		ChainConveyorConnectionHandler.clientTick();
+		PackagePortTargetSelectionHandler.tick();
+		LogisticallyLinkedClientHandler.tick();
+		DisplayClothOverlayRenderer.tick();
+		CardboardArmorStealthOverlay.clientTick();
+		FactoryPanelConnectionHandler.clientTick();
 		// fabric: see comment
 		AllKeys.fixBinds();
 	}
@@ -221,7 +233,7 @@ public class ClientEvents {
 	}
 
 	public static void onLoadWorld(Minecraft client, ClientLevel world) {
-		if (world.isClientSide() && world instanceof ClientLevel && !(world instanceof WrappedClientWorld)) {
+		if (world.isClientSide() && world instanceof ClientLevel && !(world instanceof WrappedClientLevel)) {
 			CreateClient.invalidateRenderers();
 			AnimationTickHolder.reset();
 		}
@@ -240,8 +252,7 @@ public class ClientEvents {
 	public static void onRenderWorld(WorldRenderContext event) {
 		PoseStack ms = event.matrixStack();
 		ms.pushPose();
-		SuperRenderTypeBuffer buffer = SuperRenderTypeBuffer.getInstance();
-		float partialTicks = AnimationTickHolder.getPartialTicks();
+		SuperRenderTypeBuffer buffer = DefaultSuperRenderTypeBuffer.getInstance();
 		Vec3 camera = Minecraft.getInstance().gameRenderer.getMainCamera()
 			.getPosition();
 
@@ -250,8 +261,7 @@ public class ClientEvents {
 		CouplingRenderer.renderAll(ms, buffer, camera);
 		CarriageCouplingRenderer.renderAll(ms, buffer, camera);
 		CreateClient.SCHEMATIC_HANDLER.render(ms, buffer, camera);
-		CreateClient.GHOST_BLOCKS.renderAll(ms, buffer, camera);
-		CreateClient.OUTLINER.renderOutlines(ms, buffer, camera, partialTicks);
+		ChainConveyorInteractionHandler.drawCustomBlockSelection(ms, buffer, camera);
 
 		buffer.draw();
 		RenderSystem.enableCull();
@@ -271,10 +281,6 @@ public class ClientEvents {
 		return false;
 	}
 
-	public static RenderTooltipBorderColorCallback.BorderColorEntry getItemTooltipColor(ItemStack stack, int originalBorderColorStart, int originalBorderColorEnd) {
-		return PonderTooltipHandler.handleTooltipColor(stack, originalBorderColorStart, originalBorderColorEnd);
-	}
-
 	public static void addToItemTooltip(ItemStack stack, TooltipFlag iTooltipFlag, List<Component> itemTooltip) {
 		if (!AllConfigs.client().tooltips.get())
 			return;
@@ -288,8 +294,7 @@ public class ClientEvents {
 			modifier.modify(stack, player, iTooltipFlag, itemTooltip);
 		}
 
-		PonderTooltipHandler.addToTooltip(stack, itemTooltip);
-		SequencedAssemblyRecipe.addToTooltip(stack, itemTooltip);
+		SequencedAssemblyRecipe.addToTooltip(event);
 	}
 
 	public static void onRenderTick() {
@@ -396,7 +401,7 @@ public class ClientEvents {
 	public static void addEntityRendererLayers(EntityType<? extends LivingEntity> entityType, LivingEntityRenderer<?, ?> entityRenderer,
 											   RegistrationHelper registrationHelper, EntityRendererProvider.Context context) {
 		BacktankArmorLayer.registerOn(entityRenderer, registrationHelper);
-		TrainHatArmorLayer.registerOn(entityRenderer, registrationHelper);
+		CreateHatArmorLayer.registerOn(entityRenderer, registrationHelper);
 	}
 
 	public static void register() {

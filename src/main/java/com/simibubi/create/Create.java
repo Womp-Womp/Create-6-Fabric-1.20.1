@@ -23,6 +23,7 @@ import com.simibubi.create.content.fluids.tank.BoilerHeaters;
 import com.simibubi.create.content.kinetics.TorquePropagator;
 import com.simibubi.create.content.kinetics.fan.processing.AllFanProcessingTypes;
 import com.simibubi.create.content.kinetics.mechanicalArm.AllArmInteractionPointTypes;
+import com.simibubi.create.content.logistics.packagerLink.GlobalLogisticsManager;
 import com.simibubi.create.content.redstone.displayLink.AllDisplayBehaviours;
 import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
 import com.simibubi.create.content.schematics.ServerSchematicLoader;
@@ -43,11 +44,11 @@ import com.simibubi.create.foundation.data.recipe.StandardRecipeGen;
 import com.simibubi.create.foundation.events.CommonEvents;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
-import com.simibubi.create.foundation.item.TooltipHelper.Palette;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.simibubi.create.foundation.ponder.FabricPonderProcessing;
 import com.simibubi.create.foundation.recipe.AllIngredients;
 import com.simibubi.create.foundation.utility.AttachedRegistry;
+import com.simibubi.create.foundation.utility.CreateNBTProcessors;
 import com.simibubi.create.infrastructure.command.ServerLagger;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.data.CreateDatagen;
@@ -57,6 +58,8 @@ import com.simibubi.create.infrastructure.worldgen.AllBiomeModifiers;
 import com.simibubi.create.infrastructure.worldgen.AllFeatures;
 import com.simibubi.create.infrastructure.worldgen.AllPlacementModifiers;
 
+import net.createmod.catnip.utility.FontHelper;
+import net.createmod.catnip.utility.lang.LangBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -67,7 +70,7 @@ public class Create implements ModInitializer {
 
 	public static final String ID = "create";
 	public static final String NAME = "Create";
-	public static final String VERSION = "0.5.1h";
+	public static final String VERSION = "0.5.2-experimental";
 
 	public static final Logger LOGGER = LogUtils.getLogger();
 
@@ -87,16 +90,17 @@ public class Create implements ModInitializer {
 		.defaultCreativeTab((ResourceKey<CreativeModeTab>) null);
 
 	static {
-		REGISTRATE.setTooltipModifierFactory(item -> {
-			return new ItemDescription.Modifier(item, Palette.STANDARD_CREATE)
-				.andThen(TooltipModifier.mapNull(KineticStats.create(item)));
-		});
+		REGISTRATE.setTooltipModifierFactory(item ->
+			new ItemDescription.Modifier(item, FontHelper.Palette.STANDARD_CREATE)
+			.andThen(TooltipModifier.mapNull(KineticStats.create(item)))
+		);
 	}
 
 	public static final ServerSchematicLoader SCHEMATIC_RECEIVER = new ServerSchematicLoader();
 	public static final RedstoneLinkNetworkHandler REDSTONE_LINK_NETWORK_HANDLER = new RedstoneLinkNetworkHandler();
 	public static final TorquePropagator TORQUE_PROPAGATOR = new TorquePropagator();
 	public static final GlobalRailwayManager RAILWAYS = new GlobalRailwayManager();
+	public static final GlobalLogisticsManager LOGISTICS = new GlobalLogisticsManager();
 	public static final ServerLagger LAGGER = new ServerLagger();
 
 	@Override
@@ -136,7 +140,7 @@ public class Create implements ModInitializer {
 		AllFanProcessingTypes.register();
 		BlockSpoutingBehaviour.registerDefaults();
 		BogeySizes.init();
-		AllBogeyStyles.register();
+		AllBogeyStyles.init();
 		// ----
 
 		ComputerCraftProxy.register();
@@ -147,6 +151,10 @@ public class Create implements ModInitializer {
 		Create.init();
 //		modEventBus.addListener(EventPriority.LOW, CreateDatagen::gatherData); // CreateData entrypoint
 		AllSoundEvents.register();
+		modEventBus.addListener(Create::init);
+		modEventBus.addListener(AllEntityTypes::registerEntityAttributes);
+		modEventBus.addListener(EventPriority.LOWEST, CreateDatagen::gatherData);
+		modEventBus.addListener(AllSoundEvents::register);
 
 		// causes class loading issues or something
 		// noinspection Convert2MethodRef
@@ -162,6 +170,7 @@ public class Create implements ModInitializer {
 
 	public static void init() {
 		AllFluids.registerFluidInteractions();
+		CreateNBTProcessors.register();
 
 //		event.enqueueWork(() -> {
 			// TODO: custom registration should all happen in one place
@@ -176,6 +185,10 @@ public class Create implements ModInitializer {
 			AllAdvancements.register();
 			AllTriggers.register();
 //		});
+	}
+
+	public static LangBuilder lang() {
+		return new LangBuilder(ID);
 	}
 
 	public static ResourceLocation asResource(String path) {

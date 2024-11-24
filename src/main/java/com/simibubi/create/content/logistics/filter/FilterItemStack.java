@@ -5,10 +5,11 @@ import java.util.List;
 
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.fluids.transfer.GenericItemEmptying;
-import com.simibubi.create.foundation.utility.Pair;
+import com.simibubi.create.content.logistics.box.PackageItem;
 
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import net.createmod.catnip.utility.Pair;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -31,6 +32,8 @@ public class FilterItemStack {
 				return new ListFilterItemStack(filter);
 			if (AllItems.ATTRIBUTE_FILTER.isIn(filter))
 				return new AttributeFilterItemStack(filter);
+			if (AllItems.PACKAGE_FILTER.isIn(filter))
+				return new PackageFilterItemStack(filter);
 		}
 
 		return new FilterItemStack(filter);
@@ -106,7 +109,7 @@ public class FilterItemStack {
 			fluidExtracted = true;
 			if (GenericItemEmptying.canItemBeEmptied(world, filterItemStack))
 				filterFluidStack = GenericItemEmptying.emptyItem(world, filterItemStack, true)
-				.getFirst();
+					.getFirst();
 		}
 	}
 
@@ -206,35 +209,56 @@ public class FilterItemStack {
 				boolean matches = attribute.appliesTo(stack, world) != inverted;
 
 				if (matches) {
-					switch (whitelistMode) {
-					case BLACKLIST:
-						return false;
-					case WHITELIST_CONJ:
-						continue;
-					case WHITELIST_DISJ:
-						return true;
-					}
+                    switch (whitelistMode) {
+                        case BLACKLIST -> {
+                            return false;
+                        }
+                        case WHITELIST_CONJ -> {
+							continue;
+                        }
+                        case WHITELIST_DISJ -> {
+                            return true;
+                        }
+                    }
 				} else {
-					switch (whitelistMode) {
-					case BLACKLIST:
-						continue;
-					case WHITELIST_CONJ:
-						return false;
-					case WHITELIST_DISJ:
-						continue;
-					}
+                    switch (whitelistMode) {
+                        case BLACKLIST, WHITELIST_DISJ -> {
+							continue;
+                        }
+                        case WHITELIST_CONJ -> {
+                            return false;
+                        }
+                    }
 				}
 			}
 
-			switch (whitelistMode) {
-			case BLACKLIST:
-				return true;
-			case WHITELIST_CONJ:
-				return true;
-			case WHITELIST_DISJ:
-				return false;
-			}
+            return switch (whitelistMode) {
+                case BLACKLIST, WHITELIST_CONJ -> true;
+                case WHITELIST_DISJ -> false;
+            };
 
+        }
+
+	}
+
+	public static class PackageFilterItemStack extends FilterItemStack {
+
+		public String filterString;
+
+		protected PackageFilterItemStack(ItemStack filter) {
+			super(filter);
+			filterString = filter.getOrCreateTag()
+				.getString("Address");
+		}
+
+		@Override
+		public boolean test(Level world, ItemStack stack, boolean matchNBT) {
+			return (filterString.isBlank() && super.test(world, stack, matchNBT))
+				|| stack.getItem() instanceof PackageItem && PackageItem.matchAddress(stack, filterString);
+		}
+
+		@Override
+		public boolean test(Level world, FluidStack stack, boolean matchNBT) {
 			return false;
 		}
 

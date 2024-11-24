@@ -62,7 +62,7 @@ public class ModelSwapper implements AfterBake {
 
 	public static List<ModelResourceLocation> getAllBlockStateModelLocations(Block block) {
 		List<ModelResourceLocation> models = new ArrayList<>();
-		ResourceLocation blockRl = RegisteredObjects.getKeyOrThrow(block);
+		ResourceLocation blockRl = CatnipServices.REGISTRIES.getKeyOrThrow(block);
 		block.getStateDefinition()
 			.getPossibleStates()
 			.forEach(state -> {
@@ -72,7 +72,7 @@ public class ModelSwapper implements AfterBake {
 	}
 
 	public static ModelResourceLocation getItemModelLocation(Item item) {
-		return new ModelResourceLocation(RegisteredObjects.getKeyOrThrow(item), "inventory");
+		return new ModelResourceLocation(CatnipServices.REGISTRIES.getKeyOrThrow(item), "inventory");
 	}
 
 }

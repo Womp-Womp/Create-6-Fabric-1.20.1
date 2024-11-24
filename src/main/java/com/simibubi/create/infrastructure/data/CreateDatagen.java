@@ -16,12 +16,8 @@ import com.simibubi.create.foundation.data.recipe.MechanicalCraftingRecipeGen;
 import com.simibubi.create.foundation.data.recipe.ProcessingRecipeGen;
 import com.simibubi.create.foundation.data.recipe.SequencedAssemblyRecipeGen;
 import com.simibubi.create.foundation.data.recipe.StandardRecipeGen;
-import com.simibubi.create.foundation.ponder.PonderLocalization;
+import com.simibubi.create.foundation.ponder.CreatePonderPlugin;
 import com.simibubi.create.foundation.utility.FilesHelper;
-import com.simibubi.create.infrastructure.ponder.AllPonderTags;
-import com.simibubi.create.infrastructure.ponder.GeneralText;
-import com.simibubi.create.infrastructure.ponder.PonderIndex;
-import com.simibubi.create.infrastructure.ponder.SharedText;
 import com.tterrag.registrate.providers.ProviderType;
 
 import io.github.fabricators_of_create.porting_lib.data.ExistingFileHelper;
@@ -97,14 +93,9 @@ public class CreateDatagen implements DataGeneratorEntrypoint {
 	}
 
 	private static void providePonderLang(BiConsumer<String, String> consumer) {
-		// Register these since FMLClientSetupEvent does not run during datagen
-		AllPonderTags.register();
-		PonderIndex.register();
+		// Register this since FMLClientSetupEvent does not run during datagen
+		PonderIndex.addPlugin(new CreatePonderPlugin());
 
-		SharedText.gatherText();
-		PonderLocalization.generateSceneLang();
-
-		GeneralText.provideLang(consumer);
-		PonderLocalization.provideLang(Create.ID, consumer);
+		PonderIndex.getLangAccess().provideLang(Create.ID, consumer);
 	}
 }

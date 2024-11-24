@@ -28,8 +28,8 @@ import com.simibubi.create.foundation.utility.Color;
 import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Couple;
 import com.simibubi.create.foundation.utility.Iterate;
-import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.VecHelper;
+import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import net.fabricmc.api.EnvType;
@@ -553,7 +553,7 @@ public class CarriageContraptionEntity extends OrientedContraptionEntity {
 	@Override
 	public Component getDisplayName() {
 		if (carriage == null)
-			return Lang.translateDirect("train");
+			return CreateLang.translateDirect("train");
 		return carriage.train.name;
 	}
 
@@ -612,7 +612,7 @@ public class CarriageContraptionEntity extends OrientedContraptionEntity {
 		boolean spaceDown = heldControls.contains(4);
 		GlobalStation currentStation = carriage.train.getCurrentStation();
 		if (currentStation != null && spaceDown) {
-			sendPrompt(player, Lang.translateDirect("train.arrived_at",
+			sendPrompt(player, CreateLang.translateDirect("train.arrived_at",
 				Components.literal(currentStation.name).withStyle(s -> s.withColor(0x704630))), false);
 			return true;
 		}
@@ -624,7 +624,7 @@ public class CarriageContraptionEntity extends OrientedContraptionEntity {
 
 		if (currentStation != null && targetSpeed != 0) {
 			stationMessage = false;
-			sendPrompt(player, Lang.translateDirect("train.departing_from",
+			sendPrompt(player, CreateLang.translateDirect("train.departing_from",
 				Components.literal(currentStation.name).withStyle(s -> s.withColor(0x704630))), false);
 		}
 
@@ -704,7 +704,7 @@ public class CarriageContraptionEntity extends OrientedContraptionEntity {
 	boolean stationMessage = false;
 
 	private void displayApproachStationMessage(Player player, GlobalStation station) {
-		sendPrompt(player, Lang.translateDirect("contraption.controls.approach_station",
+		sendPrompt(player, CreateLang.translateDirect("contraption.controls.approach_station",
 			Components.keybind("key.jump"), station.name), false);
 		stationMessage = true;
 	}
@@ -757,6 +757,7 @@ public class CarriageContraptionEntity extends OrientedContraptionEntity {
 		dimensional.updateRenderedCutoff();
 	}
 
+	// FIXME: entities should not reference their visual in any way
 	@Environment(EnvType.CLIENT)
 	private WeakReference<CarriageContraptionVisual> instanceHolder;
 

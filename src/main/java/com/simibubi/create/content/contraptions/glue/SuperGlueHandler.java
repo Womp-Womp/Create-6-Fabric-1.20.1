@@ -1,8 +1,5 @@
 package com.simibubi.create.content.contraptions.glue;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.content.contraptions.BlockMovementChecks;
@@ -65,10 +62,10 @@ public class SuperGlueHandler {
 		Vec3 end = start.add(look.x * distance, look.y * distance, look.z * distance);
 		Level world = placer.level();
 
-		RayTraceWorld rayTraceWorld =
-			new RayTraceWorld(world, (p, state) -> p.equals(pos) ? Blocks.AIR.defaultBlockState() : state);
+		RayTraceLevel rayTraceLevel =
+			new RayTraceLevel(world, (p, state) -> p.equals(pos) ? Blocks.AIR.defaultBlockState() : state);
 		BlockHitResult ray =
-			rayTraceWorld.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, placer));
+			rayTraceLevel.clip(new ClipContext(start, end, ClipContext.Block.OUTLINE, ClipContext.Fluid.NONE, placer));
 
 		Direction face = ray.getDirection();
 		if (face == null || ray.getType() == Type.MISS)

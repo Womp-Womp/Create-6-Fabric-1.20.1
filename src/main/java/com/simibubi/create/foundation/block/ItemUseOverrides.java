@@ -24,7 +24,7 @@ public class ItemUseOverrides {
 	private static final Set<ResourceLocation> OVERRIDES = new HashSet<>();
 
 	public static void addBlock(Block block) {
-		OVERRIDES.add(RegisteredObjects.getKeyOrThrow(block));
+		OVERRIDES.add(CatnipServices.REGISTRIES.getKeyOrThrow(block));
 	}
 
 	public static InteractionResult onBlockActivated(Player player, Level world, InteractionHand hand, BlockHitResult traceResult) {
@@ -38,7 +38,7 @@ public class ItemUseOverrides {
 
 		BlockState state = world
 				.getBlockState(pos);
-		ResourceLocation id = RegisteredObjects.getKeyOrThrow(state.getBlock());
+		ResourceLocation id = CatnipServices.REGISTRIES.getKeyOrThrow(state.getBlock());
 
 		if (!OVERRIDES.contains(id))
 			return InteractionResult.PASS;

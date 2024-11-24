@@ -138,7 +138,7 @@ public class ScrollValueBehaviour extends BlockEntityBehaviour implements ValueS
 	public boolean testHit(Vec3 hit) {
 		BlockState state = blockEntity.getBlockState();
 		Vec3 localHit = hit.subtract(Vec3.atLowerCornerOf(blockEntity.getBlockPos()));
-		return slotPositioning.testHit(state, localHit);
+		return slotPositioning.testHit(getWorld(), getPos(), state, localHit);
 	}
 
 	public void setLabel(Component label) {
@@ -182,11 +182,10 @@ public class ScrollValueBehaviour extends BlockEntityBehaviour implements ValueS
 	}
 
 	@Override
-	public void onShortInteract(Player player, InteractionHand hand, Direction side) {
+	public void onShortInteract(Player player, InteractionHand hand, Direction side, BlockHitResult hitResult) {
 		if (player instanceof FakePlayer)
 			blockEntity.getBlockState()
-				.use(getWorld(), player, hand,
-					new BlockHitResult(VecHelper.getCenterOf(getPos()), side, getPos(), true));
+				.use(getWorld(), player, hand, hitResult);
 	}
 
 }

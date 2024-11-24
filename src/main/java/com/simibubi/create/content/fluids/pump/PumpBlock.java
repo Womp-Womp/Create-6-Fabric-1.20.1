@@ -8,8 +8,8 @@ import com.simibubi.create.content.kinetics.base.DirectionalKineticBlock;
 import com.simibubi.create.content.kinetics.simpleRelays.ICogWheel;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
-import com.simibubi.create.foundation.utility.Iterate;
 
+import net.createmod.catnip.utility.Iterate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -18,7 +18,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -49,11 +48,6 @@ public class PumpBlock extends DirectionalKineticBlock
 	public BlockState getRotatedBlockState(BlockState originalState, Direction targetedFace) {
 		return originalState.setValue(FACING, originalState.getValue(FACING)
 			.getOpposite());
-	}
-
-	@Override
-	public BlockState updateAfterWrenched(BlockState newState, UseOnContext context) {
-		return super.updateAfterWrenched(newState, context);
 	}
 
 	@Override

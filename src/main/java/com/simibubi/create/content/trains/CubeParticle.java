@@ -7,9 +7,10 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.simibubi.create.AllSpecialTextures;
+
 import io.github.fabricators_of_create.porting_lib.util.ParticleHelper;
 
+import net.createmod.catnip.enums.CatnipSpecialTextures;
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -45,7 +46,7 @@ public class CubeParticle extends Particle {
 	private static final ParticleRenderType RENDER_TYPE = new ParticleRenderType() {
 		@Override
 		public void begin(BufferBuilder builder, TextureManager textureManager) {
-			AllSpecialTextures.BLANK.bind();
+			CatnipSpecialTextures.BLANK.bind();
 
 			// transparent, additive blending
 			RenderSystem.depthMask(false);

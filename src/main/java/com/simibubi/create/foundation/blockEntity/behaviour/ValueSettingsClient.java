@@ -3,8 +3,9 @@ package com.simibubi.create.foundation.blockEntity.behaviour;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllPackets;
-import com.simibubi.create.foundation.gui.ScreenOpener;
-import com.simibubi.create.foundation.utility.Color;
+
+import net.createmod.catnip.gui.ScreenOpener;
+import net.createmod.catnip.utility.theme.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
@@ -19,7 +20,6 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import java.util.List;
 
 public class ValueSettingsClient {
-
 	private Minecraft mc;
 
 	public int interactHeldTicks = -1;
@@ -75,14 +75,16 @@ public class ValueSettingsClient {
 		}
 		BlockEntityBehaviour behaviour = BlockEntityBehaviour.get(mc.level, interactHeldPos, interactHeldBehaviour);
 		if (!(behaviour instanceof ValueSettingsBehaviour valueSettingBehaviour)
+			|| valueSettingBehaviour.bypassesInput(player.getMainHandItem())
 			|| !valueSettingBehaviour.testHit(blockHitResult.getLocation())) {
 			cancelInteraction();
 			return;
 		}
 		if (!mc.options.keyUse.isDown()) {
 			AllPackets.getChannel()
-				.sendToServer(
-					new ValueSettingsPacket(interactHeldPos, 0, 0, interactHeldHand, interactHeldFace, false));
+				.sendToServer(new ValueSettingsPacket(interactHeldPos, 0, 0, interactHeldHand, blockHitResult,
+					interactHeldFace, false, valueSettingBehaviour.netId()));
+			valueSettingBehaviour.onShortInteract(player, interactHeldHand, interactHeldFace, blockHitResult);
 			cancelInteraction();
 			return;
 		}
@@ -91,9 +93,9 @@ public class ValueSettingsClient {
 			player.swinging = false;
 		if (interactHeldTicks++ < 5)
 			return;
-		ScreenOpener
-			.open(new ValueSettingsScreen(interactHeldPos, valueSettingBehaviour.createBoard(player, blockHitResult),
-				valueSettingBehaviour.getValueSettings(), valueSettingBehaviour::newSettingHovered));
+		ScreenOpener.open(new ValueSettingsScreen(interactHeldPos,
+			valueSettingBehaviour.createBoard(player, blockHitResult), valueSettingBehaviour.getValueSettings(),
+			valueSettingBehaviour::newSettingHovered, valueSettingBehaviour.netId()));
 		interactHeldTicks = -1;
 	}
 

@@ -8,6 +8,13 @@ import java.util.Set;
 
 import io.github.fabricators_of_create.porting_lib.tags.Tags;
 
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import com.simibubi.create.AllBlockEntityTypes;
@@ -25,6 +32,8 @@ import com.simibubi.create.content.kinetics.belt.BeltSlicer.Feedback;
 import com.simibubi.create.content.kinetics.belt.behaviour.TransportedItemStackHandlerBehaviour.TransportedResult;
 import com.simibubi.create.content.kinetics.belt.transport.BeltMovementHandler.TransportedEntityInfo;
 import com.simibubi.create.content.kinetics.belt.transport.BeltTunnelInteractionHandler;
+import com.simibubi.create.content.logistics.box.PackageEntity;
+import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.funnel.FunnelBlock;
 import com.simibubi.create.content.logistics.tunnel.BeltTunnelBlock;
 import com.simibubi.create.content.schematics.requirement.ISpecialBlockItemRequirement;
@@ -34,17 +43,15 @@ import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
 import com.simibubi.create.foundation.block.render.MultiPosDestructionHandler;
 import com.simibubi.create.foundation.block.render.ReducedDestroyEffects;
-import com.simibubi.create.foundation.utility.Iterate;
+import com.simibubi.create.foundation.item.ItemHelper;
 
-import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import io.github.fabricators_of_create.porting_lib.util.TagUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.block.BlockPickInteractionAware;
 import net.fabricmc.fabric.api.registry.LandPathNodeTypesRegistry;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+import net.createmod.catnip.utility.Iterate;
+import net.createmod.catnip.utility.VecHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -58,7 +65,6 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.BlockGetter;
@@ -88,6 +94,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -199,12 +206,15 @@ public class BeltBlock extends HorizontalKineticBlock
 		BeltBlockEntity belt = BeltHelper.getSegmentBE(worldIn, pos);
 		if (belt == null)
 			return;
-		if (entityIn instanceof ItemEntity && entityIn.isAlive()) {
+		ItemStack asItem = ItemHelper.fromItemEntity(entityIn);
+		if (!asItem.isEmpty()) {
 			if (worldIn.isClientSide)
 				return;
 			if (entityIn.getDeltaMovement().y > 0)
 				return;
-			if (!entityIn.isAlive())
+			Vec3 targetLocation = VecHelper.getCenterOf(pos)
+				.add(0, 5 / 16f, 0);
+			if (!PackageEntity.centerPackage(entityIn, targetLocation))
 				return;
 			if (BeltTunnelInteractionHandler.getTunnelOnPosition(worldIn, pos) != null)
 				return;
@@ -278,6 +288,19 @@ public class BeltBlock extends HorizontalKineticBlock
 		BeltBlockEntity belt = BeltHelper.getSegmentBE(world, pos);
 		if (belt == null)
 			return InteractionResult.PASS;
+
+		if (heldItem.getItem() instanceof PackageItem) {
+			ItemStack toInsert = heldItem.copy();
+			IItemHandler handler = belt.getCapability(ForgeCapabilities.ITEM_HANDLER)
+				.orElse(null);
+			if (handler == null)
+				return InteractionResult.PASS;
+			ItemStack remainder = handler.insertItem(0, toInsert, false);
+			if (remainder.isEmpty()) {
+				heldItem.shrink(1);
+				return InteractionResult.SUCCESS;
+			}
+		}
 
 		if (isHand) {
 			BeltBlockEntity controllerBelt = belt.getControllerBE();
@@ -548,7 +571,7 @@ public class BeltBlock extends HorizontalKineticBlock
 			((BeltTunnelBlock) tunnelBlock).updateTunnel(world, pos);
 	}
 
-	public static List<BlockPos> getBeltChain(Level world, BlockPos controllerPos) {
+	public static List<BlockPos> getBeltChain(LevelAccessor world, BlockPos controllerPos) {
 		List<BlockPos> positions = new LinkedList<>();
 
 		BlockState blockState = world.getBlockState(controllerPos);

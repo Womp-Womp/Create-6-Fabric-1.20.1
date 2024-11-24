@@ -4,8 +4,8 @@ import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
 import com.simibubi.create.foundation.model.BakedQuadHelper;
-import com.simibubi.create.foundation.utility.VecHelper;
 
+import net.createmod.catnip.utility.VecHelper;
 import net.fabricmc.fabric.api.renderer.v1.model.ForwardingBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;
 import net.fabricmc.fabric.api.rendering.data.v1.RenderAttachedBlockView;

@@ -3,9 +3,7 @@ package com.simibubi.create.content.trains.track;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.foundation.mixin.fabric.GuiAccessor;
-import com.simibubi.create.foundation.utility.Color;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -35,7 +33,7 @@ public class TrackPlacementOverlay {
 			return;
 
 		boolean active = mc.options.keySprint.isDown();
-		MutableComponent text = Lang.translateDirect("track.hold_for_smooth_curve", Components.keybind("key.sprint")
+		MutableComponent text = CreateLang.translateDirect("track.hold_for_smooth_curve", Components.keybind("key.sprint")
 			.withStyle(active ? ChatFormatting.WHITE : ChatFormatting.GRAY));
 
 		Window window = mc.getWindow();

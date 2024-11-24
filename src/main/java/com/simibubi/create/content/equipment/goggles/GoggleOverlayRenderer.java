@@ -8,7 +8,6 @@ import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
-import com.simibubi.create.CreateClient;
 import com.simibubi.create.compat.Mods;
 import com.simibubi.create.content.contraptions.IDisplayAssemblyExceptions;
 import com.simibubi.create.content.contraptions.piston.MechanicalPistonBlock;
@@ -16,23 +15,22 @@ import com.simibubi.create.content.contraptions.piston.PistonExtensionPoleBlock;
 import com.simibubi.create.content.trains.entity.TrainRelocator;
 import com.simibubi.create.foundation.blockEntity.behaviour.ValueBox;
 import com.simibubi.create.foundation.gui.RemovedGuiUtils;
-import com.simibubi.create.foundation.gui.Theme;
-import com.simibubi.create.foundation.gui.element.GuiGameElement;
 import com.simibubi.create.foundation.mixin.accessor.MouseHandlerAccessor;
-import com.simibubi.create.foundation.outliner.Outline;
-import com.simibubi.create.foundation.outliner.Outliner.OutlineEntry;
-import com.simibubi.create.foundation.utility.Color;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Iterate;
-import com.simibubi.create.foundation.utility.Lang;
+import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.config.CClient;
 
-import io.github.fabricators_of_create.porting_lib.util.client.ScreenUtils;
+import net.createmod.catnip.CatnipClient;
+import net.createmod.catnip.gui.element.BoxElement;
+import net.createmod.catnip.gui.element.GuiGameElement;
+import net.createmod.catnip.utility.Iterate;
+import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.utility.outliner.Outline;
+import net.createmod.catnip.utility.outliner.Outliner.OutlineEntry;
+import net.createmod.catnip.utility.theme.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.MouseHandler;
-import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -49,7 +47,7 @@ import net.minecraft.world.phys.HitResult;
 
 public class GoggleOverlayRenderer {
 
-	private static final Map<Object, OutlineEntry> outlines = CreateClient.OUTLINER.getOutlines();
+	private static final Map<Object, OutlineEntry> outlines = CatnipClient.OUTLINER.getOutlines();
 
 	public static int hoverTicks = 0;
 	public static BlockPos lastHovered = null;
@@ -156,7 +154,8 @@ public class GoggleOverlayRenderer {
 			if (!tooltip.isEmpty())
 				tooltip.add(Components.immutableEmpty());
 
-			Lang.translate("gui.goggles.pole_length").text(" " + poles)
+			CreateLang.translate("gui.goggles.pole_length")
+				.text(" " + poles)
 				.forGoggles(tooltip);
 		}
 
@@ -191,14 +190,11 @@ public class GoggleOverlayRenderer {
 		float fade = Mth.clamp((hoverTicks + partialTicks) / 24f, 0, 1);
 		Boolean useCustom = cfg.overlayCustomColor.get();
 		Color colorBackground = useCustom ? new Color(cfg.overlayBackgroundColor.get())
-			: Theme.c(Theme.Key.VANILLA_TOOLTIP_BACKGROUND)
-				.scaleAlpha(.75f);
+			: BoxElement.COLOR_VANILLA_BACKGROUND.scaleAlpha(.75f);
 		Color colorBorderTop = useCustom ? new Color(cfg.overlayBorderColorTop.get())
-			: Theme.c(Theme.Key.VANILLA_TOOLTIP_BORDER, true)
-				.copy();
+			: BoxElement.COLOR_VANILLA_BORDER.getFirst().copy();
 		Color colorBorderBot = useCustom ? new Color(cfg.overlayBorderColorBot.get())
-			: Theme.c(Theme.Key.VANILLA_TOOLTIP_BORDER, false)
-				.copy();
+			: BoxElement.COLOR_VANILLA_BORDER.getSecond().copy();
 
 		if (fade < 1) {
 			poseStack.translate(Math.pow(1 - fade, 3) * Math.signum(cfg.overlayOffsetX.get() + .5f) * 8, 0, 0);

@@ -9,10 +9,10 @@ import com.simibubi.create.foundation.block.connected.AllCTTypes;
 import com.simibubi.create.foundation.block.connected.CTSpriteShiftEntry;
 import com.simibubi.create.foundation.block.connected.CTSpriteShifter;
 import com.simibubi.create.foundation.block.connected.CTType;
-import com.simibubi.create.foundation.block.render.SpriteShiftEntry;
-import com.simibubi.create.foundation.block.render.SpriteShifter;
-import com.simibubi.create.foundation.utility.Couple;
 
+import net.createmod.catnip.render.SpriteShiftEntry;
+import net.createmod.catnip.render.SpriteShifter;
+import net.createmod.catnip.utility.Couple;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.block.state.properties.WoodType;
 
@@ -40,7 +40,8 @@ public class AllSpriteShifts {
 		HORIZONTAL_FRAMED_GLASS =
 			getCT(AllCTTypes.HORIZONTAL_KRYPPERS, "palettes/framed_glass", "palettes/horizontal_framed_glass"),
 		VERTICAL_FRAMED_GLASS = getCT(AllCTTypes.VERTICAL, "palettes/framed_glass", "palettes/vertical_framed_glass"),
-		ORNATE_IRON_WINDOW = vertical("palettes/ornate_iron_window");
+		ORNATE_IRON_WINDOW = vertical("palettes/ornate_iron_window"),
+		INDUSTRIAL_IRON_WINDOW = getCT(AllCTTypes.RECTANGLE, "palettes/industrial_iron_window");
 
 	public static final CTSpriteShiftEntry CRAFTER_SIDE = vertical("crafter_side"),
 		CRAFTER_OTHERSIDE = horizontal("crafter_side"),
@@ -73,6 +74,9 @@ public class AllSpriteShifts {
 		get("block/elevator_pulley_belt", "block/elevator_pulley_belt_scroll"),
 		ELEVATOR_COIL = get("block/elevator_pulley_coil", "block/elevator_pulley_coil_scroll");
 
+	public static final SpriteShiftEntry FACTORY_PANEL_CONNECTIONS =
+		get("block/factory_panel_connections", "block/factory_panel_connections_animated");
+
 	public static final SpriteShiftEntry BELT = get("block/belt", "block/belt_scroll"),
 		BELT_OFFSET = get("block/belt_offset", "block/belt_scroll"),
 		BELT_DIAGONAL = get("block/belt_diagonal", "block/belt_diagonal_scroll"),
@@ -85,7 +89,8 @@ public class AllSpriteShifts {
 
 	private static void populateMaps() {
 		WoodType[] supportedWoodTypes = new WoodType[] { WoodType.OAK, WoodType.SPRUCE, WoodType.BIRCH, WoodType.ACACIA,
-			WoodType.JUNGLE, WoodType.DARK_OAK, WoodType.MANGROVE, WoodType.CRIMSON, WoodType.WARPED };
+			WoodType.JUNGLE, WoodType.DARK_OAK, WoodType.MANGROVE, WoodType.CRIMSON, WoodType.WARPED, WoodType.CHERRY,
+			WoodType.BAMBOO };
 		Arrays.stream(supportedWoodTypes)
 			.forEach(woodType -> WOODEN_WINDOWS.put(woodType, vertical("palettes/" + woodType.name() + "_window")));
 

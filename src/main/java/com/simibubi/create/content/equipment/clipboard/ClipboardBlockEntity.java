@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.UUID;
 
 import com.simibubi.create.AllBlocks;
+import com.simibubi.create.content.logistics.AddressEditBoxHelper;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
@@ -40,6 +41,13 @@ public class ClipboardBlockEntity extends SmartBlockEntity {
 		notifyUpdate();
 		updateWrittenState();
 	}
+	
+	@Override
+	public void lazyTick() {
+		super.lazyTick();
+		if (level.isClientSide())
+			DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> this::advertiseToAddressHelper);
+	}
 
 	public void updateWrittenState() {
 		BlockState blockState = getBlockState();
@@ -69,6 +77,8 @@ public class ClipboardBlockEntity extends SmartBlockEntity {
 	protected void read(CompoundTag tag, boolean clientPacket) {
 		super.read(tag, clientPacket);
 		dataContainer = ItemStack.of(tag.getCompound("Item"));
+		if (!AllBlocks.CLIPBOARD.isIn(dataContainer))
+			dataContainer = AllBlocks.CLIPBOARD.asStack();
 
 		if (clientPacket)
 			EnvExecutor.runWhenOn(EnvType.CLIENT, () -> () -> readClientSide(tag));
@@ -85,6 +95,11 @@ public class ClipboardBlockEntity extends SmartBlockEntity {
 		if (!worldPosition.equals(cs.targetedBlock))
 			return;
 		cs.reopenWith(dataContainer);
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	private void advertiseToAddressHelper() {
+		AddressEditBoxHelper.advertiseClipboard(this);
 	}
 
 }

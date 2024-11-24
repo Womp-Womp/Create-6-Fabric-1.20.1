@@ -9,12 +9,11 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.simibubi.create.content.logistics.filter.ItemAttribute;
-import com.simibubi.create.foundation.utility.RegisteredObjects;
 
 import io.github.fabricators_of_create.porting_lib.util.TagUtil;
 
+import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.client.resources.language.I18n;
-import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.world.item.DyeColor;
@@ -60,7 +59,7 @@ public class ColorAttribute implements ItemAttribute {
 			colors.addAll(getFireworkStarColors(nbt.getCompound("Explosion")));
 		}
 
-		Arrays.stream(DyeColor.values()).filter(c -> RegisteredObjects.getKeyOrThrow(stack.getItem()).getPath().startsWith(c.getName() + "_")).forEach(colors::add);
+		Arrays.stream(DyeColor.values()).filter(c -> CatnipServices.REGISTRIES.getKeyOrThrow(stack.getItem()).getPath().startsWith(c.getName() + "_")).forEach(colors::add);
 
 		return colors;
 	}

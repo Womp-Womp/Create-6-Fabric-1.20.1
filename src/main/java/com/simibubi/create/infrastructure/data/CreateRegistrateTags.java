@@ -1,5 +1,8 @@
 package com.simibubi.create.infrastructure.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllTags.AllBlockTags;
 import com.simibubi.create.AllTags.AllEntityTags;
@@ -24,9 +27,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CreateRegistrateTags {
 	public static void addGenerators() {
@@ -147,6 +147,10 @@ public class CreateRegistrateTags {
 
 	private static void genItemTags(RegistrateTagsProvider<Item> provIn) {
 		CreateTagsProvider<Item> prov = new CreateTagsProvider<>(provIn, Item::builtInRegistryHolder);
+
+		prov.tag(AllItemTags.PULPIFIABLE.tag)
+			.add(Items.BAMBOO, Items.SUGAR_CANE)
+			.addTag(ItemTags.SAPLINGS);
 
 		prov.tag(AllItemTags.SLEEPERS.tag)
 			.add(Items.STONE_SLAB, Items.SMOOTH_STONE_SLAB, Items.ANDESITE_SLAB);

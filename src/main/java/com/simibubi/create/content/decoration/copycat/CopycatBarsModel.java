@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.simibubi.create.foundation.block.render.SpriteShiftEntry;
 
+import net.createmod.catnip.render.SpriteShiftEntry;
 import net.fabricmc.fabric.api.renderer.v1.model.FabricBakedModel;
 import net.fabricmc.fabric.api.renderer.v1.model.SpriteFinder;
 import net.fabricmc.fabric.api.renderer.v1.render.RenderContext;

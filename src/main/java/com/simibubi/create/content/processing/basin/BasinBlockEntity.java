@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.simibubi.create.foundation.utility.IntAttached;
-
 import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
@@ -32,12 +30,10 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.InvManipul
 import com.simibubi.create.foundation.fluid.CombinedTankWrapper;
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.item.SmartInventory;
-import com.simibubi.create.foundation.utility.AnimationTickHolder;
 import com.simibubi.create.foundation.utility.BlockHelper;
 import com.simibubi.create.foundation.utility.Components;
 import com.simibubi.create.foundation.utility.Couple;
 import com.simibubi.create.foundation.utility.Iterate;
-import com.simibubi.create.foundation.utility.Lang;
 import com.simibubi.create.foundation.utility.LangBuilder;
 import com.simibubi.create.foundation.utility.LongAttached;
 import com.simibubi.create.foundation.utility.NBTHelper;
@@ -45,6 +41,7 @@ import com.simibubi.create.foundation.utility.VecHelper;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat;
 import com.simibubi.create.foundation.utility.animation.LerpedFloat.Chaser;
 import com.simibubi.create.infrastructure.config.AllConfigs;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
@@ -63,6 +60,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.fabricmc.fabric.api.transfer.v1.transaction.base.SnapshotParticipant;
+import net.createmod.catnip.utility.AnimationTickHolder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -460,7 +458,8 @@ public class BasinBlockEntity extends SmartBlockEntity implements IHaveGoggleInf
 			if (filter != null && !filter.test(itemStack))
 				continue;
 
-			visualizedOutputItems.add(LongAttached.withZero(itemStack));
+			if (visualizedOutputItems.size() < 3)
+				visualizedOutputItems.add(LongAttached.withZero(itemStack));
 			update = true;
 
 			inserted = TransferUtil.insertItem(targetInv, itemStack.copy());
@@ -491,6 +490,7 @@ public class BasinBlockEntity extends SmartBlockEntity implements IHaveGoggleInf
 
 					update = true;
 					iterator.remove();
+					if (visualizedOutputFluids.size() < 3)
 					visualizedOutputFluids.add(LongAttached.withZero(fluidStack));
 					nested.commit();
 				}
@@ -787,7 +787,7 @@ public class BasinBlockEntity extends SmartBlockEntity implements IHaveGoggleInf
 
 	@Override
 	public boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
-		Lang.translate("gui.goggles.basin_contents")
+		CreateLang.translate("gui.goggles.basin_contents")
 			.forGoggles(tooltip);
 
 		boolean isEmpty = true;
@@ -797,10 +797,10 @@ public class BasinBlockEntity extends SmartBlockEntity implements IHaveGoggleInf
 				ItemStack stackInSlot = inventory.getStackInSlot(i);
 				if (stackInSlot.isEmpty())
 					continue;
-				Lang.text("")
+				CreateLang.text("")
 						.add(Components.translatable(stackInSlot.getDescriptionId())
 								.withStyle(ChatFormatting.GRAY))
-						.add(Lang.text(" x" + stackInSlot.getCount())
+						.add(CreateLang.text(" x" + stackInSlot.getCount())
 								.style(ChatFormatting.GREEN))
 						.forGoggles(tooltip, 1);
 				isEmpty = false;
@@ -808,18 +808,18 @@ public class BasinBlockEntity extends SmartBlockEntity implements IHaveGoggleInf
 		}
 
 		FluidUnit unit = AllConfigs.client().fluidUnitType.get();
-		LangBuilder unitSuffix = Lang.translate(unit.getTranslationKey());
+		LangBuilder unitSuffix = CreateLang.translate(unit.getTranslationKey());
 		boolean simplify = AllConfigs.client().simplifyFluidUnit.get();
 		for (SmartFluidTankBehaviour behaviour : tanks) {
 			for (TankSegment tank : behaviour.getTanks()) {
 				FluidStack fluidStack = tank.getTank().getFluid();
 				if (fluidStack.isEmpty())
 					continue;
-				Lang.text("")
-						.add(Lang.fluidName(fluidStack)
-								.add(Lang.text(" "))
+				CreateLang.text("")
+						.add(CreateLang.fluidName(fluidStack)
+								.add(CreateLang.text(" "))
 								.style(ChatFormatting.GRAY)
-								.add(Lang.text(FluidTextUtil.getUnicodeMillibuckets(fluidStack.getAmount(), unit, simplify))
+								.add(CreateLang.text(FluidTextUtil.getUnicodeMillibuckets(fluidStack.getAmount(), unit, simplify))
 										.add(unitSuffix)
 										.style(ChatFormatting.BLUE)))
 						.forGoggles(tooltip, 1);

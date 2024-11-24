@@ -7,7 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
-import com.simibubi.create.foundation.utility.Lang;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
@@ -33,8 +33,7 @@ public class MountedStorageInteraction {
 		int slotCount, Supplier<Boolean> stillValid) {
 		int rows = Mth.clamp(slotCount / 9, 1, 6);
 		MenuType<?> menuType = menus.get(rows - 1);
-		Component menuName = Lang.translateDirect("contraptions.moving_container", displayName);
-
+		Component menuName = CreateLang.translateDirect("contraptions.moving_container", displayName);
 		return new MenuProvider() {
 
 			@Override

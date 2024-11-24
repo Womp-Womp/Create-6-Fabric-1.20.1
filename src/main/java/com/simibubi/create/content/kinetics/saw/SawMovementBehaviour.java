@@ -2,20 +2,23 @@ package com.simibubi.create.content.kinetics.saw;
 
 import java.util.Optional;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
+import com.simibubi.create.content.contraptions.render.ActorVisual;
 import com.simibubi.create.content.contraptions.render.ContraptionMatrices;
 import com.simibubi.create.content.kinetics.base.BlockBreakingMovementBehaviour;
 import com.simibubi.create.foundation.damageTypes.CreateDamageSources;
 import com.simibubi.create.foundation.utility.AbstractBlockBreakQueue;
 import com.simibubi.create.foundation.utility.TreeCutter;
-import com.simibubi.create.foundation.utility.VecHelper;
 import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import net.createmod.catnip.utility.VecHelper;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -98,6 +101,11 @@ public class SawMovementBehaviour extends BlockBreakingMovementBehaviour {
 	@Override
 	public boolean disableBlockEntityRendering() {
 		return true;
+	}
+
+	@Override
+	public @Nullable ActorVisual createVisual(VisualizationContext visualizationContext, VirtualRenderWorld simulationWorld, MovementContext movementContext) {
+		return new SawActorVisual(visualizationContext, simulationWorld, movementContext);
 	}
 
 	@Override

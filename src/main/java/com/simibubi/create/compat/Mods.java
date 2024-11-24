@@ -33,6 +33,8 @@ public enum Mods {
 	FRAMEDBLOCKS,
 	XLPACKETS,
 	MODERNUI,
+	FTBCHUNKS,
+	JOURNEYMAP,
 
 	// fabric mods
 	SANDWICHABLE,
@@ -73,7 +75,7 @@ public enum Mods {
 		if (!isLoaded())
 			return false;
 		Item asItem = entry.asItem();
-		return asItem != null && RegisteredObjects.getKeyOrThrow(asItem)
+		return asItem != null && CatnipServices.REGISTRIES.getKeyOrThrow(asItem)
 			.getNamespace()
 			.equals(id);
 	}

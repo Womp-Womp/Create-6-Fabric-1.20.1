@@ -1,6 +1,7 @@
 package com.simibubi.create.content.contraptions.actors.seat;
 
 import com.simibubi.create.AllEntityTypes;
+import com.simibubi.create.content.logistics.box.PackageEntity;
 
 import io.github.fabricators_of_create.porting_lib.entity.IEntityAdditionalSpawnData;
 import io.github.fabricators_of_create.porting_lib.entity.PortingLibEntity;
@@ -80,6 +81,8 @@ public class SeatEntity extends Entity implements IEntityAdditionalSpawnData {
 			return 1 / 16f;
 		if (entity instanceof Frog)
 			return 1 / 8f + 1 / 64f;
+		if (entity instanceof PackageEntity)
+			return 1 / 4f;
 		return 0;
 	}
 

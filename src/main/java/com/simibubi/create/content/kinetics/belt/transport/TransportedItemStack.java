@@ -4,6 +4,7 @@ import java.util.Random;
 
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
 import com.simibubi.create.content.kinetics.fan.processing.FanProcessingType;
+import com.simibubi.create.content.logistics.box.PackageItem;
 
 import io.github.fabricators_of_create.porting_lib.util.NBTSerializer;
 import net.minecraft.core.Direction;
@@ -36,6 +37,8 @@ public class TransportedItemStack implements Comparable<TransportedItemStack> {
 		this.stack = stack;
 		boolean centered = BeltHelper.isItemUpright(stack);
 		angle = centered ? 180 : R.nextInt(360);
+		if (stack.getItem() instanceof PackageItem)
+			angle = 180 + R.nextInt(10);
 		sideOffset = prevSideOffset = getTargetSideOffset();
 		insertedFrom = Direction.UP;
 	}

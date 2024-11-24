@@ -2,19 +2,21 @@ package com.simibubi.create.foundation.blockEntity.behaviour.inventory;
 
 import javax.annotation.Nullable;
 
+import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
 import com.simibubi.create.foundation.item.ItemHelper.ExtractionCountMode;
-import com.simibubi.create.foundation.utility.BlockFace;
-import com.simibubi.create.foundation.utility.HashableNonNullConsumer;
 
 import io.github.fabricators_of_create.porting_lib.util.StorageProvider;
 import net.fabricmc.fabric.api.lookup.v1.block.BlockApiLookup;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.createmod.catnip.utility.BlockFace;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
@@ -25,6 +27,7 @@ public abstract class CapManipulationBehaviourBase<T, S extends CapManipulationB
 
 	protected InterfaceProvider target;
 	private StorageProvider<T> targetStorageProvider;
+	protected Predicate<BlockEntity> filter;
 	protected boolean simulateNext;
 	protected boolean bypassSided;
 	protected Direction side;
@@ -36,6 +39,7 @@ public abstract class CapManipulationBehaviourBase<T, S extends CapManipulationB
 		targetStorageProvider = null;
 		simulateNext = false;
 		bypassSided = false;
+		filter = Predicates.alwaysTrue();
 	}
 
 	protected abstract StorageProvider<T> getProvider(BlockPos pos, boolean bypassSided);
@@ -52,6 +56,12 @@ public abstract class CapManipulationBehaviourBase<T, S extends CapManipulationB
 	@SuppressWarnings("unchecked")
 	public S simulate() {
 		simulateNext = true;
+		return (S) this;
+	}
+
+	@SuppressWarnings("unchecked")
+	public S withFilter(Predicate<BlockEntity> filter) {
+		this.filter = filter;
 		return (S) this;
 	}
 
@@ -106,13 +116,11 @@ public abstract class CapManipulationBehaviourBase<T, S extends CapManipulationB
 //		if (!world.isLoaded(pos))
 //			return;
 //		BlockEntity invBE = world.getBlockEntity(pos);
-//		if (invBE == null)
+//		if (invBE == null || !filter.test(invBE))
 //			return;
 //		Capability<T> capability = capability();
 //		targetCapability =
 //			bypassSided ? invBE.getCapability(capability) : invBE.getCapability(capability, targetBlockFace.getFace());
-//		if (targetCapability.isPresent())
-//			targetCapability.addListener(new HashableNonNullConsumer<>(this::onHandlerInvalidated, this));
 //	}
 
 	@FunctionalInterface

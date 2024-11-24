@@ -14,11 +14,12 @@ import com.simibubi.create.content.equipment.blueprint.BlueprintEntity;
 import com.simibubi.create.content.equipment.blueprint.BlueprintRenderer;
 import com.simibubi.create.content.equipment.potatoCannon.PotatoProjectileEntity;
 import com.simibubi.create.content.equipment.potatoCannon.PotatoProjectileRenderer;
+import com.simibubi.create.content.logistics.box.PackageEntity;
+import com.simibubi.create.content.logistics.box.PackageRenderer;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntity;
 import com.simibubi.create.content.trains.entity.CarriageContraptionEntityRenderer;
 import com.simibubi.create.content.trains.entity.CarriageContraptionVisual;
 import com.simibubi.create.foundation.data.CreateEntityBuilder;
-import com.simibubi.create.foundation.utility.Lang;
 import com.tterrag.registrate.util.entry.EntityEntry;
 import com.tterrag.registrate.util.nullness.NonNullConsumer;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
@@ -30,6 +31,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType.EntityFactory;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 
 public class AllEntityTypes {
 
@@ -67,6 +69,9 @@ public class AllEntityTypes {
 	public static final EntityEntry<SeatEntity> SEAT = register("seat", SeatEntity::new, () -> SeatEntity.Render::new,
 		MobCategory.MISC, 5, Integer.MAX_VALUE, false, true, SeatEntity::build).register();
 
+	public static final EntityEntry<PackageEntity> PACKAGE = register("package", PackageEntity::new, () -> PackageRenderer::new,
+		MobCategory.MISC, 10, 3, true, false, PackageEntity::build).register();
+
 	//
 
 	private static <T extends Entity> CreateEntityBuilder<T, ?> contraption(String name, EntityFactory<T> factory,
@@ -92,6 +97,11 @@ public class AllEntityTypes {
 					b.fireImmune();
 			})
 			.renderer(renderer);
+	}
+
+	public static void registerEntityAttributes(EntityAttributeCreationEvent event) {
+		event.put(PACKAGE.get(), PackageEntity.createPackageAttributes()
+			.build());
 	}
 
 	public static void register() {}

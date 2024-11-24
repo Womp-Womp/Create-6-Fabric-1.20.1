@@ -67,10 +67,6 @@ public class ContraptionVisual<E extends AbstractContraptionEntity> extends Abst
 		super(ctx, entity, partialTick);
 		embedding = ctx.createEmbedding(Vec3i.ZERO);
 
-		init(partialTick);
-    }
-
-	protected void init(float partialTick) {
 		setEmbeddingMatrices(partialTick);
 
 		Contraption contraption = entity.getContraption();
@@ -181,9 +177,10 @@ public class ContraptionVisual<E extends AbstractContraptionEntity> extends Abst
 	}
 
 	private void setEmbeddingMatrices(float partialTick) {
-		double x = Mth.lerp(partialTick, entity.xOld, entity.getX());
-		double y = Mth.lerp(partialTick, entity.yOld, entity.getY());
-		double z = Mth.lerp(partialTick, entity.zOld, entity.getZ());
+		var origin = renderOrigin();
+		double x = Mth.lerp(partialTick, entity.xOld, entity.getX()) - origin.getX();
+		double y = Mth.lerp(partialTick, entity.yOld, entity.getY()) - origin.getY();
+		double z = Mth.lerp(partialTick, entity.zOld, entity.getZ()) - origin.getZ();
 
 		contraptionMatrix.setIdentity();
 		contraptionMatrix.translate(x, y, z);

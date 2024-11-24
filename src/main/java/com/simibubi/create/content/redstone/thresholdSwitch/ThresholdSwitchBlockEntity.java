@@ -3,6 +3,8 @@ package com.simibubi.create.content.redstone.thresholdSwitch;
 import java.util.List;
 
 import com.simibubi.create.compat.thresholdSwitch.ThresholdSwitchCompat;
+import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
+import com.simibubi.create.content.processing.recipe.ProcessingInventory;
 import com.simibubi.create.content.redstone.DirectedDirectionalBlock;
 import com.simibubi.create.content.redstone.FilteredDetectorFilterSlot;
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkBlock;
@@ -13,7 +15,7 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.CapManipul
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.InvManipulationBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.TankManipulationBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.VersionedInventoryTrackerBehaviour;
-import com.simibubi.create.foundation.utility.BlockFace;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
@@ -24,6 +26,7 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
@@ -34,9 +37,14 @@ import net.minecraft.world.ticks.TickPriority;
 
 public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 
-	public float onWhenAbove;
-	public float offWhenBelow;
-	public float currentLevel;
+	public int onWhenAbove;
+	public int offWhenBelow;
+
+	public int currentMinLevel;
+	public int currentLevel;
+	public int currentMaxLevel;
+	public boolean inStacks;
+
 	private boolean redstoneState;
 	private boolean inverted;
 	private boolean poweredAfterDelay;
@@ -55,8 +63,8 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 
 	public ThresholdSwitchBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
-		onWhenAbove = .75f;
-		offWhenBelow = .25f;
+		onWhenAbove = 128;
+		offWhenBelow = 64;
 		currentLevel = -1;
 		redstoneState = false;
 		inverted = false;
@@ -66,9 +74,12 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 
 	@Override
 	protected void read(CompoundTag compound, boolean clientPacket) {
-		onWhenAbove = compound.getFloat("OnAbove");
-		offWhenBelow = compound.getFloat("OffBelow");
-		currentLevel = compound.getFloat("Current");
+		onWhenAbove = compound.getInt("OnAboveAmount");
+		offWhenBelow = compound.getInt("OffBelowAmount");
+		currentLevel = compound.getInt("CurrentAmount");
+		currentMinLevel = compound.getInt("CurrentMinAmount");
+		currentMaxLevel = compound.getInt("CurrentMaxAmount");
+		inStacks = compound.getBoolean("InStacks");
 		redstoneState = compound.getBoolean("Powered");
 		inverted = compound.getBoolean("Inverted");
 		poweredAfterDelay = compound.getBoolean("PoweredAfterDelay");
@@ -76,15 +87,18 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 	}
 
 	protected void writeCommon(CompoundTag compound) {
-		compound.putFloat("OnAbove", onWhenAbove);
-		compound.putFloat("OffBelow", offWhenBelow);
+		compound.putFloat("OnAboveAmount", onWhenAbove);
+		compound.putFloat("OffBelowAmount", offWhenBelow);
 		compound.putBoolean("Inverted", inverted);
 	}
 
 	@Override
 	public void write(CompoundTag compound, boolean clientPacket) {
 		writeCommon(compound);
-		compound.putFloat("Current", currentLevel);
+		compound.putInt("CurrentAmount", currentLevel);
+		compound.putInt("CurrentMinAmount", currentMinLevel);
+		compound.putInt("CurrentMaxAmount", currentMaxLevel);
+		compound.putBoolean("InStacks", inStacks);
 		compound.putBoolean("Powered", redstoneState);
 		compound.putBoolean("PoweredAfterDelay", poweredAfterDelay);
 		super.write(compound, clientPacket);
@@ -96,8 +110,16 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 		super.writeSafe(compound);
 	}
 
-	public float getStockLevel() {
+	public int getMinLevel() {
+		return currentMinLevel;
+	}
+
+	public int getStockLevel() {
 		return currentLevel;
+	}
+
+	public int getMaxLevel() {
+		return currentMaxLevel;
 	}
 
 	public void updateCurrentLevel() {
@@ -107,24 +129,37 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 			return;
 		}
 		boolean changed = false;
-		float occupied = 0;
-		float totalSpace = 0;
-		float prevLevel = currentLevel;
+		int prevLevel = currentLevel;
+		int prevMaxLevel = currentMaxLevel;
 
-		BlockPos target = worldPosition.relative(ThresholdSwitchBlock.getTargetDirection(getBlockState()));
+		BlockPos target = getTargetPos();
 		BlockEntity targetBlockEntity = level.getBlockEntity(target);
 
+		observedInventory.findNewCapability();
+		observedTank.findNewCapability();
 		if (targetBlockEntity instanceof ThresholdSwitchObservable observable) {
-			currentLevel = observable.getPercent() / 100f;
+			currentMinLevel = observable.getMinValue();
+			currentLevel = observable.getCurrentValue();
+			currentMaxLevel = observable.getMaxValue();
+
+		/*} else if (StorageDrawers.isDrawer(targetBlockEntity) && observedInventory.hasInventory()) {
+			currentMinLevel = 0;
+			currentLevel = StorageDrawers.getItemCount(observedInventory.getInventory(), filtering);
+			currentMaxLevel = StorageDrawers.getTotalStorageSpace(observedInventory.getInventory());
+		*/
 
 		} else if (observedInventory.hasInventory() || observedTank.hasInventory()) {
+			currentMinLevel = 0;
+			currentLevel = 0;
+			currentMaxLevel = 0;
+
 			if (observedInventory.hasInventory()) {
 
 				// Item inventory
 				Storage<ItemVariant> inv = observedInventory.getInventory();
 				if (invVersionTracker.stillWaiting(inv)) {
-					occupied = prevLevel;
-					totalSpace = 1f;
+					currentLevel = prevLevel;
+					currentMaxLevel = prevMaxLevel;
 
 				} else {
 					invVersionTracker.awaitNewVersion(inv);
@@ -141,9 +176,9 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 						if (space == 0)
 							continue;
 
-						totalSpace += 1;
+						currentMaxLevel += space;
 						if (filtering.test(stackInSlot))
-							occupied += count * (1f / space);
+							currentLevel += count;
 					}
 				}
 			}
@@ -157,13 +192,11 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 					if (space == 0)
 						continue;
 
-					totalSpace += 1;
+					currentMaxLevel += space;
 					if (filtering.test(new FluidStack(view)))
-						occupied += count * (1f / space);
+						currentLevel += count;
 				}
 			}
-
-			currentLevel = occupied / totalSpace;
 
 			// fabric: since fluid amounts are 81x larger, we lose floating point precision. Let's just round a little.
 			if (currentLevel > 0.999) {
@@ -174,8 +207,11 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 
 		} else {
 			// No compatible inventories found
+			currentMinLevel = -1;
+			currentMaxLevel = -1;
 			if (currentLevel == -1)
 				return;
+
 			level.setBlock(worldPosition, getBlockState().setValue(ThresholdSwitchBlock.LEVEL, 0), 3);
 			currentLevel = -1;
 			redstoneState = false;
@@ -184,7 +220,7 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 			return;
 		}
 
-		currentLevel = Mth.clamp(currentLevel, 0, 1);
+		currentLevel = Mth.clamp(currentLevel, currentMinLevel, currentMaxLevel);
 		changed = currentLevel != prevLevel;
 
 		boolean previouslyPowered = redstoneState;
@@ -195,8 +231,9 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 		boolean update = previouslyPowered != redstoneState;
 
 		int displayLevel = 0;
+		float normedLevel = (float) (currentLevel - currentMinLevel) / (currentMaxLevel - currentMinLevel);
 		if (currentLevel > 0)
-			displayLevel = (int) (1 + currentLevel * 4);
+			displayLevel = (int) (1 + normedLevel * 4);
 		level.setBlock(worldPosition, getBlockState().setValue(ThresholdSwitchBlock.LEVEL, displayLevel),
 			update ? 3 : 2);
 
@@ -207,6 +244,50 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 			DisplayLinkBlock.notifyGatherers(level, worldPosition);
 			notifyUpdate();
 		}
+	}
+
+	private boolean isSuitableInventory(BlockEntity be) {
+		return be != null && !(be instanceof StockTickerBlockEntity || be.getCapability(ForgeCapabilities.ITEM_HANDLER)
+			.filter(ProcessingInventory.class::isInstance)
+			.isPresent());
+	}
+
+	private BlockPos getTargetPos() {
+		return worldPosition.relative(ThresholdSwitchBlock.getTargetDirection(getBlockState()));
+	}
+
+	public ItemStack getDisplayItemForScreen() {
+		BlockPos target = getTargetPos();
+		return new ItemStack(level.getBlockState(target)
+			.getBlock());
+	}
+
+	public static enum ThresholdType {
+		UNSUPPORTED, ITEM, FLUID, CUSTOM;
+	}
+
+	public MutableComponent format(int value, boolean stacks) {
+		ThresholdType type = getTypeOfCurrentTarget();
+		if (type == ThresholdType.CUSTOM)
+			if (level.getBlockEntity(getTargetPos()) instanceof ThresholdSwitchObservable tso)
+				return tso.format(value);
+
+		String suffix = type == ThresholdType.ITEM
+			? stacks ? "schedule.condition.threshold.stacks" : "schedule.condition.threshold.items"
+			: "schedule.condition.threshold.buckets";
+		return CreateLang.text(value + " ")
+			.add(CreateLang.translate(suffix))
+			.component();
+	}
+
+	public ThresholdType getTypeOfCurrentTarget() {
+		if (observedInventory.hasInventory())
+			return ThresholdType.ITEM;
+		if (observedTank.hasInventory())
+			return ThresholdType.FLUID;
+		if (level.getBlockEntity(getTargetPos()) instanceof ThresholdSwitchObservable)
+			return ThresholdType.CUSTOM;
+		return ThresholdType.UNSUPPORTED;
 	}
 
 	protected void scheduleBlockTick() {
@@ -226,8 +307,8 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 
 	@Override
 	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
-		behaviours.add(filtering = new FilteringBehaviour(this, new FilteredDetectorFilterSlot(true))
-			.withCallback($ -> {
+		behaviours
+			.add(filtering = new FilteringBehaviour(this, new FilteredDetectorFilterSlot(true)).withCallback($ -> {
 				this.updateCurrentLevel();
 				invVersionTracker.reset();
 			}));
@@ -237,7 +318,8 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 		InterfaceProvider towardBlockFacing =
 			(w, p, s) -> new BlockFace(p, DirectedDirectionalBlock.getTargetDirection(s));
 
-		behaviours.add(observedInventory = new InvManipulationBehaviour(this, towardBlockFacing).bypassSidedness());
+		behaviours.add(observedInventory = new InvManipulationBehaviour(this, towardBlockFacing).bypassSidedness()
+			.withFilter(this::isSuitableInventory));
 		behaviours.add(observedTank = new TankManipulationBehaviour(this, towardBlockFacing).bypassSidedness());
 	}
 
@@ -256,6 +338,7 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 	public void updatePowerAfterDelay() {
 		poweredAfterDelay = shouldBePowered();
 		level.blockUpdated(worldPosition, getBlockState().getBlock());
+		sendData();
 	}
 
 	public boolean isPowered() {

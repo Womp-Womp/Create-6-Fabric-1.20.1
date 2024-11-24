@@ -74,10 +74,6 @@ import com.simibubi.create.foundation.utility.BBHelper;
 import com.simibubi.create.foundation.utility.BlockFace;
 import com.simibubi.create.foundation.utility.BlockHelper;
 import com.simibubi.create.foundation.utility.ICoordinate;
-import com.simibubi.create.foundation.utility.Iterate;
-import com.simibubi.create.foundation.utility.NBTHelper;
-import com.simibubi.create.foundation.utility.NBTProcessors;
-import com.simibubi.create.foundation.utility.UniqueLinkedList;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
@@ -86,6 +82,12 @@ import io.github.fabricators_of_create.porting_lib.util.StickinessUtil;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
+import net.createmod.catnip.utility.BBHelper;
+import net.createmod.catnip.utility.BlockFace;
+import net.createmod.catnip.utility.Iterate;
+import net.createmod.catnip.utility.NBTHelper;
+import net.createmod.catnip.utility.NBTProcessors;
+import net.createmod.catnip.utility.UniqueLinkedList;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -1144,6 +1146,7 @@ public abstract class Contraption {
 					if (blockEntity instanceof IMultiBlockEntityContainer) {
 						if (tag.contains("LastKnownPos") || capturedMultiblocks.isEmpty()) {
 							tag.put("LastKnownPos", NbtUtils.writeBlockPos(BlockPos.ZERO.below(Integer.MAX_VALUE - 1)));
+							tag.remove("Controller");
 						}
 					}
 
@@ -1200,6 +1203,9 @@ public abstract class Contraption {
 			// swap nbt data to the new controller position
 			StructureBlockInfo prevControllerInfo = blocks.get(controllerPos);
 			StructureBlockInfo newControllerInfo = blocks.get(otherPos);
+			if (prevControllerInfo == null || newControllerInfo == null)
+				return;
+
 			blocks.put(otherPos, new StructureBlockInfo(newControllerInfo.pos(), newControllerInfo.state(), prevControllerInfo.nbt()));
 			blocks.put(controllerPos, new StructureBlockInfo(prevControllerInfo.pos(), prevControllerInfo.state(), newControllerInfo.nbt()));
 		});
@@ -1385,6 +1391,9 @@ public abstract class Contraption {
 
 	private void gatherBBsOffThread() {
 		getContraptionWorld();
+		if (simplifiedEntityColliderProvider != null) {
+			simplifiedEntityColliderProvider.cancel(false);
+		}
 		simplifiedEntityColliderProvider = CompletableFuture.supplyAsync(() -> {
 					VoxelShape combinedShape = Shapes.empty();
 					for (Entry<BlockPos, StructureBlockInfo> entry : blocks.entrySet()) {
@@ -1401,7 +1410,7 @@ public abstract class Contraption {
 				})
 				.thenAccept(r -> {
 					simplifiedEntityColliders = Optional.of(r);
-					simplifiedEntityColliderProvider = null;
+
 				});
 	}
 

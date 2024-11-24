@@ -5,18 +5,17 @@
 //import org.spongepowered.asm.mixin.injection.Inject;
 //import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 //
-//import com.simibubi.create.content.schematics.SchematicWorld;
-//
+//import net.createmod.catnip.utility.levelWrappers.SchematicLevel;
 //import net.minecraft.client.Minecraft;
 //import net.minecraft.world.level.Level;
 //import net.minecraft.world.level.block.entity.BlockEntity;
 //import net.minecraftforge.api.distmarker.Dist;
 //import net.minecraftforge.api.distmarker.OnlyIn;
-//import net.minecraftforge.client.model.ModelDataManager;
+//import net.minecraftforge.client.model.data.ModelDataManager;
 //
 //@OnlyIn(Dist.CLIENT)
 //@Mixin(ModelDataManager.class)
-//public class ModelDataRefreshMixin { // fabric: forge mixin, unneeded
+//public class ModelDataRefreshMixin {
 //	/**
 //	 * Normally ModelDataManager will throw an exception if a block entity tries
 //	 * to refresh its model data from a world the client isn't currently in,
@@ -27,7 +26,7 @@
 //	private static void create$requestModelDataRefresh(BlockEntity be, CallbackInfo ci) {
 //		if (be != null) {
 //			Level world = be.getLevel();
-//			if (world != Minecraft.getInstance().level && world instanceof SchematicWorld)
+//			if (world != Minecraft.getInstance().level && world instanceof SchematicLevel)
 //				ci.cancel();
 //		}
 //	}

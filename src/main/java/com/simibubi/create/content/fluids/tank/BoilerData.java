@@ -5,10 +5,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.simibubi.create.foundation.utility.Components;
-
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.AllBlocks;
@@ -21,13 +17,15 @@ import com.simibubi.create.foundation.advancement.AdvancementBehaviour;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.fluid.FluidHelper;
 import com.simibubi.create.foundation.fluid.SmartFluidTank;
-import com.simibubi.create.foundation.utility.Iterate;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.animation.LerpedFloat;
-import com.simibubi.create.foundation.utility.animation.LerpedFloat.Chaser;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import joptsimple.internal.Strings;
+import net.createmod.catnip.utility.Iterate;
+import net.createmod.catnip.utility.animation.LerpedFloat;
+import net.createmod.catnip.utility.animation.LerpedFloat.Chaser;
+import net.createmod.catnip.utility.lang.Components;
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
 import net.minecraft.ChatFormatting;
@@ -153,11 +151,11 @@ public class BoilerData {
 
 		calcMinMaxForSize(boilerSize);
 
-		Lang.translate("boiler.status", getHeatLevelTextComponent().withStyle(ChatFormatting.GREEN))
+		CreateLang.translate("boiler.status", getHeatLevelTextComponent().withStyle(ChatFormatting.GREEN))
 						.forGoggles(tooltip);
-		Lang.builder().add(getSizeComponent(true, false)).forGoggles(tooltip, 1);
-		Lang.builder().add(getWaterComponent(true, false)).forGoggles(tooltip, 1);
-		Lang.builder().add(getHeatComponent(true, false)).forGoggles(tooltip, 1);
+		CreateLang.builder().add(getSizeComponent(true, false)).forGoggles(tooltip, 1);
+		CreateLang.builder().add(getWaterComponent(true, false)).forGoggles(tooltip, 1);
+		CreateLang.builder().add(getHeatComponent(true, false)).forGoggles(tooltip, 1);
 
 		if (attachedEngines == 0)
 			return true;
@@ -168,31 +166,31 @@ int boilerLevel = Math.min(activeHeat, Math.min(maxHeatForWater, maxHeatForSize)
 		tooltip.add(Components.immutableEmpty());
 
 		if (attachedEngines > 0 && maxHeatForSize > 0 && maxHeatForWater == 0 && (passiveHeat ? 1 : activeHeat) > 0) {
-			Lang.translate("boiler.water_input_rate")
+			CreateLang.translate("boiler.water_input_rate")
 				.style(ChatFormatting.GRAY)
 				.forGoggles(tooltip);
-			Lang.number(waterSupply)
+			CreateLang.number(waterSupply)
 				.style(ChatFormatting.BLUE)
-				.add(Lang.translate("generic.unit.millibuckets"))
-				.add(Lang.text(" / ")
+				.add(CreateLang.translate("generic.unit.millibuckets"))
+				.add(CreateLang.text(" / ")
 					.style(ChatFormatting.GRAY))
-				.add(Lang.translate("boiler.per_tick", Lang.number(waterSupplyPerLevel)
-					.add(Lang.translate("generic.unit.millibuckets")))
+				.add(CreateLang.translate("boiler.per_tick", CreateLang.number(waterSupplyPerLevel)
+					.add(CreateLang.translate("generic.unit.millibuckets")))
 					.style(ChatFormatting.DARK_GRAY))
 				.forGoggles(tooltip, 1);
 			return true;
 		}
 
-		Lang.translate("tooltip.capacityProvided")
+		CreateLang.translate("tooltip.capacityProvided")
 			.style(ChatFormatting.GRAY)
 			.forGoggles(tooltip);
 
-		Lang.number(totalSU)
+		CreateLang.number(totalSU)
 			.translate("generic.unit.stress")
 			.style(ChatFormatting.AQUA)
 			.space()
-			.add((attachedEngines == 1 ? Lang.translate("boiler.via_one_engine")
-				: Lang.translate("boiler.via_engines", attachedEngines)).style(ChatFormatting.DARK_GRAY))
+			.add((attachedEngines == 1 ? CreateLang.translate("boiler.via_one_engine")
+				: CreateLang.translate("boiler.via_engines", attachedEngines)).style(ChatFormatting.DARK_GRAY))
 			.forGoggles(tooltip, 1);
 
 		return true;
@@ -210,10 +208,10 @@ int boilerLevel = Math.min(activeHeat, Math.min(maxHeatForWater, maxHeatForSize)
 	public MutableComponent getHeatLevelTextComponent() {
 		int boilerLevel = Math.min(activeHeat, Math.min(maxHeatForWater, maxHeatForSize));
 
-		return isPassive() ? Lang.translateDirect("boiler.passive")
-			: (boilerLevel == 0 ? Lang.translateDirect("boiler.idle")
-				: boilerLevel == 18 ? Lang.translateDirect("boiler.max_lvl")
-					: Lang.translateDirect("boiler.lvl", String.valueOf(boilerLevel)));
+		return isPassive() ? CreateLang.translateDirect("boiler.passive")
+			: (boilerLevel == 0 ? CreateLang.translateDirect("boiler.idle")
+				: boilerLevel == 18 ? CreateLang.translateDirect("boiler.max_lvl")
+					: CreateLang.translateDirect("boiler.lvl", String.valueOf(boilerLevel)));
 	}
 
 	public MutableComponent getSizeComponent(boolean forGoggles, boolean useBlocksAsBars, ChatFormatting... styles) {
@@ -238,9 +236,9 @@ int boilerLevel = Math.min(activeHeat, Math.min(maxHeatForWater, maxHeatForSize)
 		ChatFormatting style1 = styles.length >= 1 ? styles[0] : ChatFormatting.GRAY;
 		ChatFormatting style2 = styles.length >= 2 ? styles[1] : ChatFormatting.DARK_GRAY;
 
-		return Lang.translateDirect("boiler." + label)
+		return CreateLang.translateDirect("boiler." + label)
 			.withStyle(style1)
-			.append(Lang.translateDirect("boiler." + label + "_dots")
+			.append(CreateLang.translateDirect("boiler." + label + "_dots")
 				.withStyle(style2))
 			.append(base);
 	}

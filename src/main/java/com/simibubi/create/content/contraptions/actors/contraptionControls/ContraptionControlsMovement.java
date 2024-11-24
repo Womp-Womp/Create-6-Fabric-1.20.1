@@ -5,11 +5,7 @@ import com.simibubi.create.content.contraptions.behaviour.MovementBehaviour;
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import com.simibubi.create.content.contraptions.elevator.ElevatorContraption;
 import com.simibubi.create.content.contraptions.render.ContraptionMatrices;
-import com.simibubi.create.foundation.utility.Couple;
-import com.simibubi.create.foundation.utility.IntAttached;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.animation.LerpedFloat;
-import com.simibubi.create.foundation.utility.animation.LerpedFloat.Chaser;
+import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
@@ -134,7 +130,7 @@ public class ContraptionControlsMovement implements MovementBehaviour {
 		efs.targetYEqualsSelection = efs.currentTargetY == ec.clientYTarget;
 
 		if (ec.isTargetUnreachable(efs.currentTargetY))
-			efs.currentLongName = Lang.translate("contraption.controls.floor_unreachable")
+			efs.currentLongName = CreateLang.translate("contraption.controls.floor_unreachable")
 				.string();
 	}
 

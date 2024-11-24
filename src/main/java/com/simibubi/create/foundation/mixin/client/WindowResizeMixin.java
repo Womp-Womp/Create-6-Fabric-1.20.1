@@ -8,7 +8,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.mojang.blaze3d.platform.Window;
-import com.simibubi.create.foundation.gui.UIRenderHelper;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

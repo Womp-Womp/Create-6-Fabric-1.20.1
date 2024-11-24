@@ -1,9 +1,8 @@
 package com.simibubi.create.content.equipment.armor;
 
-import com.simibubi.create.foundation.utility.NBTHelper;
+import net.createmod.catnip.utility.NBTHelper;
 
 import io.github.fabricators_of_create.porting_lib.mixin.accessors.common.accessor.LivingEntityAccessor;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;

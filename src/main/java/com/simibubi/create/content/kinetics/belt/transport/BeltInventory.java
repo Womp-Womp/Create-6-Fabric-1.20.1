@@ -8,6 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Function;
 
+import javax.annotation.Nullable;
+
 import com.simibubi.create.content.kinetics.belt.BeltBlock;
 import com.simibubi.create.content.kinetics.belt.BeltBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
@@ -28,6 +30,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -42,6 +45,8 @@ public class BeltInventory {
 	boolean beltMovementPositive;
 	final float SEGMENT_WINDOW = .75f;
 
+	TransportedItemStack lazyClientItem;
+
 	public final ToInsertSnapshotParticipant toInsertSnapshotParticipant = new ToInsertSnapshotParticipant();
 	public final ItemsSnapshotParticipant itemsSnapshotParticipant = new ItemsSnapshotParticipant();
 
@@ -53,6 +58,15 @@ public class BeltInventory {
 	}
 
 	public void tick() {
+
+		// Residual item for "smooth" transitions
+		if (lazyClientItem != null) {
+			if (lazyClientItem.locked)
+				lazyClientItem = null;
+			else
+				lazyClientItem.locked = true;
+		}
+
 		// Added/Removed items from previous cycle
 		if (!toInsert.isEmpty() || !toRemove.isEmpty()) {
 			toInsert.forEach(this::insert);
@@ -175,8 +189,9 @@ public class BeltInventory {
 
 			// Apply Movement
 			currentItem.beltPosition += limitedMovement;
-			currentItem.sideOffset +=
-				(currentItem.getTargetSideOffset() - currentItem.sideOffset) * Math.abs(limitedMovement) * 2f;
+			float diffToMiddle = currentItem.getTargetSideOffset() - currentItem.sideOffset;
+			currentItem.sideOffset += Mth.clamp(diffToMiddle * Math.abs(limitedMovement) * 6f, -Math.abs(diffToMiddle),
+				Math.abs(diffToMiddle));
 			currentPos = currentItem.beltPosition;
 
 			// Movement successful
@@ -203,8 +218,12 @@ public class BeltInventory {
 					continue;
 
 				currentItem.stack = remainder;
-				if (remainder.isEmpty())
+				if (remainder.isEmpty()) {
+					lazyClientItem = currentItem;
+					lazyClientItem.locked = false;
 					iterator.remove();
+				} else
+					currentItem.stack = remainder;
 
 				flapTunnel(this, lastOffset, movementFacing, false);
 				belt.sendData();
@@ -405,6 +424,8 @@ public class BeltInventory {
 		items.clear();
 		nbt.getList("Items", Tag.TAG_COMPOUND)
 			.forEach(inbt -> items.add(TransportedItemStack.read((CompoundTag) inbt)));
+		if (nbt.contains("LazyItem"))
+			lazyClientItem = TransportedItemStack.read(nbt.getCompound("LazyItem"));
 		beltMovementPositive = nbt.getBoolean("PositiveOrder");
 	}
 
@@ -413,6 +434,8 @@ public class BeltInventory {
 		ListTag itemsNBT = new ListTag();
 		items.forEach(stack -> itemsNBT.add(stack.serializeNBT()));
 		nbt.put("Items", itemsNBT);
+		if (lazyClientItem != null)
+			nbt.put("LazyItem", lazyClientItem.serializeNBT());
 		nbt.putBoolean("PositiveOrder", beltMovementPositive);
 		return nbt;
 	}
@@ -469,6 +492,11 @@ public class BeltInventory {
 
 	public List<TransportedItemStack> getTransportedItems() {
 		return items;
+	}
+
+	@Nullable
+	public TransportedItemStack getLazyClientItem() {
+		return lazyClientItem;
 	}
 
 	public class ToInsertSnapshotParticipant extends SnapshotParticipant<List<TransportedItemStack>> {

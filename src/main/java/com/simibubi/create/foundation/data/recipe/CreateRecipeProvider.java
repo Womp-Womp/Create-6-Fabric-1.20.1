@@ -91,6 +91,14 @@ public abstract class CreateRecipeProvider extends FabricRecipeProvider {
 		static ItemLike andesiteCasing() {
 			return AllBlocks.ANDESITE_CASING.get();
 		}
+		
+		static ItemLike vault() {
+			return AllBlocks.ITEM_VAULT.get();
+		}
+		
+		static ItemLike stockLink() {
+			return AllBlocks.STOCK_LINK.get();
+		}
 
 		static TagKey<Item> brass() {
 			return AllTags.forgeItemTag("brass_ingots");
@@ -122,6 +130,10 @@ public abstract class CreateRecipeProvider extends FabricRecipeProvider {
 
 		static ItemLike brassCasing() {
 			return AllBlocks.BRASS_CASING.get();
+		}
+		
+		static ItemLike cardboard() {
+			return AllItems.CARDBOARD.get();
 		}
 
 		static ItemLike railwayCasing() {

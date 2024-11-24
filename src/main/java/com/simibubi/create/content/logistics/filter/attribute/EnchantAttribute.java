@@ -6,10 +6,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.simibubi.create.content.logistics.filter.ItemAttribute;
-import com.simibubi.create.foundation.utility.Components;
 
-import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;

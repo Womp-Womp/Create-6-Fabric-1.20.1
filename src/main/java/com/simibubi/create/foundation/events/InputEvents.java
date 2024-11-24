@@ -2,7 +2,12 @@ package com.simibubi.create.foundation.events;
 
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.contraptions.elevator.ElevatorControlsHandler;
+import com.simibubi.create.content.contraptions.wrench.RadialWrenchHandler;
 import com.simibubi.create.content.equipment.toolbox.ToolboxHandlerClient;
+import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorInteractionHandler;
+import com.simibubi.create.content.kinetics.chainConveyor.ChainPackageInteractionHandler;
+import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelConnectionHandler;
+import com.simibubi.create.content.logistics.packagePort.PackagePortTargetSelectionHandler;
 import com.simibubi.create.content.redstone.link.controller.LinkedControllerClientHandler;
 import com.simibubi.create.content.trains.TrainHUD;
 import com.simibubi.create.content.trains.entity.TrainRelocator;
@@ -27,6 +32,7 @@ public class InputEvents {
 
 		CreateClient.SCHEMATIC_HANDLER.onKeyInput(key, pressed);
 		ToolboxHandlerClient.onKeyInput(key, pressed);
+		RadialWrenchHandler.onKeyInput(key, pressed);
 	}
 
 	public static boolean onMouseScrolled(double deltaX, double delta /* Y */) {
@@ -62,6 +68,10 @@ public class InputEvents {
 			return InteractionResult.SUCCESS;
 		}
 
+		if (key == mc.options.keyUse && FactoryPanelConnectionHandler.onRightClick()) {
+			event.setCanceled(true);
+			return;
+		}
 
 		boolean glueCancelled = CreateClient.GLUE_HANDLER.onMouseInput(false);
 		LinkedControllerClientHandler.deactivateInLectern();
@@ -99,6 +109,19 @@ public class InputEvents {
 		InteractEvents.USE.register(InputEvents::onUse);
 		InteractEvents.ATTACK.register(InputEvents::onAttack);
 		InteractEvents.PICK.register(InputEvents::onPick);
+
+		if (ChainConveyorInteractionHandler.onUse()) {
+			event.setCanceled(true);
+			return;
+		} else if (PackagePortTargetSelectionHandler.onUse()) {
+			event.setCanceled(true);
+			return;
+		}
+
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+			if (ChainPackageInteractionHandler.onUse())
+				event.setCanceled(true);
+		});
 	}
 
 }

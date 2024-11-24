@@ -1,7 +1,5 @@
 package com.simibubi.create.content.contraptions.glue;
 
-import java.util.Set;
-
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import com.simibubi.create.foundation.networking.SimplePacketBase;
@@ -13,6 +11,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.Set;
 
 public class SuperGlueSelectionPacket extends SimplePacketBase {
 

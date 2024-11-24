@@ -22,6 +22,7 @@ archivesBaseName = "create-fabric"
 repositories {
     maven { url = "https://maven.parchmentmc.org" } // Parchment
     maven { url = "https://maven.fabricmc.net/" } // FAPI, Loader
+    maven { url = "https://maven.createmod.net" } // Catnip, Ponder
     maven { url = "https://mvn.devos.one/snapshots/" } // Registrate, Forge Tags, Milk Lib
     maven { url = "https://mvn.devos.one/releases/" } // Porting Lib
     maven { // for Porting Lib: Mixin Extras, Fabric ASM
@@ -65,6 +66,8 @@ def dependencies(DependencyHandler deps) {
     deps.modApi(deps.include("com.electronwill.night-config:toml:$night_config_version"))
     deps.modApi(deps.include("fuzs.forgeconfigapiport:forgeconfigapiport-fabric:$forge_config_api_port_version"))
     deps.modApi(deps.include("dev.engine_room.flywheel:flywheel-fabric-$flywheel_minecraft_version:$flywheel_version"))
+    deps.modApi(deps.include("net.createmod.catnip:Catnip-Fabric-$minecraft_version:$catnip_version"))
+    deps.modApi(deps.include("net.createmod.ponder:Ponder-Fabric-$minecraft_version:$ponder_version"))
     deps.modApi(deps.include("com.jamieswhiteshirt:reach-entity-attributes:$reach_entity_attributes_version"))
     deps.modApi(deps.include("io.github.tropheusj:milk-lib:$milk_lib_version"))
     deps.api(deps.include("com.google.code.findbugs:jsr305:$jsr305_version"))

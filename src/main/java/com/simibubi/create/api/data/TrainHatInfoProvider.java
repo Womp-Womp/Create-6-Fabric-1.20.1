@@ -1,9 +1,12 @@
 package com.simibubi.create.api.data;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+
 import com.mojang.serialization.JsonOps;
 import com.simibubi.create.Create;
 import com.simibubi.create.content.trains.schedule.hat.TrainHatInfo;
-
 import com.simibubi.create.content.trains.schedule.hat.TrainHatInfoReloadListener;
 
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -13,10 +16,6 @@ import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.phys.Vec3;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 public abstract class TrainHatInfoProvider implements DataProvider {
 	private final PackOutput.PathProvider path;

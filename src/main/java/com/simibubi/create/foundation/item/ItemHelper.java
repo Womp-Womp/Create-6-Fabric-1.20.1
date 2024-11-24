@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 
-import com.simibubi.create.foundation.utility.Pair;
+import com.simibubi.create.content.logistics.box.PackageEntity;
 
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
@@ -21,6 +21,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.util.Mth;
 import net.minecraft.world.Containers;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
@@ -303,4 +305,26 @@ public class ItemHelper {
 //		else
 //			return inv.getStackInSlot(slot);
 //	}
+
+	public static ItemStack fromItemEntity(Entity entityIn) {
+		if (!entityIn.isAlive())
+			return ItemStack.EMPTY;
+		if (entityIn instanceof PackageEntity) {
+			PackageEntity packageEntity = (PackageEntity) entityIn;
+			return packageEntity.getBox();
+		}
+		return entityIn instanceof ItemEntity ? ((ItemEntity) entityIn).getItem() : ItemStack.EMPTY;
+	}
+
+	public static ItemStack limitCountToMaxStackSize(ItemStack stack, boolean simulate) {
+		int count = stack.getCount();
+		int max = stack.getMaxStackSize();
+		if (count <= max)
+			return ItemStack.EMPTY;
+		ItemStack remainder = ItemHandlerHelper.copyStackWithSize(stack, count - max);
+		if (!simulate)
+			stack.setCount(max);
+		return remainder;
+	}
+
 }

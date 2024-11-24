@@ -50,7 +50,6 @@ import com.simibubi.create.foundation.blockEntity.behaviour.ValueSettingsInputHa
 import com.simibubi.create.foundation.blockEntity.behaviour.edgeInteraction.EdgeInteractionHandler;
 import com.simibubi.create.foundation.recipe.RecipeFinder;
 import com.simibubi.create.foundation.utility.ServerSpeedProvider;
-import com.simibubi.create.foundation.utility.WorldAttached;
 import com.simibubi.create.infrastructure.command.AllCommands;
 
 import io.github.fabricators_of_create.porting_lib.entity.events.EntityDataEvents;
@@ -100,6 +99,8 @@ public class CommonEvents {
 		Create.LAGGER.tick();
 		ServerSpeedProvider.serverTick(server);
 		Create.RAILWAYS.sync.serverTick();
+		TrainMapSync.serverTick(event);
+		ServerChainConveyorHandler.tick();
 	}
 
 	public static void onChunkUnloaded(Level world, LevelChunk chunk) {
@@ -124,6 +125,7 @@ public class CommonEvents {
 			LinkedControllerServerHandler.tick(world);
 			ControlsServerHandler.tick(world);
 			Create.RAILWAYS.tick(world);
+			Create.LOGISTICS.tick(world);
 		}
 	}
 
@@ -169,6 +171,7 @@ public class CommonEvents {
 		Create.REDSTONE_LINK_NETWORK_HANDLER.onLoadWorld(world);
 		Create.TORQUE_PROPAGATOR.onLoadWorld(world);
 		Create.RAILWAYS.levelLoaded(world);
+		Create.LOGISTICS.levelLoaded(world);
 	}
 
 	public static void onUnloadWorld(Executor executor, LevelAccessor world) {

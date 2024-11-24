@@ -8,6 +8,7 @@ import java.util.Map;
 import javax.annotation.Nonnull;
 
 import com.simibubi.create.AllBlocks;
+import com.simibubi.create.AllItems;
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.content.contraptions.mounted.CartAssemblerBlock;
 import com.simibubi.create.content.equipment.symmetryWand.mirror.CrossPlaneMirror;
@@ -16,7 +17,6 @@ import com.simibubi.create.content.equipment.symmetryWand.mirror.PlaneMirror;
 import com.simibubi.create.content.equipment.symmetryWand.mirror.SymmetryMirror;
 import com.simibubi.create.foundation.gui.ScreenOpener;
 import com.simibubi.create.foundation.utility.BlockHelper;
-import com.simibubi.create.foundation.utility.Iterate;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
@@ -29,6 +29,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -342,5 +343,13 @@ public class SymmetryWandItem extends Item {
 //	public void initializeClient(Consumer<IItemRenderProperties> consumer) {
 //		consumer.accept(SimpleCustomRenderer.create(this, new SymmetryWandItemRenderer()));
 //	}
+
+	public static boolean presentInHotbar(Player player) {
+		Inventory inv = player.getInventory();
+		for (int i = 0; i < Inventory.getSelectionSize(); i++)
+			if (AllItems.WAND_OF_SYMMETRY.isIn(inv.getItem(i)))
+				return true;
+		return false;
+	}
 
 }

@@ -48,12 +48,7 @@ import com.simibubi.create.content.trains.station.GlobalStation;
 import com.simibubi.create.content.trains.station.StationBlockEntity;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.fluid.CombinedTankWrapper;
-import com.simibubi.create.foundation.utility.Couple;
-import com.simibubi.create.foundation.utility.Iterate;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.NBTHelper;
-import com.simibubi.create.foundation.utility.Pair;
-import com.simibubi.create.foundation.utility.VecHelper;
+import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
@@ -97,6 +92,7 @@ public class Train {
 	public Navigation navigation;
 	public ScheduleRuntime runtime;
 	public TrainIconType icon;
+	public int mapColorIndex;
 	public Component name;
 	public TrainStatus status;
 
@@ -132,6 +128,7 @@ public class Train {
 	public float accumulatedSteamRelease;
 
 	int tickOffset;
+	int ticksSinceLastMailTransfer;
 	double[] stress;
 
 	// advancements
@@ -147,7 +144,7 @@ public class Train {
 		this.carriageSpacing = carriageSpacing;
 		this.icon = TrainIconType.getDefault();
 		this.stress = new double[carriageSpacing.size()];
-		this.name = Lang.translateDirect("train.unnamed");
+		this.name = CreateLang.translateDirect("train.unnamed");
 		this.status = new TrainStatus(this);
 		this.doubleEnded = doubleEnded;
 
@@ -251,6 +248,15 @@ public class Train {
 			carriages.forEach(c -> c.manageEntities(level));
 			updateConductors();
 			return;
+		}
+
+		GlobalStation currentStation = getCurrentStation();
+		if (currentStation != null) {
+			ticksSinceLastMailTransfer++;
+			if (ticksSinceLastMailTransfer > 20) {
+				currentStation.runMailTransfer();
+				ticksSinceLastMailTransfer = 0;
+			}
 		}
 
 		updateConductors();
@@ -901,6 +907,8 @@ public class Train {
 		setCurrentStation(station);
 		reservedSignalBlocks.clear();
 		runtime.destinationReached();
+		station.runMailTransfer();
+		ticksSinceLastMailTransfer = 0;
 	}
 
 	public void setCurrentStation(GlobalStation station) {
@@ -917,6 +925,8 @@ public class Train {
 
 	@Nullable
 	public LivingEntity getOwner(Level level) {
+		if (level.getServer() == null)
+			return null;
 		try {
 			UUID uuid = owner;
 			return uuid == null ? null
@@ -1118,6 +1128,7 @@ public class Train {
 		tag.putInt("Fuel", fuelTicks);
 		tag.putDouble("TargetSpeed", targetSpeed);
 		tag.putString("IconType", icon.id.toString());
+		tag.putInt("MapColorIndex", mapColorIndex);
 		tag.putString("Name", Component.Serializer.toJson(name));
 		if (currentStation != null)
 			tag.putUUID("Station", currentStation);
@@ -1170,6 +1181,7 @@ public class Train {
 			train.speedBeforeStall = tag.getDouble("SpeedBeforeStall");
 		train.targetSpeed = tag.getDouble("TargetSpeed");
 		train.icon = TrainIconType.byId(new ResourceLocation(tag.getString("IconType")));
+		train.mapColorIndex = tag.getInt("MapColorIndex");
 		train.name = Component.Serializer.fromJson(tag.getString("Name"));
 		train.currentStation = tag.contains("Station") ? tag.getUUID("Station") : null;
 		train.currentlyBackwards = tag.getBoolean("Backwards");
@@ -1234,6 +1246,21 @@ public class Train {
 			distance = Math.min(distance, (float) dce.positionAnchor.distanceToSqr(location));
 		}
 		return distance;
+	}
+
+	public List<ResourceKey<Level>> getPresentDimensions() {
+		return carriages.stream()
+				.flatMap((Carriage carriage) -> carriage.getPresentDimensions().stream())
+				.distinct()
+				.toList();
+	}
+
+	public Optional<BlockPos> getPositionInDimension(ResourceKey<Level> dimension) {
+		return carriages.stream()
+				.map(carriage -> carriage.getPositionInDimension(dimension))
+				.filter(Optional::isPresent)
+				.map(Optional::get)
+				.findFirst();
 	}
 
 }

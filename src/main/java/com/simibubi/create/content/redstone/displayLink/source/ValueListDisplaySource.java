@@ -139,11 +139,11 @@ public abstract class ValueListDisplaySource extends DisplaySource {
 	private Couple<MutableComponent> shorten(long number) {
 		if (number >= 1000000)
 			return Couple.create(Components.literal(String.valueOf(number / 1000000)),
-				Lang.translateDirect("display_source.value_list.million")
+				CreateLang.translateDirect("display_source.value_list.million")
 					.append(WHITESPACE));
 		if (number >= 1000)
 			return Couple.create(Components.literal(String.valueOf(number / 1000)),
-				Lang.translateDirect("display_source.value_list.thousand")
+				CreateLang.translateDirect("display_source.value_list.thousand")
 					.append(WHITESPACE));
 		return Couple.create(Components.literal(String.valueOf(number)), WHITESPACE);
 	}
@@ -163,8 +163,8 @@ public abstract class ValueListDisplaySource extends DisplaySource {
 	@Environment(EnvType.CLIENT)
 	protected void addFullNumberConfig(ModularGuiLineBuilder builder) {
 		builder.addSelectionScrollInput(0, 75,
-			(si, l) -> si.forOptions(Lang.translatedOptions("display_source.value_list", "shortened", "full_number"))
-				.titled(Lang.translateDirect("display_source.value_list.display")),
+			(si, l) -> si.forOptions(CreateLang.translatedOptions("display_source.value_list", "shortened", "full_number"))
+				.titled(CreateLang.translateDirect("display_source.value_list.display")),
 			"Format");
 	}
 

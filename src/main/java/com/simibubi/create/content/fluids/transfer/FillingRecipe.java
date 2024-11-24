@@ -10,13 +10,13 @@ import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder.ProcessingRecipeParams;
 import com.simibubi.create.content.processing.sequenced.IAssemblyRecipe;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.util.FluidUtil;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -59,8 +59,7 @@ public class FillingRecipe extends ProcessingRecipe<Container> implements IAssem
 
 	@Override
 	public void addAssemblyIngredients(List<Ingredient> list) {
-	}
-
+}
 	@Override
 	public void addAssemblyFluidIngredients(List<FluidIngredient> list) {
 		list.add(getRequiredFluid());
@@ -76,7 +75,7 @@ public class FillingRecipe extends ProcessingRecipe<Container> implements IAssem
 
 		Fluid fluid = matchingFluidStacks.get(0).getFluid();
 		String translationKey = FluidUtil.getTranslationKey(fluid);
-		return Lang.translateDirect("recipe.assembly.spout_filling_fluid", Component.translatable(translationKey).getString());
+		return CreateLang.translateDirect("recipe.assembly.spout_filling_fluid", Component.translatable(translationKey).getString());
 	}
 
 	@Override

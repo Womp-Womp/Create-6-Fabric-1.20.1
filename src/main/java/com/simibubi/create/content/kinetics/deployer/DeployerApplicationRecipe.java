@@ -10,11 +10,11 @@ import com.simibubi.create.compat.recipeViewerCommon.SequencedAssemblySubCategor
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder.ProcessingRecipeParams;
 import com.simibubi.create.content.processing.sequenced.IAssemblyRecipe;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -58,7 +58,7 @@ public class DeployerApplicationRecipe extends ItemApplicationRecipe implements 
 			.getItems();
 		if (matchingStacks.length == 0)
 			return Components.literal("Invalid");
-		return Lang.translateDirect("recipe.assembly.deploying_item",
+		return CreateLang.translateDirect("recipe.assembly.deploying_item",
 			Components.translatable(matchingStacks[0].getDescriptionId()).getString());
 	}
 

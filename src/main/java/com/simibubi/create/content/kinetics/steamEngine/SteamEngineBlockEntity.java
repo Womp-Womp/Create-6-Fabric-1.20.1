@@ -17,9 +17,7 @@ import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.scrollValue.ScrollOptionBehaviour;
-import com.simibubi.create.foundation.utility.AngleHelper;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.VecHelper;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import com.tterrag.registrate.fabric.EnvExecutor;
 
@@ -55,7 +53,7 @@ public class SteamEngineBlockEntity extends SmartBlockEntity implements IHaveGog
 	@Override
 	public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
 		movementDirection = new ScrollOptionBehaviour<>(RotationDirection.class,
-			Lang.translateDirect("contraptions.windmill.rotation_direction"), this, new SteamEngineValueBox());
+			CreateLang.translateDirect("contraptions.windmill.rotation_direction"), this, new SteamEngineValueBox());
 		movementDirection.onlyActiveWhen(() -> {
 			PoweredShaftBlockEntity shaft = getShaft();
 			return shaft == null || !shaft.hasSource();

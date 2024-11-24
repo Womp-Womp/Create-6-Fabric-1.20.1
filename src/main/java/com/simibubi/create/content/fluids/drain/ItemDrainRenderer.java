@@ -149,8 +149,8 @@ public class ItemDrainRenderer extends SmartBlockEntityRenderer<ItemDrainBlockEn
 			float yOffset = (7 / 16f) * level;
 			ms.pushPose();
 			ms.translate(0, yOffset, 0);
-			FluidRenderer.renderFluidBox(fluidStack, min, yMin - yOffset, min, max, yMin, max, buffer, ms, light,
-				false);
+			FluidRenderer.renderFluidBox(fluidStack.getFluid(), fluidStack.getAmount(), min, yMin - yOffset, min,
+					max, yMin, max, buffer, ms, light, false);
 			ms.popPose();
 		}
 
@@ -174,7 +174,7 @@ public class ItemDrainRenderer extends SmartBlockEntityRenderer<ItemDrainBlockEn
 		if (processingTicks != -1) {
 			radius = (float) (Math.pow(((2 * processingProgress) - 1), 2) - 1);
 			AABB bb = new AABB(0.5, 1.0, 0.5, 0.5, 0.25, 0.5).inflate(radius / 32f);
-			FluidRenderer.renderFluidBox(fluidStack2, (float) bb.minX, (float) bb.minY, (float) bb.minZ,
+			FluidRenderer.renderFluidBox(fluidStack2.getFluid(), fluidStack2.getAmount(), (float) bb.minX, (float) bb.minY, (float) bb.minZ,
 				(float) bb.maxX, (float) bb.maxY, (float) bb.maxZ, buffer, ms, light, true);
 		}
 

@@ -1,7 +1,5 @@
 package com.simibubi.create.content.equipment.bell;
 
-import org.joml.Quaternionf;
-
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.math.Axis;
 import com.simibubi.create.AllParticleTypes;
@@ -14,6 +12,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.util.Mth;
+import org.joml.Quaternionf;
 
 public class SoulParticle extends CustomRotationParticle {
 

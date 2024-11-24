@@ -5,8 +5,9 @@ import org.jetbrains.annotations.ApiStatus.Internal;
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.api.connectivity.ConnectivityHandler;
 import com.simibubi.create.content.fluids.tank.FluidTankItem;
-import com.simibubi.create.foundation.utility.VecHelper;
+import com.simibubi.create.content.equipment.symmetryWand.SymmetryWandItem;
 
+import net.createmod.catnip.utility.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -72,6 +73,8 @@ public class ItemVaultItem extends BlockItem {
 		BlockState placedOnState = world.getBlockState(placedOnPos);
 
 		if (!ItemVaultBlock.isVault(placedOnState))
+			return;
+		if (SymmetryWandItem.presentInHotbar(player))
 			return;
 		ItemVaultBlockEntity tankAt = ConnectivityHandler.partAt(AllBlockEntityTypes.ITEM_VAULT.get(), world, placedOnPos);
 		if (tankAt == null)

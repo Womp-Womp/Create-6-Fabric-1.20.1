@@ -13,9 +13,7 @@ import com.simibubi.create.Create;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.Pair;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 import net.fabricmc.api.EnvType;
@@ -253,9 +251,9 @@ public class SequencedAssemblyRecipe implements Recipe<Container> {
 		int step = sequencedAssemblyRecipe.getStep(stack);
 		int total = length * sequencedAssemblyRecipe.loops;
 		tooltip.add(Components.immutableEmpty());
-		tooltip.add(Lang.translateDirect("recipe.sequenced_assembly")
+		tooltip.add(CreateLang.translateDirect("recipe.sequenced_assembly")
 			.withStyle(ChatFormatting.GRAY));
-		tooltip.add(Lang.translateDirect("recipe.assembly.progress", step, total)
+		tooltip.add(CreateLang.translateDirect("recipe.assembly.progress", step, total)
 			.withStyle(ChatFormatting.DARK_GRAY));
 
 		int remaining = total - step;
@@ -266,7 +264,7 @@ public class SequencedAssemblyRecipe implements Recipe<Container> {
 			Component textComponent = sequencedRecipe.getAsAssemblyRecipe()
 				.getDescriptionForAssembly();
 			if (i == 0)
-				tooltip.add(Lang.translateDirect("recipe.assembly.next", textComponent)
+				tooltip.add(CreateLang.translateDirect("recipe.assembly.next", textComponent)
 					.withStyle(ChatFormatting.AQUA));
 			else
 				tooltip.add(Components.literal("-> ").append(textComponent)

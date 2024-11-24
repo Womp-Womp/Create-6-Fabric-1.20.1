@@ -21,12 +21,12 @@ import com.simibubi.create.content.kinetics.deployer.DeployerBlockEntity.Mode;
 import com.simibubi.create.content.trains.track.ITrackBlock;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.utility.BlockHelper;
-import com.simibubi.create.foundation.utility.worldWrappers.WrappedWorld;
 
 import io.github.fabricators_of_create.porting_lib.item.UseFirstBehaviorItem;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseEntityCallback;
+import net.createmod.catnip.utility.levelWrappers.WrappedLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -75,7 +75,7 @@ import net.minecraft.world.phys.Vec3;
 
 public class DeployerHandler {
 
-	private static final class ItemUseWorld extends WrappedWorld {
+	private static final class ItemUseWorld extends WrappedLevel {
 		private final Direction face;
 		private final BlockPos pos;
 		boolean rayMode = false;
@@ -101,7 +101,7 @@ public class DeployerHandler {
 				|| pos.relative(face.getOpposite(), 1)
 					.equals(position)))
 				return Blocks.BEDROCK.defaultBlockState();
-			return world.getBlockState(position);
+			return level.getBlockState(position);
 		}
 	}
 

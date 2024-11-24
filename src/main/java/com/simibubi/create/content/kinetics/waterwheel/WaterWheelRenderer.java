@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllPartialModels;
-import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
 import com.simibubi.create.foundation.model.BakedModelHelper;
 import com.simibubi.create.foundation.render.CachedBufferer;
@@ -19,6 +18,12 @@ import com.simibubi.create.foundation.render.VirtualRenderHelper;
 import com.simibubi.create.foundation.utility.RegisteredObjects;
 
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
+import net.createmod.catnip.platform.CatnipServices;
+import net.createmod.catnip.render.CachedBuffers;
+import net.createmod.catnip.render.StitchedSprite;
+import net.createmod.catnip.render.SuperBufferFactory;
+import net.createmod.catnip.render.SuperByteBuffer;
+import net.createmod.catnip.render.SuperByteBufferCache;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
@@ -37,7 +42,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class WaterWheelRenderer<T extends WaterWheelBlockEntity> extends KineticBlockEntityRenderer<T> {
-	public static final Compartment<WaterWheelModelKey> WATER_WHEEL = new Compartment<>();
+	public static final SuperByteBufferCache.Compartment<WaterWheelModelKey> WATER_WHEEL = new SuperByteBufferCache.Compartment<>();
 
 	public static final StitchedSprite OAK_PLANKS_TEMPLATE = new StitchedSprite(new ResourceLocation("block/oak_planks"));
 	public static final StitchedSprite OAK_LOG_TEMPLATE = new StitchedSprite(new ResourceLocation("block/oak_log"));
@@ -61,7 +66,7 @@ public class WaterWheelRenderer<T extends WaterWheelBlockEntity> extends Kinetic
 	@Override
 	protected SuperByteBuffer getRotatedModel(T be, BlockState state) {
 		WaterWheelModelKey key = new WaterWheelModelKey(large, state, be.material);
-		return CreateClient.BUFFER_CACHE.get(WATER_WHEEL, key, () -> {
+		return SuperByteBufferCache.getInstance().get(WATER_WHEEL, key, () -> {
 			BakedModel model = generateModel(key);
 			BlockState state1 = key.state();
 			Direction dir;
@@ -70,8 +75,8 @@ public class WaterWheelRenderer<T extends WaterWheelBlockEntity> extends Kinetic
 			} else {
 				dir = state1.getValue(WaterWheelBlock.FACING);
 			}
-			PoseStack transform = CachedBufferer.rotateToFaceVertical(dir).get();
-			return VirtualRenderHelper.bufferModel(model, Blocks.AIR.defaultBlockState(), transform);
+			PoseStack transform = CachedBuffers.rotateToFaceVertical(dir).get();
+			return SuperBufferFactory.getInstance().createForBlock(model, Blocks.AIR.defaultBlockState(), transform);
 		});
 	}
 
@@ -94,7 +99,7 @@ public class WaterWheelRenderer<T extends WaterWheelBlockEntity> extends Kinetic
 
 	public static BakedModel generateModel(BakedModel template, BlockState planksBlockState) {
 		Block planksBlock = planksBlockState.getBlock();
-		ResourceLocation id = RegisteredObjects.getKeyOrThrow(planksBlock);
+		ResourceLocation id = CatnipServices.REGISTRIES.getKeyOrThrow(planksBlock);
 		String wood = plankStateToWoodName(planksBlockState);
 
 		if (wood == null)
@@ -114,7 +119,7 @@ public class WaterWheelRenderer<T extends WaterWheelBlockEntity> extends Kinetic
 	@Nullable
 	private static String plankStateToWoodName(BlockState planksBlockState) {
 		Block planksBlock = planksBlockState.getBlock();
-		ResourceLocation id = RegisteredObjects.getKeyOrThrow(planksBlock);
+		ResourceLocation id = CatnipServices.REGISTRIES.getKeyOrThrow(planksBlock);
 		String path = id.getPath();
 
 		if (path.endsWith("_planks")) // Covers most wood types

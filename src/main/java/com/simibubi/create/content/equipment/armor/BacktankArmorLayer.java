@@ -1,15 +1,9 @@
 package com.simibubi.create.content.equipment.armor;
 
-import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.simibubi.create.foundation.render.CachedBufferer;
-import com.simibubi.create.foundation.render.SuperByteBuffer;
-import com.simibubi.create.foundation.utility.AngleHelper;
-import com.simibubi.create.foundation.utility.AnimationTickHolder;
 
 import net.fabricmc.fabric.api.client.rendering.v1.LivingEntityFeatureRendererRegistrationCallback.RegistrationHelper;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -21,7 +15,6 @@ import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class BacktankArmorLayer<T extends LivingEntity, M extends EntityModel<T>> extends RenderLayer<T, M> {
@@ -48,8 +41,8 @@ public class BacktankArmorLayer<T extends LivingEntity, M extends EntityModel<T>
 		VertexConsumer vc = buffer.getBuffer(Sheets.cutoutBlockSheet());
 		BlockState renderedState = item.getBlock().defaultBlockState()
 				.setValue(BacktankBlock.HORIZONTAL_FACING, Direction.SOUTH);
-		SuperByteBuffer backtank = CachedBufferer.block(renderedState);
-		SuperByteBuffer cogs = CachedBufferer.partial(BacktankRenderer.getCogsModel(renderedState), renderedState);
+		SuperByteBuffer backtank = CachedBuffers.block(renderedState);
+		SuperByteBuffer cogs = CachedBuffers.partial(BacktankRenderer.getCogsModel(renderedState), renderedState);
 
 		ms.pushPose();
 
@@ -65,7 +58,7 @@ public class BacktankArmorLayer<T extends LivingEntity, M extends EntityModel<T>
 			.rotateYDegrees(180)
 			.uncenter()
 			.translate(0, 6.5f / 16, 11f / 16)
-			.rotate(AngleHelper.rad(2 * AnimationTickHolder.getRenderTime(entity.level()) % 360), Direction.EAST)
+			.rotate(AngleHelper.rad(2 * LevelTickHolder.getRenderTime(entity.level()) % 360), Direction.EAST)
 			.translate(0, -6.5f / 16, -11f / 16);
 
 		cogs.disableDiffuse()

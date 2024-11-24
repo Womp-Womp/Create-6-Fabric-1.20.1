@@ -5,9 +5,7 @@ import java.util.List;
 
 import com.simibubi.create.content.equipment.zapper.PlacementPatterns;
 import com.simibubi.create.content.equipment.zapper.ZapperItem;
-import com.simibubi.create.foundation.gui.ScreenOpener;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.NBTHelper;
+import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -48,7 +46,7 @@ public class WorldshaperItem extends ZapperItem {
 	public Component validateUsage(ItemStack item) {
 		if (!item.getOrCreateTag()
 			.contains("BrushParams"))
-			return Lang.translateDirect("terrainzapper.shiftRightClickToSet");
+			return CreateLang.translateDirect("terrainzapper.shiftRightClickToSet");
 		return super.validateUsage(item);
 	}
 

@@ -4,12 +4,12 @@ import java.util.List;
 
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllTags.AllBlockTags;
+import com.simibubi.create.content.equipment.toolbox.ToolboxInventory;
 import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity;
 import com.simibubi.create.content.logistics.crate.BottomlessItemHandler;
 import com.simibubi.create.content.logistics.vault.ItemVaultBlockEntity;
 import com.simibubi.create.content.processing.recipe.ProcessingInventory;
-import com.simibubi.create.foundation.utility.NBTHelper;
-
+import net.createmod.catnip.utility.NBTHelper;
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import io.github.fabricators_of_create.porting_lib.util.NBTSerializer;
@@ -58,7 +58,6 @@ public class MountedStorage {
 			if (handler instanceof ItemStackHandler)
 				return !(handler instanceof ProcessingInventory);
 			return handler != null && canUseModdedInventory(be, handler);
-
 		} catch (Exception e) {
 			return false;
 		}
@@ -186,6 +185,8 @@ public class MountedStorage {
 		CompoundTag tag = handler.serializeNBT();
 		if (noFuel)
 			NBTHelper.putMarker(tag, "NoFuel");
+		if (handler instanceof ToolboxInventory)
+			NBTHelper.putMarker(tag, "Toolbox");
 		if (!(handler instanceof BottomlessItemHandler))
 			return tag;
 
@@ -199,6 +200,9 @@ public class MountedStorage {
 		storage.handler = new ItemStackHandler();
 		if (nbt == null)
 			return storage;
+		if (nbt.contains("Toolbox"))
+			storage.handler = new ToolboxInventory(null);
+
 		storage.valid = true;
 		storage.noFuel = nbt.contains("NoFuel");
 

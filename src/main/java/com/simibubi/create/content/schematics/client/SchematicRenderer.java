@@ -4,7 +4,6 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.simibubi.create.content.schematics.SchematicWorld;
 import com.simibubi.create.foundation.render.BlockEntityRenderHelper;
 import com.simibubi.create.foundation.render.ShadedBlockSbbBuilder;
 import com.simibubi.create.foundation.render.SuperByteBuffer;
@@ -31,14 +30,14 @@ public class SchematicRenderer {
 	private final Map<RenderType, SuperByteBuffer> bufferCache = new LinkedHashMap<>();
 	private boolean active;
 	private boolean changed;
-	protected SchematicWorld schematic;
+	protected SchematicLevel schematic;
 	private BlockPos anchor;
 
 	public SchematicRenderer() {
 		changed = false;
 	}
 
-	public void display(SchematicWorld world) {
+	public void display(SchematicLevel world) {
 		this.anchor = world.anchor;
 		this.schematic = world;
 		this.active = true;
@@ -91,7 +90,7 @@ public class SchematicRenderer {
 		PoseStack poseStack = objects.poseStack;
 		RandomSource random = objects.random;
 		BlockPos.MutableBlockPos mutableBlockPos = objects.mutableBlockPos;
-		SchematicWorld renderWorld = schematic;
+		SchematicLevel renderWorld = schematic;
 		BoundingBox bounds = renderWorld.getBounds();
 
 		ShadedBlockSbbBuilder sbbBuilder = objects.sbbBuilder;
@@ -141,7 +140,7 @@ public class SchematicRenderer {
 		public final PoseStack poseStack = new PoseStack();
 		public final RandomSource random = RandomSource.createNewThreadLocalInstance();
 		public final BlockPos.MutableBlockPos mutableBlockPos = new BlockPos.MutableBlockPos();
-		public final ShadedBlockSbbBuilder sbbBuilder = new ShadedBlockSbbBuilder();
+		public final ShadedBlockSbbBuilder sbbBuilder = ShadedBlockSbbBuilder.create();
 	}
 
 }

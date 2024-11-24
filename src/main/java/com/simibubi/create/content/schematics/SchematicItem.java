@@ -17,10 +17,7 @@ import org.slf4j.Logger;
 import com.mojang.logging.LogUtils;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.schematics.client.SchematicEditScreen;
-import com.simibubi.create.foundation.gui.ScreenOpener;
-import com.simibubi.create.foundation.utility.Components;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.NBTHelper;
+import com.simibubi.create.foundation.utility.CreateLang;
 import com.tterrag.registrate.fabric.EnvExecutor;
 
 import net.fabricmc.api.EnvType;
@@ -82,7 +79,7 @@ public class SchematicItem extends Item {
 				tooltip.add(Components.literal(ChatFormatting.GOLD + stack.getTag()
 					.getString("File")));
 		} else {
-			tooltip.add(Lang.translateDirect("schematic.invalid").withStyle(ChatFormatting.RED));
+			tooltip.add(CreateLang.translateDirect("schematic.invalid").withStyle(ChatFormatting.RED));
 		}
 		super.appendHoverText(stack, worldIn, tooltip, flagIn);
 	}

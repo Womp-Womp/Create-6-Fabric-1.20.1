@@ -8,7 +8,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.simibubi.create.AllItems;
-import com.simibubi.create.foundation.utility.NBTHelper;
 
 import io.github.fabricators_of_create.porting_lib.transfer.callbacks.TransactionCallback;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
@@ -88,7 +87,7 @@ public class ToolboxInventory extends ItemStackHandler {
 			}
 		}
 		settling = false;
-		blockEntity.sendData();
+		notifyUpdate();
 	}
 
 	@Override
@@ -119,8 +118,8 @@ public class ToolboxInventory extends ItemStackHandler {
 		if (!stack.isEmpty() && filters.get(compartment)
 				.isEmpty()) {
 			filters.set(compartment, ItemHandlerHelper.copyStackWithSize(stack, 1));
-			if (ctx != null) TransactionCallback.onSuccess(ctx, blockEntity::sendData);
-			else blockEntity.sendData();
+			if (ctx != null) TransactionCallback.onSuccess(ctx, this::notifyUpdate);
+			else notifyUpdate();
 		}
 	}
 
@@ -133,10 +132,9 @@ public class ToolboxInventory extends ItemStackHandler {
 
 	@Override
 	protected void onContentsChanged(int slot) {
-		if (!settling && !blockEntity.getLevel().isClientSide)
+		if (!settling && (blockEntity == null || !blockEntity.getLevel().isClientSide))
 			settle(slot / STACKS_PER_COMPARTMENT);
-		blockEntity.sendData();
-		blockEntity.setChanged();
+		notifyUpdate();
 		super.onContentsChanged(slot);
 	}
 
@@ -205,4 +203,11 @@ public class ToolboxInventory extends ItemStackHandler {
 			return true;
 		return ItemHandlerHelper.canItemStacksStack(stack1, stack2);
 	}
+
+	private void notifyUpdate() {
+		if (blockEntity != null)
+			// change to sendData if this doesn't exist
+			blockEntity.notifyUpdate();
+	}
+
 }

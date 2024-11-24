@@ -9,8 +9,6 @@ import com.simibubi.create.content.fluids.tank.CreativeFluidTankBlockEntity;
 import com.simibubi.create.content.fluids.transfer.GenericItemEmptying;
 import com.simibubi.create.content.fluids.transfer.GenericItemFilling;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import com.simibubi.create.foundation.utility.Pair;
-import com.simibubi.create.foundation.utility.RegisteredObjects;
 
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
@@ -50,11 +48,11 @@ public class FluidHelper {
 	public static boolean isLava(Fluid fluid) {
 		return convertToStill(fluid) == Fluids.LAVA;
 	}
-	
+
 	public static boolean isSame(FluidStack fluidStack, FluidStack fluidStack2) {
 		return fluidStack.getFluid() == fluidStack2.getFluid();
 	}
-	
+
 	public static boolean isSame(FluidStack fluidStack, Fluid fluid) {
 		return fluidStack.getFluid() == fluid;
 	}
@@ -116,7 +114,7 @@ public class FluidHelper {
 
 	public static JsonElement serializeFluidStack(FluidStack stack) {
 		JsonObject json = new JsonObject();
-		json.addProperty("fluid", RegisteredObjects.getKeyOrThrow(stack.getFluid())
+		json.addProperty("fluid", CatnipServices.REGISTRIES.getKeyOrThrow(stack.getFluid())
 			.toString());
 		json.addProperty("amount", stack.getAmount());
 		if (stack.hasTag())
@@ -130,6 +128,8 @@ public class FluidHelper {
 		Fluid fluid = BuiltInRegistries.FLUID.get(id);
 		if (fluid == null)
 			throw new JsonSyntaxException("Unknown fluid '" + id + "'");
+		if (fluid == Fluids.EMPTY)
+			throw new JsonSyntaxException("Invalid empty fluid '" + id + "'");
 		int amount = GsonHelper.getAsInt(json, "amount");
 		if (!json.has("nbt"))
 			return new FluidStack(fluid, amount);

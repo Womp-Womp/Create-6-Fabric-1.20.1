@@ -9,8 +9,6 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.InvManipul
 import com.simibubi.create.foundation.item.CountedItemStackList;
 import com.simibubi.create.foundation.utility.LongAttached;
 
-import com.simibubi.create.foundation.utility.LongAttached;
-
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.minecraft.network.chat.MutableComponent;

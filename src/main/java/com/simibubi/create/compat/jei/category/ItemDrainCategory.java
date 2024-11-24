@@ -10,7 +10,6 @@ import com.simibubi.create.content.fluids.potion.PotionFluidHandler;
 import com.simibubi.create.content.fluids.transfer.EmptyingRecipe;
 import com.simibubi.create.content.processing.recipe.ProcessingRecipeBuilder;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
-import com.simibubi.create.foundation.utility.RegisteredObjects;
 
 import com.simibubi.create.foundation.item.ItemHelper;
 
@@ -34,7 +33,6 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.PotionItem;
 import net.minecraft.world.item.crafting.Ingredient;
 
 @ParametersAreNonnullByDefault
@@ -75,8 +73,8 @@ public class ItemDrainCategory extends CreateRecipeCategory<EmptyingRecipe> {
 				continue;
 
 			Ingredient ingredient = Ingredient.of(stack);
-			ResourceLocation itemName = RegisteredObjects.getKeyOrThrow(stack.getItem());
-			ResourceLocation fluidName = RegisteredObjects.getKeyOrThrow(extracted.getFluid());
+			ResourceLocation itemName = CatnipServices.REGISTRIES.getKeyOrThrow(stack.getItem());
+			ResourceLocation fluidName = CatnipServices.REGISTRIES.getKeyOrThrow(extracted.getFluid());
 
 			consumer.accept(new ProcessingRecipeBuilder<>(EmptyingRecipe::new,
 				Create.asResource("empty_" + itemName.getNamespace() + "_" + itemName.getPath() + "_of_"

@@ -50,7 +50,7 @@ public class ScoreboardDisplaySource extends ValueListDisplaySource {
 
 	private ImmutableList<LongAttached<MutableComponent>> notFound(String objective) {
 		return ImmutableList
-			.of(LongAttached.with(404, Lang.translateDirect("display_source.scoreboard.objective_not_found", objective)));
+			.of(LongAttached.with(404, CreateLang.translateDirect("display_source.scoreboard.objective_not_found", objective)));
 	}
 
 	@Override
@@ -63,9 +63,9 @@ public class ScoreboardDisplaySource extends ValueListDisplaySource {
 		if (isFirstLine)
 			builder.addTextInput(0, 137, (e, t) -> {
 				e.setValue("");
-				t.withTooltip(ImmutableList.of(Lang.translateDirect("display_source.scoreboard.objective")
+				t.withTooltip(ImmutableList.of(CreateLang.translateDirect("display_source.scoreboard.objective")
 					.withStyle(s -> s.withColor(0x5391E1)),
-					Lang.translateDirect("gui.schedule.lmb_edit")
+					CreateLang.translateDirect("gui.schedule.lmb_edit")
 						.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC)));
 			}, "Objective");
 		else

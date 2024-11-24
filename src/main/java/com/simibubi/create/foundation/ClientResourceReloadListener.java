@@ -6,8 +6,8 @@ import java.util.Set;
 import com.simibubi.create.Create;
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
+import com.simibubi.create.content.logistics.displayCloth.DisplayClothModel;
 import com.simibubi.create.foundation.sound.SoundScapes;
-import com.simibubi.create.foundation.utility.LangNumberFormat;
 
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.fabricmc.fabric.api.resource.ResourceReloadListenerKeys;
@@ -24,8 +24,8 @@ public class ClientResourceReloadListener implements ResourceManagerReloadListen
 	public void onResourceManagerReload(ResourceManager resourceManager) {
 		CreateClient.invalidateRenderers();
 		SoundScapes.invalidateAll();
-		LangNumberFormat.numberFormat.update();
 		BeltHelper.uprightCache.clear();
+		DisplayClothModel.reload();
 	}
 
 	@Override

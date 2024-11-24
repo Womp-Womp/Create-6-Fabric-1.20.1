@@ -11,9 +11,7 @@ import com.simibubi.create.AllTags.AllBlockTags;
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.foundation.item.CustomArmPoseItem;
 import com.simibubi.create.foundation.utility.BlockHelper;
-import com.simibubi.create.foundation.utility.Lang;
-import com.simibubi.create.foundation.utility.NBTHelper;
-import com.simibubi.create.foundation.utility.NBTProcessors;
+import com.simibubi.create.foundation.utility.CreateLang;
 import io.github.fabricators_of_create.porting_lib.item.EntitySwingListenerItem;
 import io.github.fabricators_of_create.porting_lib.item.ReequipAnimationItem;
 import com.tterrag.registrate.fabric.EnvExecutor;
@@ -66,7 +64,7 @@ public abstract class ZapperItem extends Item implements CustomArmPoseItem, Enti
 				.getCompound("BlockUsed"))
 				.getBlock()
 				.getName();
-			tooltip.add(Lang.translateDirect("terrainzapper.usingBlock",
+			tooltip.add(CreateLang.translateDirect("terrainzapper.usingBlock",
 				usedBlock.withStyle(ChatFormatting.GRAY))
 					.withStyle(ChatFormatting.DARK_GRAY));
 		}
@@ -188,7 +186,7 @@ public abstract class ZapperItem extends Item implements CustomArmPoseItem, Enti
 	public Component validateUsage(ItemStack item) {
 		CompoundTag tag = item.getOrCreateTag();
 		if (!canActivateWithoutSelectedBlock(item) && !tag.contains("BlockUsed"))
-			return Lang.translateDirect("terrainzapper.leftClickToSet");
+			return CreateLang.translateDirect("terrainzapper.leftClickToSet");
 		return null;
 	}
 

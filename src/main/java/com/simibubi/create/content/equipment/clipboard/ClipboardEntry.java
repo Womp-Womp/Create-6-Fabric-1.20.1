@@ -3,7 +3,7 @@ package com.simibubi.create.content.equipment.clipboard;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.simibubi.create.foundation.utility.NBTHelper;
+import net.createmod.catnip.utility.NBTHelper;
 
 import io.github.fabricators_of_create.porting_lib.util.NBTSerializer;
 import net.minecraft.nbt.CompoundTag;

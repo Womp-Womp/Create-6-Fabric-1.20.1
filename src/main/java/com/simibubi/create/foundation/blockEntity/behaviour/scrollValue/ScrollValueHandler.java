@@ -1,6 +1,5 @@
 package com.simibubi.create.foundation.blockEntity.behaviour.scrollValue;
 
-import com.simibubi.create.foundation.utility.animation.PhysicalFloat;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;

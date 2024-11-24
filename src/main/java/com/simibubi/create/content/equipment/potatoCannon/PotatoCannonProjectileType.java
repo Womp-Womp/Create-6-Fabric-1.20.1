@@ -11,8 +11,8 @@ import java.util.function.Supplier;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import com.simibubi.create.foundation.utility.RegisteredObjects;
 
+import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.ResourceLocationException;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -150,7 +150,7 @@ public class PotatoCannonProjectileType {
 	public static void toBuffer(PotatoCannonProjectileType type, FriendlyByteBuf buffer) {
 		buffer.writeVarInt(type.items.size());
 		for (Supplier<Item> delegate : type.items) {
-			buffer.writeResourceLocation(RegisteredObjects.getKeyOrThrow(delegate.get()));
+			buffer.writeResourceLocation(CatnipServices.REGISTRIES.getKeyOrThrow(delegate.get()));
 		}
 		buffer.writeInt(type.reloadTicks);
 		buffer.writeInt(type.damage);
