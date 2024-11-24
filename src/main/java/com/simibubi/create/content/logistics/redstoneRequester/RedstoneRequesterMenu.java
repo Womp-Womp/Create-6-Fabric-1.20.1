@@ -16,8 +16,6 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.SlotItemHandler;
 
 public class RedstoneRequesterMenu extends GhostItemMenu<RedstoneRequesterBlockEntity> {
 

@@ -5,7 +5,6 @@ import com.simibubi.create.foundation.item.ItemHandlerWrapper;
 import com.simibubi.create.foundation.item.ItemHelper;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandlerModifiable;
 
 public class PackagePortAutomationInventoryWrapper extends ItemHandlerWrapper {
 

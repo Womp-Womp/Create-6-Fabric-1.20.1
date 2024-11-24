@@ -77,8 +77,9 @@ public class SymmetryHandler {
 		handlingSymmetry = true;
 		for (int i = 0; i < Inventory.getSelectionSize(); i++)
 			if (AllItems.WAND_OF_SYMMETRY.isIn(inv.getItem(i)))
-				SymmetryWandItem.remove(player.level(), inv.getItem(i), player, event.getPos());
+				SymmetryWandItem.remove(player.level(), inv.getItem(i), player, pos, state);
 		handlingSymmetry = false;
+		return true;
 	}
 
 	@Environment(EnvType.CLIENT)

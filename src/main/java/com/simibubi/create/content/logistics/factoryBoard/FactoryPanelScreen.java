@@ -41,7 +41,6 @@ import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraftforge.items.ItemHandlerHelper;
 
 public class FactoryPanelScreen extends AbstractSimiScreen {
 
@@ -78,7 +77,7 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 				return b == null ? new BigItemStack(ItemStack.EMPTY, 0) : new BigItemStack(b.getFilter(), c.amount);
 			})
 			.toList();
-		
+
 //		searchForCraftingRecipe(); TODO finish crafter integration
 
 		craftingActive = false;

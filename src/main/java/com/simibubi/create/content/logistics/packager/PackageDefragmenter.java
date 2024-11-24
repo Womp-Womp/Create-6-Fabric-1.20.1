@@ -13,8 +13,6 @@ import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class PackageDefragmenter {
 

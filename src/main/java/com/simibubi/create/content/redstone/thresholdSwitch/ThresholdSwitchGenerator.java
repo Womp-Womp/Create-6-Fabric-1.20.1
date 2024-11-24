@@ -6,7 +6,7 @@ import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 
 import io.github.fabricators_of_create.porting_lib.models.generators.ModelFile;
-
+import net.createmod.catnip.utility.lang.Lang;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 

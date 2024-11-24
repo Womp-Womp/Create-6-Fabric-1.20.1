@@ -11,6 +11,7 @@ import com.simibubi.create.AllPackets;
 import com.simibubi.create.AllParticleTypes;
 import com.simibubi.create.Create;
 import com.simibubi.create.CreateClient;
+import com.simibubi.create.compat.trainmap.TrainMapEvents;
 import com.simibubi.create.content.contraptions.ContraptionHandler;
 import com.simibubi.create.content.contraptions.ContraptionHandlerClient;
 import com.simibubi.create.content.contraptions.actors.seat.ContraptionPlayerPassengerRotation;
@@ -44,6 +45,7 @@ import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorRidingHan
 import com.simibubi.create.content.kinetics.fan.AirCurrent;
 import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPointHandler;
 import com.simibubi.create.content.kinetics.turntable.TurntableHandler;
+import com.simibubi.create.content.logistics.box.PackageClientInteractionHandler;
 import com.simibubi.create.content.logistics.depot.EjectorTargetHandler;
 import com.simibubi.create.content.logistics.displayCloth.DisplayClothOverlayRenderer;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelConnectionHandler;
@@ -81,6 +83,7 @@ import dev.engine_room.flywheel.api.event.ReloadLevelRendererCallback;
 import io.github.fabricators_of_create.porting_lib.client_events.event.client.RenderArmCallback;
 import io.github.fabricators_of_create.porting_lib.entity.events.EntityMountEvents;
 import io.github.fabricators_of_create.porting_lib.entity.events.PlayerTickEvents;
+import io.github.fabricators_of_create.porting_lib.entity.events.player.AttackEntityEvent;
 import io.github.fabricators_of_create.porting_lib.event.client.CameraSetupCallback;
 import io.github.fabricators_of_create.porting_lib.event.client.CameraSetupCallback.CameraInfo;
 import io.github.fabricators_of_create.porting_lib.event.client.ClientWorldEvents;
@@ -218,6 +221,7 @@ public class ClientEvents {
 		DisplayClothOverlayRenderer.tick();
 		CardboardArmorStealthOverlay.clientTick();
 		FactoryPanelConnectionHandler.clientTick();
+		TrainMapEvents.tick();
 		// fabric: see comment
 		AllKeys.fixBinds();
 	}
@@ -444,6 +448,7 @@ public class ClientEvents {
 		PlayerTickEvents.END.register(ContraptionHandlerClient::preventRemotePlayersWalkingAnimations);
 		ClientPlayConnectionEvents.DISCONNECT.register(ClientEvents::onLeave);
 		DrawSelectionEvents.BLOCK.register(TrackBlockOutline::drawCustomBlockSelection);
+		AttackEntityEvent.ATTACK_ENTITY.register(PackageClientInteractionHandler::onPlayerPunchPackage);
 		// we need to add our config button after mod menu, so we register our event with a phase that comes later
 		ResourceLocation latePhase = Create.asResource("late");
 		ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase);

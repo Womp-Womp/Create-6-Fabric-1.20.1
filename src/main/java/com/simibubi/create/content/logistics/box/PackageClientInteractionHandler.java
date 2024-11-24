@@ -1,5 +1,8 @@
 package com.simibubi.create.content.logistics.box;
 
+import io.github.fabricators_of_create.porting_lib.entity.events.player.AttackEntityEvent;
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.entity.player.Player;
 
@@ -9,7 +12,6 @@ public class PackageClientInteractionHandler {
 	// accidentally breaking blocks behind an armorstand or package when punching it
 	// in creative mode
 
-	@SubscribeEvent
 	@Environment(EnvType.CLIENT)
 	public static void onPlayerPunchPackage(AttackEntityEvent event) {
 		Player attacker = event.getEntity();

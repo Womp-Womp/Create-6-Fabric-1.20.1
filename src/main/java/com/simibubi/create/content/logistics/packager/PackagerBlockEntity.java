@@ -44,12 +44,6 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
-import net.minecraftforge.items.ItemStackHandler;
 
 public class PackagerBlockEntity extends SmartBlockEntity {
 
@@ -151,7 +145,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 			this.availableItems = availableItems;
 			return availableItems;
 		}
-		
+
 		if (targetInv instanceof BottomlessItemHandler bih) {
 			availableItems.add(bih.getStackInSlot(0), BigItemStack.INF);
 			this.availableItems = availableItems;
@@ -448,7 +442,7 @@ public class PackagerBlockEntity extends SmartBlockEntity {
 					continuePacking = true;
 					if (nextRequest.context() != null)
 						orderContext = nextRequest.context();
-					
+
 					if (bulky)
 						break Outer;
 					break;

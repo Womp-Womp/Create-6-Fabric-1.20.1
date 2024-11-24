@@ -32,7 +32,6 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
 
 public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 
@@ -183,11 +182,11 @@ public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 	}
 
 	//
-	
+
 	public boolean mayInteract(Player player) {
 		return Create.LOGISTICS.mayInteract(freqId, player);
 	}
-	
+
 	public boolean mayInteractMessage(Player player) {
 		boolean mayInteract = Create.LOGISTICS.mayInteract(freqId, player);
 		if (!mayInteract)
@@ -196,7 +195,7 @@ public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 				.component(), true);
 		return mayInteract;
 	}
-	
+
 	public boolean mayAdministrate(Player player) {
 		return Create.LOGISTICS.mayAdministrate(freqId, player);
 	}

@@ -3,15 +3,11 @@ package com.simibubi.create.compat.trainmap;
 import com.mojang.blaze3d.platform.InputConstants;
 import com.simibubi.create.compat.Mods;
 
-import dev.architectury.event.events.client.ClientTickEvent;
 import net.minecraft.client.Minecraft;
 
 public class TrainMapEvents {
 
-	@SubscribeEvent
-	public static void tick(ClientTickEvent event) {
-		if (event.phase == Phase.START)
-			return;
+	public static void tick() {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.level == null)
 			return;

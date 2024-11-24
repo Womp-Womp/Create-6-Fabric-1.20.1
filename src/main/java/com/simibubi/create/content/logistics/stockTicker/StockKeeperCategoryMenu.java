@@ -7,6 +7,8 @@ import com.simibubi.create.AllMenuTypes;
 import com.simibubi.create.content.logistics.filter.FilterItem;
 import com.simibubi.create.foundation.gui.menu.MenuBase;
 
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
+import io.github.fabricators_of_create.porting_lib.transfer.item.SlotItemHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
@@ -18,9 +20,6 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import net.minecraftforge.items.SlotItemHandler;
 
 public class StockKeeperCategoryMenu extends MenuBase<StockTickerBlockEntity> {
 

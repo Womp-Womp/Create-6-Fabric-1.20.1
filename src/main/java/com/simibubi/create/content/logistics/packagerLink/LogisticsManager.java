@@ -27,7 +27,6 @@ import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 
 import net.createmod.catnip.utility.Pair;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.items.IItemHandler;
 
 public class LogisticsManager {
 
