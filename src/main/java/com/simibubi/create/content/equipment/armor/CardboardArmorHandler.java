@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import com.simibubi.create.AllItems;
 
+import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -17,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 public class CardboardArmorHandler {
 
 	@SubscribeEvent
-	public static void playersStealthWhenWearingCardboard(LivingVisibilityEvent event) {
+	public static void playersStealthWhenWearingCardboard(LivingEntityEvents.LivingVisibilityEvent event) {
 		LivingEntity entity = event.getEntity();
 		if (!testForStealth(entity))
 			return;
@@ -25,7 +26,7 @@ public class CardboardArmorHandler {
 	}
 
 	@SubscribeEvent
-	public static void mobsMayLoseTargetWhenItIsWearingCardboard(LivingTickEvent event) {
+	public static void mobsMayLoseTargetWhenItIsWearingCardboard(LivingEntityEvents.LivingTickEvent event) {
 		LivingEntity entity = event.getEntity();
 		if (entity.tickCount % 16 != 0)
 			return;

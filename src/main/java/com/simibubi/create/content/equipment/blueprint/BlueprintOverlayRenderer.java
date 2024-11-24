@@ -342,10 +342,10 @@ public class BlueprintOverlayRenderer {
 			TooltipRenderUtil.renderTooltipBackground(graphics, x - 2, y + 1, w + 4, 19, 0, 0x55_000000, 0x55_000000, 0,
 				0);
 
-			AllGuiTextures.TRADE_OVERLAY.render(graphics, width / 2 - 49, y - 19);
+			AllGuiTextures.TRADE_OVERLAY.render(graphics, window.getGuiScaledWidth() / 2 - 49, y - 19);
 			if (shopContext.purchases() > 0) {
-				graphics.renderItem(AllItems.SHOPPING_LIST.asStack(), width / 2 + 20, y - 20);
-				graphics.drawString(mc.font, Components.literal("x" + shopContext.purchases()), width / 2 + 20 + 16,
+				graphics.renderItem(AllItems.SHOPPING_LIST.asStack(), window.getGuiScaledWidth() / 2 + 20, y - 20);
+				graphics.drawString(mc.font, Components.literal("x" + shopContext.purchases()), window.getGuiScaledWidth() / 2 + 20 + 16,
 					y - 20 + 4, 0xff_eeeeee, true);
 			}
 		}

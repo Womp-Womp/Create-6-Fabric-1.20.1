@@ -70,7 +70,9 @@ public class AllEntityTypes {
 		MobCategory.MISC, 5, Integer.MAX_VALUE, false, true, SeatEntity::build).register();
 
 	public static final EntityEntry<PackageEntity> PACKAGE = register("package", PackageEntity::new, () -> PackageRenderer::new,
-		MobCategory.MISC, 10, 3, true, false, PackageEntity::build).register();
+		MobCategory.MISC, 10, 3, true, false, PackageEntity::build)
+		.attributes(PackageEntity::createPackageAttributes)
+		.register();
 
 	//
 
@@ -99,10 +101,11 @@ public class AllEntityTypes {
 			.renderer(renderer);
 	}
 
-	public static void registerEntityAttributes(EntityAttributeCreationEvent event) {
-		event.put(PACKAGE.get(), PackageEntity.createPackageAttributes()
-			.build());
-	}
+	// fabric: handled with EntityBuilder#attributes
+//	public static void registerEntityAttributes(EntityAttributeCreationEvent event) {
+//		event.put(PACKAGE.get(), PackageEntity.createPackageAttributes()
+//			.build());
+//	}
 
 	public static void register() {}
 }

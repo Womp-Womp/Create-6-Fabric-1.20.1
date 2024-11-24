@@ -2,11 +2,6 @@ package com.simibubi.create;
 
 import java.util.Random;
 
-import io.github.tropheusj.milk.Milk;
-import net.fabricmc.api.ModInitializer;
-
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-
 import org.slf4j.Logger;
 
 import com.google.gson.Gson;
@@ -34,32 +29,23 @@ import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.advancement.AllTriggers;
 import com.simibubi.create.foundation.block.CopperRegistries;
 import com.simibubi.create.foundation.data.CreateRegistrate;
-import com.simibubi.create.foundation.data.DamageTypeTagGen;
-import com.simibubi.create.foundation.data.TagGen;
-import com.simibubi.create.foundation.data.TagLangGen;
-import com.simibubi.create.foundation.data.recipe.MechanicalCraftingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.ProcessingRecipeGen;
-import com.simibubi.create.foundation.data.recipe.SequencedAssemblyRecipeGen;
-import com.simibubi.create.foundation.data.recipe.StandardRecipeGen;
 import com.simibubi.create.foundation.events.CommonEvents;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.simibubi.create.foundation.ponder.FabricPonderProcessing;
 import com.simibubi.create.foundation.recipe.AllIngredients;
-import com.simibubi.create.foundation.utility.AttachedRegistry;
 import com.simibubi.create.foundation.utility.CreateNBTProcessors;
 import com.simibubi.create.infrastructure.command.ServerLagger;
 import com.simibubi.create.infrastructure.config.AllConfigs;
-import com.simibubi.create.infrastructure.data.CreateDatagen;
-import com.simibubi.create.infrastructure.data.CreateRecipeSerializerTagsProvider;
-import com.simibubi.create.infrastructure.data.GeneratedEntriesProvider;
 import com.simibubi.create.infrastructure.worldgen.AllBiomeModifiers;
 import com.simibubi.create.infrastructure.worldgen.AllFeatures;
 import com.simibubi.create.infrastructure.worldgen.AllPlacementModifiers;
 
+import io.github.tropheusj.milk.Milk;
 import net.createmod.catnip.utility.FontHelper;
 import net.createmod.catnip.utility.lang.LangBuilder;
+import net.fabricmc.api.ModInitializer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -151,7 +137,6 @@ public class Create implements ModInitializer {
 		Create.init();
 //		modEventBus.addListener(EventPriority.LOW, CreateDatagen::gatherData); // CreateData entrypoint
 		AllSoundEvents.register();
-		modEventBus.addListener(AllEntityTypes::registerEntityAttributes);
 
 		// causes class loading issues or something
 		// noinspection Convert2MethodRef

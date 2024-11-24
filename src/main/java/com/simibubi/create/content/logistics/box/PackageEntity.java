@@ -16,6 +16,7 @@ import io.github.fabricators_of_create.porting_lib.entity.events.LivingAttackEve
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import net.createmod.catnip.utility.VecHelper;
 import net.createmod.catnip.utility.math.AngleHelper;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -114,10 +115,10 @@ public class PackageEntity extends LivingEntity implements IEntityAdditionalSpaw
 			.add(Attributes.MOVEMENT_SPEED, 1f);
 	}
 
-	public static EntityType.Builder<?> build(EntityType.Builder<?> builder) {
-		@SuppressWarnings("unchecked")
-		EntityType.Builder<PackageEntity> boxBuilder = (EntityType.Builder<PackageEntity>) builder;
-		return boxBuilder.setCustomClientFactory(PackageEntity::spawn)
+	public static FabricEntityTypeBuilder<?> build(FabricEntityTypeBuilder<?> builder) {
+		//@SuppressWarnings("unchecked")
+		//EntityType.Builder<PackageEntity> boxBuilder = (EntityType.Builder<PackageEntity>) builder;
+		return builder.setCustomClientFactory(PackageEntity::spawn)
 			.sized(1, 1);
 	}
 
