@@ -11,6 +11,8 @@ import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.logistics.chute.ChuteBlock;
 
 import io.github.fabricators_of_create.porting_lib.entity.IEntityAdditionalSpawnData;
+import io.github.fabricators_of_create.porting_lib.entity.PortingLibEntity;
+import io.github.fabricators_of_create.porting_lib.entity.events.LivingAttackEvent;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import net.createmod.catnip.utility.VecHelper;
 import net.createmod.catnip.utility.math.AngleHelper;
@@ -283,7 +285,9 @@ public class PackageEntity extends LivingEntity implements IEntityAdditionalSpaw
 
 	@Override
 	public boolean hurt(DamageSource source, float amount) {
-		if (!ForgeHooks.onLivingAttack(this, source, amount))
+		LivingAttackEvent event = new LivingAttackEvent(this, source, amount);
+		event.sendEvent();
+		if (event.isCanceled())
 			return false;
 
 		if (level().isClientSide || !this.isAlive())
@@ -341,9 +345,7 @@ public class PackageEntity extends LivingEntity implements IEntityAdditionalSpaw
 	}
 
 	private void destroy(DamageSource source) {
-		AllPackets.getChannel()
-			.send(PacketDistributor.TRACKING_ENTITY.with(() -> this),
-				new PackageDestroyPacket(getBoundingBox().getCenter(), box));
+		AllPackets.getChannel().sendToClientsTracking(new PackageDestroyPacket(getBoundingBox().getCenter(), box), this);
 		AllSoundEvents.PACKAGE_POP.playOnServer(level(), blockPosition());
 		this.dropAllDeathLoot(source);
 	}
@@ -385,7 +387,7 @@ public class PackageEntity extends LivingEntity implements IEntityAdditionalSpaw
 
 	@Override
 	public Packet<ClientGamePacketListener> getAddEntityPacket() {
-		return NetworkHooks.getEntitySpawningPacket(this);
+		return PortingLibEntity.getEntitySpawningPacket(this);
 	}
 
 	@Override
