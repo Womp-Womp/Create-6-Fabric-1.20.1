@@ -1,5 +1,7 @@
 package com.simibubi.create.impl.schematic.requirement;
 
+import net.minecraft.core.registries.BuiltInRegistries;
+
 import org.jetbrains.annotations.ApiStatus;
 
 import com.simibubi.create.api.schematic.requirement.SchematicRequirementsRegistry;
@@ -11,13 +13,12 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraftforge.registries.ForgeRegistries;
 
 @ApiStatus.Internal
 public class SchematicRequirementsRegistryImpl {
-	private static final AttachedRegistry<Block, SchematicRequirementsRegistry.BlockRequirement> BLOCK_REQUIREMENTS = new AttachedRegistry<>(ForgeRegistries.BLOCKS);
-	private static final AttachedRegistry<BlockEntityType<?>, SchematicRequirementsRegistry.BlockEntityRequirement> BLOCK_ENTITY_REQUIREMENTS = new AttachedRegistry<>(ForgeRegistries.BLOCK_ENTITY_TYPES);
-	private static final AttachedRegistry<EntityType<?>, SchematicRequirementsRegistry.EntityRequirement> ENTITY_REQUIREMENTS = new AttachedRegistry<>(ForgeRegistries.ENTITY_TYPES);
+	private static final AttachedRegistry<Block, SchematicRequirementsRegistry.BlockRequirement> BLOCK_REQUIREMENTS = new AttachedRegistry<>(BuiltInRegistries.BLOCK);
+	private static final AttachedRegistry<BlockEntityType<?>, SchematicRequirementsRegistry.BlockEntityRequirement> BLOCK_ENTITY_REQUIREMENTS = new AttachedRegistry<>(BuiltInRegistries.BLOCK_ENTITY_TYPE);
+	private static final AttachedRegistry<EntityType<?>, SchematicRequirementsRegistry.EntityRequirement> ENTITY_REQUIREMENTS = new AttachedRegistry<>(BuiltInRegistries.ENTITY_TYPE);
 
 	public static void registerForBlock(Block block, SchematicRequirementsRegistry.BlockRequirement requirement) {
 		BLOCK_REQUIREMENTS.register(block, requirement);

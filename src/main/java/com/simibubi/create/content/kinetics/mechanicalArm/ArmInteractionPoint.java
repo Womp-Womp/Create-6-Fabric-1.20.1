@@ -129,7 +129,7 @@ public class ArmInteractionPoint {
 	}
 
 	public final CompoundTag serialize(BlockPos anchor) {
-		ResourceLocation key = AllRegistries.ARM_INTERACTION_POINT_TYPES.get().getKey(type);
+		ResourceLocation key = AllRegistries.ARM_INTERACTION_POINT_TYPES.getKey(type);
 		if (key == null)
 			throw new IllegalArgumentException("Could not get id for ArmInteractionPointType " + type + "!");
 
@@ -145,7 +145,7 @@ public class ArmInteractionPoint {
 		ResourceLocation id = ResourceLocation.tryParse(nbt.getString("Type"));
 		if (id == null)
 			return null;
-		ArmInteractionPointType type = AllRegistries.ARM_INTERACTION_POINT_TYPES.get().getValue(id);
+		ArmInteractionPointType type = AllRegistries.ARM_INTERACTION_POINT_TYPES.get(id);
 		if (type == null)
 			return null;
 		BlockPos pos = NbtUtils.readBlockPos(nbt.getCompound("Pos")).offset(anchor);
