@@ -40,6 +40,7 @@ import com.simibubi.create.content.kinetics.deployer.DeployerFakePlayer;
 import com.simibubi.create.content.kinetics.deployer.ManualApplicationRecipe;
 import com.simibubi.create.content.processing.burner.BlazeBurnerHandler;
 import com.simibubi.create.content.redstone.link.LinkHandler;
+import com.simibubi.create.content.kinetics.drill.CobbleGenOptimisation;
 import com.simibubi.create.content.redstone.link.controller.LinkedControllerServerHandler;
 import com.simibubi.create.content.trains.entity.CarriageEntityHandler;
 import com.simibubi.create.content.trains.schedule.ScheduleItemEntityInteraction;
@@ -48,6 +49,7 @@ import com.simibubi.create.foundation.blockEntity.behaviour.ValueSettingsInputHa
 import com.simibubi.create.foundation.blockEntity.behaviour.edgeInteraction.EdgeInteractionHandler;
 import com.simibubi.create.foundation.recipe.RecipeFinder;
 import com.simibubi.create.foundation.utility.ServerSpeedProvider;
+import com.simibubi.create.foundation.utility.TickBasedCache;
 import com.simibubi.create.infrastructure.command.AllCommands;
 
 import io.github.fabricators_of_create.porting_lib.entity.events.EntityDataEvents;
@@ -101,6 +103,7 @@ public class CommonEvents {
 		Create.RAILWAYS.sync.serverTick();
 		TrainMapSync.serverTick(server);
 		ServerChainConveyorHandler.tick();
+		TickBasedCache.tick();
 	}
 
 	public static void onChunkUnloaded(Level world, LevelChunk chunk) {
@@ -178,6 +181,7 @@ public class CommonEvents {
 		Create.REDSTONE_LINK_NETWORK_HANDLER.onUnloadWorld(world);
 		Create.TORQUE_PROPAGATOR.onUnloadWorld(world);
 		WorldAttached.invalidateWorld(world);
+		CobbleGenOptimisation.invalidateWorld(world);
 	}
 
 	// handled by AbstractMinecartMixin

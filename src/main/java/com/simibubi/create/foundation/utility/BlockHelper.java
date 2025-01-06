@@ -6,6 +6,8 @@ import javax.annotation.Nullable;
 
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllTags.AllBlockTags;
+import com.simibubi.create.api.schematic.nbt.IPartialSafeNBT;
+import com.simibubi.create.api.schematic.nbt.SchematicSafeNBTRegistry;
 import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.framedblocks.FramedBlocksInSchematics;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
@@ -13,6 +15,7 @@ import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.foundation.blockEntity.IMergeableBE;
 import com.simibubi.create.foundation.blockEntity.IMultiBlockEntityContainer;
+import com.simibubi.create.impl.schematic.nbt.SchematicSafeNBTRegistryImpl;
 
 import io.github.fabricators_of_create.porting_lib.common.util.IPlantable;
 import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
@@ -239,18 +242,20 @@ public class BlockHelper {
 	public static CompoundTag prepareBlockEntityData(BlockState blockState, BlockEntity blockEntity) {
 		CompoundTag data = null;
 		if (blockEntity == null)
-			return data;
-
+			return null;
+SchematicSafeNBTRegistry.ContextProvidingPartialSafeNBT safeNBT = SchematicSafeNBTRegistryImpl.getPartialSafeNBT(blockEntity.getType());
 		if (AllBlockTags.SAFE_NBT.matches(blockState)) {
 			data = blockEntity.saveWithFullMetadata();
 
-		} else if (blockEntity instanceof IPartialSafeNBT) {
+		} else if (safeNBT != null) {
 			data = new CompoundTag();
-			((IPartialSafeNBT) blockEntity).writeSafe(data);
-
-		} else if (Mods.FRAMEDBLOCKS.contains(blockState.getBlock()))
+			safeNBT.writeSafe(blockEntity, data);
+		} else if (blockEntity instanceof IPartialSafeNBT safeNbtBE) {
+			data = new CompoundTag();
+safeNbtBE.writeSafe(data);
+		} else if (Mods.FRAMEDBLOCKS.contains(blockState.getBlock())) {
 			data = FramedBlocksInSchematics.prepareBlockEntityData(blockState, blockEntity);
-
+}
 		return NBTProcessors.process(blockState, blockEntity, data, true);
 	}
 

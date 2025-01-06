@@ -8,6 +8,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import net.fabricmc.fabric.api.renderer.v1.mesh.MutableQuadView;
 import net.fabricmc.fabric.api.renderer.v1.mesh.QuadView;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
 public final class BakedQuadHelper {
@@ -48,16 +49,32 @@ public final class BakedQuadHelper {
 		vertexData[vertex * VERTEX_STRIDE + Z_OFFSET] = Float.floatToRawIntBits((float) xyz.z);
 	}
 
-	public static Vec3 getXYZ(QuadView quad, int vertex) {
-		float x = quad.x(vertex);
-        float y = quad.y(vertex);
-        float z = quad.z(vertex);
-        return new Vec3(x, y, z);
+	public static Vec3 getNormalXYZ(int[] vertexData, int vertex) {
+		int data = vertexData[vertex * VERTEX_STRIDE + NORMAL_OFFSET];
+		float x = (byte) (data >> 24 & 0xFF) / 127f;
+		float y = (byte) (data >> 16 & 0xFF) / 127f;
+		float z = (byte) (data >> 8 & 0xFF) / 127f;
+		return new Vec3(x, y, z);
 	}
 
-	public static void setXYZ(MutableQuadView quad, int vertex, Vec3 xyz) {
-		quad.pos(vertex, (float) xyz.x, (float) xyz.y, (float) xyz.z);
+	public static void setNormalXYZ(int[] vertexData, int vertex, Vec3 xyz) {
+		int x = Byte.toUnsignedInt((byte) (Mth.clamp(xyz.x, -1.0f, 1.0f) * 127));
+		int y = Byte.toUnsignedInt((byte) (Mth.clamp(xyz.y, -1.0f, 1.0f) * 127));
+		int z = Byte.toUnsignedInt((byte) (Mth.clamp(xyz.z, -1.0f, 1.0f) * 127));
+		int data = (x << 24) | (y << 16) | (z << 8);
+		vertexData[vertex * VERTEX_STRIDE + NORMAL_OFFSET] = data;
 	}
+
+	// 	public static Vec3 getXYZ(QuadView quad, int vertex) {
+	//		float x = quad.x(vertex);
+	//        float y = quad.y(vertex);
+	//        float z = quad.z(vertex);
+	//        return new Vec3(x, y, z);
+	//	}
+	//
+	//	public static void setXYZ(MutableQuadView quad, int vertex, Vec3 xyz) {
+	//		quad.pos(vertex, (float) xyz.x, (float) xyz.y, (float) xyz.z);
+	//	}
 
 	public static float getU(int[] vertexData, int vertex) {
 		return Float.intBitsToFloat(vertexData[vertex * VERTEX_STRIDE + U_OFFSET]);

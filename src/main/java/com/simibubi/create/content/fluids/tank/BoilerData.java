@@ -1,6 +1,7 @@
 package com.simibubi.create.content.fluids.tank;
 
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,7 +9,7 @@ import java.util.Set;
 import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.Create;
+import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.decoration.steamWhistle.WhistleBlock;
 import com.simibubi.create.content.decoration.steamWhistle.WhistleBlockEntity;
 import com.simibubi.create.content.kinetics.BlockStressValues;
@@ -34,9 +35,12 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
 public class BoilerData {
 
@@ -65,17 +69,34 @@ public class BoilerData {
 	private int maxHeatForWater = 0;
 	private int minValue = 0;
 	private int maxValue = 0;
+	public boolean[] occludedDirections = { true, true, true, true };
 
 	public LerpedFloat gauge = LerpedFloat.linear();
+
+	// client only sound control
+
+	// re-use the same lambda for each side
+	private final SoundPool.Sound sound = (level, pos) -> {
+		float volume = 3f / Math.max(2, attachedEngines / 6);
+		float pitch = 1.18f - level.random.nextFloat() * .25f;
+		level.playLocalSound(pos.getX(), pos.getY(), pos.getZ(),
+			SoundEvents.CANDLE_EXTINGUISH, SoundSource.BLOCKS, volume, pitch, false);
+
+		AllSoundEvents.STEAM.playAt(level, pos, volume / 16, .8f, false);
+	};
+	// separate pools for each side so they sound distinct when standing at corners of the boiler
+	private final EnumMap<Direction, SoundPool> pools = new EnumMap<>(Direction.class);
 
 	public void tick(FluidTankBlockEntity controller) {
 		if (!isActive())
 			return;
-		if (controller.getLevel().isClientSide) {
+		Level level = controller.getLevel();
+		if (level.isClientSide) {
+			pools.values().forEach(p -> p.play(level));
 			gauge.tickChaser();
 			float current = gauge.getValue(1);
-			if (current > 1 && Create.RANDOM.nextFloat() < 1 / 2f)
-				gauge.setValueNoUpdate(current + Math.min(-(current - 1) * Create.RANDOM.nextFloat(), 0));
+			if (current > 1 && level.random.nextFloat() < 1 / 2f)
+				gauge.setValueNoUpdate(current + Math.min(-(current - 1) * level.random.nextFloat(), 0));
 			return;
 		}
 		if (needsHeatLevelUpdate && updateTemperature(controller))
@@ -106,6 +127,32 @@ public class BoilerData {
 			controller.award(AllAdvancements.STEAM_ENGINE_MAXED);
 
 		controller.notifyUpdate();
+	}
+
+	public void updateOcclusion(FluidTankBlockEntity controller) {
+		if (!controller.getLevel().isClientSide)
+			return;
+		if (attachedEngines + attachedWhistles == 0)
+			return;
+		for (Direction d : Iterate.horizontalDirections) {
+			AABB aabb =
+				new AABB(controller.getBlockPos()).move(controller.width / 2f - .5f, 0, controller.width / 2f - .5f)
+					.deflate(5f / 8);
+			aabb = aabb.move(d.getStepX() * (controller.width / 2f + 1 / 4f), 0,
+				d.getStepZ() * (controller.width / 2f + 1 / 4f));
+			aabb = aabb.inflate(Math.abs(d.getStepZ()) / 2f, 0.25f, Math.abs(d.getStepX()) / 2f);
+			occludedDirections[d.get2DDataValue()] = !controller.getLevel()
+				.noCollision(aabb);
+		}
+	}
+
+	public void queueSoundOnSide(BlockPos pos, Direction side) {
+		SoundPool pool = pools.get(side);
+		if (pool == null) {
+			pool = new SoundPool(4, 2, sound);
+			pools.put(side, pool);
+		}
+		pool.queueAt(pos);
 	}
 
 	public int getTheoreticalHeatLevel() {

@@ -42,7 +42,7 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity implements
 
 	protected AnimatedContainerBehaviour<PackagePortMenu> openTracker;
 
-	private LazyOptional<IItemHandler> itemHandler;
+	protected LazyOptional<IItemHandler> itemHandler;
 
 	public PackagePortBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
@@ -141,11 +141,17 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity implements
 			return InteractionResult.PASS;
 		if (player instanceof FakePlayer)
 			return InteractionResult.PASS;
-		if (level.isClientSide)
-			return InteractionResult.SUCCESS;
 
 		ItemStack mainHandItem = player.getMainHandItem();
-		if (AllBlocks.CLIPBOARD.isIn(mainHandItem)) {
+		boolean clipboard = AllBlocks.CLIPBOARD.isIn(mainHandItem);
+
+		if (level.isClientSide) {
+			if (!clipboard)
+				onOpenedManually();
+			return InteractionResult.SUCCESS;
+		}
+
+		if (clipboard) {
 			addAddressToClipboard(player, mainHandItem);
 			return InteractionResult.SUCCESS;
 		}
@@ -153,6 +159,8 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity implements
 		NetworkHooks.openScreen((ServerPlayer) player, this, worldPosition);
 		return InteractionResult.SUCCESS;
 	}
+
+	protected void onOpenedManually() {};
 
 	private void addAddressToClipboard(Player player, ItemStack mainHandItem) {
 		if (addressFilter == null || addressFilter.isBlank())
@@ -198,6 +206,10 @@ public abstract class PackagePortBlockEntity extends SmartBlockEntity implements
 	@Override
 	public AbstractContainerMenu createMenu(int pContainerId, Inventory pPlayerInventory, Player pPlayer) {
 		return PackagePortMenu.create(pContainerId, pPlayerInventory, this);
+	}
+
+	public int getComparatorOutput() {
+		return ItemHandlerHelper.calcRedstoneFromInventory(inventory);
 	}
 
 }

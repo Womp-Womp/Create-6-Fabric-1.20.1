@@ -1,12 +1,12 @@
 package com.simibubi.create.content.logistics.box;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 import javax.annotation.Nullable;
 
 import com.simibubi.create.AllEntityTypes;
+import com.simibubi.create.Create;
+import com.simibubi.create.content.logistics.box.PackageStyles.PackageStyle;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
@@ -43,25 +43,20 @@ import net.minecraft.world.phys.Vec3;
 
 public class PackageItem extends Item {
 
-	public static final List<PackageItem> ALL_BOXES = new ArrayList<>();
-	public static ItemStack FALLBACK_BOX = ItemStack.EMPTY;
 	public static final int SLOTS = 9;
 
-	int width, height;
-	float hookDistance;
+	public PackageStyle style;
 
-	public PackageItem(Properties properties, int width, int height, float hookDistance) {
+	public PackageItem(Properties properties, PackageStyle style) {
 		super(properties);
-		this.width = width;
-		this.height = height;
-		this.hookDistance = hookDistance;
-		ALL_BOXES.add(this);
+		this.style = style;
+		PackageStyles.ALL_BOXES.add(this);
+		(style.rare() ? PackageStyles.RARE_BOXES : PackageStyles.STANDARD_BOXES).add(this);
 	}
 
-	public static ItemStack getFallbackBox() {
-		if (FALLBACK_BOX.isEmpty())
-			FALLBACK_BOX = new ItemStack(ALL_BOXES.get(0));
-		return FALLBACK_BOX;
+	@Override
+	public String getDescriptionId() {
+		return "item." + Create.ID + (style.rare() ? ".rare_package" : ".package");
 	}
 
 	public static boolean isPackage(ItemStack stack) {
@@ -90,7 +85,7 @@ public class PackageItem extends Item {
 	}
 
 	public static ItemStack containing(ItemStackHandler stacks) {
-		ItemStack box = new ItemStack(randomBox());
+		ItemStack box = PackageStyles.getRandomBox();
 		CompoundTag compound = new CompoundTag();
 		compound.put("Items", stacks.serializeNBT());
 		box.setTag(compound);
@@ -130,6 +125,24 @@ public class PackageItem extends Item {
 			.getInt("OrderId");
 	}
 
+	public static PackageOrder getOrderContext(ItemStack box) {
+		CompoundTag tag = box.getTag();
+		if (tag == null || !tag.contains("Fragment"))
+			return null;
+		CompoundTag frag = tag.getCompound("Fragment");
+		if (!frag.contains("OrderContext"))
+			return null;
+		return PackageOrder.read(frag.getCompound("OrderContext"));
+	}
+
+	public static void addOrderContext(ItemStack box, PackageOrder orderContext) {
+		CompoundTag tag = box.getOrCreateTagElement("Fragment");
+		if (orderContext != null)
+			tag.put("OrderContext", orderContext.write());
+		box.getOrCreateTag()
+			.put("Fragment", tag);
+	}
+
 	public static boolean matchAddress(ItemStack box, String address) {
 		return matchAddress(getAddress(box), address);
 	}
@@ -153,19 +166,19 @@ public class PackageItem extends Item {
 
 	public static float getWidth(ItemStack box) {
 		if (box.getItem() instanceof PackageItem pi)
-			return pi.width / 16f;
+			return pi.style.width() / 16f;
 		return 1;
 	}
 
 	public static float getHeight(ItemStack box) {
 		if (box.getItem() instanceof PackageItem pi)
-			return pi.height / 16f;
+			return pi.style.height() / 16f;
 		return 1;
 	}
 
 	public static float getHookDistance(ItemStack box) {
 		if (box.getItem() instanceof PackageItem pi)
-			return pi.hookDistance / 16f;
+			return pi.style.riggingOffset() / 16f;
 		return 1;
 	}
 
@@ -175,10 +188,6 @@ public class PackageItem extends Item {
 		if (!invNBT.isEmpty())
 			newInv.deserializeNBT(invNBT);
 		return newInv;
-	}
-
-	public static PackageItem randomBox() {
-		return ALL_BOXES.get(new Random().nextInt(ALL_BOXES.size()));
 	}
 
 	@Override
@@ -250,15 +259,13 @@ public class PackageItem extends Item {
 		ItemStackHandler contents = getContents(box);
 		ItemStack particle = box.copy();
 
-		box = box.copyWithCount(box.getCount() - 1);
-		if (box.isEmpty())
-			box = ItemStack.EMPTY;
-
-		playerIn.setItemInHand(handIn, box);
+		playerIn.setItemInHand(handIn, box.getCount() <= 1 ? ItemStack.EMPTY : box.copyWithCount(box.getCount() - 1));
 
 		if (!worldIn.isClientSide()) {
 			for (int i = 0; i < contents.getSlots(); i++) {
 				ItemStack itemstack = contents.getStackInSlot(i);
+				if (itemstack.isEmpty())
+					continue;
 
 				if (itemstack.getItem() instanceof SpawnEggItem sei && worldIn instanceof ServerLevel sl) {
 					EntityType<?> entitytype = sei.getType(itemstack.getTag());
@@ -271,10 +278,8 @@ public class PackageItem extends Item {
 						itemstack.shrink(1);
 				}
 
-				if (itemstack.isEmpty())
-					continue;
 				playerIn.getInventory()
-					.placeItemBackInInventory(itemstack);
+					.placeItemBackInInventory(itemstack.copy());
 			}
 		}
 
@@ -294,18 +299,19 @@ public class PackageItem extends Item {
 			}
 		}
 
-		return new InteractionResultHolder<>(InteractionResult.SUCCESS, playerIn.getItemInHand(handIn));
+		return new InteractionResultHolder<>(InteractionResult.SUCCESS, box);
 	}
 
 	@Override
 	public InteractionResult useOn(UseOnContext context) {
 		if (context.getPlayer()
-			.isShiftKeyDown())
+			.isShiftKeyDown()) {
 			return open(context.getLevel(), context.getPlayer(), context.getHand()).getResult();
+		}
 
 		Vec3 point = context.getClickLocation();
-		float h = height / 16f;
-		float r = width / 2f / 16f;
+		float h = style.height() / 16f;
+		float r = style.width() / 2f / 16f;
 
 		if (context.getClickedFace() == Direction.DOWN)
 			point = point.subtract(0, h + .25f, 0);

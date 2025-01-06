@@ -3,6 +3,7 @@ package com.simibubi.create.content.logistics.packager;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -45,6 +46,10 @@ public class InventorySummary {
 	public void add(BigItemStack entry) {
 		add(entry.stack, entry.count);
 	}
+	
+	public Map<Item, List<BigItemStack>> getItemMap() {
+		return items;
+	}
 
 	public InventorySummary copy() {
 		InventorySummary inventorySummary = new InventorySummary();
@@ -68,9 +73,28 @@ public class InventorySummary {
 				return;
 			}
 		}
+		
+		if (stack.getCount() > stack.getMaxStackSize())
+			stack = stack.copyWithCount(1);
 
 		BigItemStack newEntry = new BigItemStack(stack, count);
 		stacks.add(newEntry);
+	}
+
+	public boolean erase(ItemStack stack) {
+		List<BigItemStack> stacks = items.get(stack.getItem());
+		if (stacks == null)
+			return false;
+		for (Iterator<BigItemStack> iterator = stacks.iterator(); iterator.hasNext();) {
+			BigItemStack existing = iterator.next();
+			ItemStack existingStack = existing.stack;
+			if (!ItemHandlerHelper.canItemStacksStack(existingStack, stack))
+				continue;
+			totalCount -= existing.count;
+			iterator.remove();
+			return true;
+		}
+		return false;
 	}
 
 	public int getCountOf(ItemStack stack) {

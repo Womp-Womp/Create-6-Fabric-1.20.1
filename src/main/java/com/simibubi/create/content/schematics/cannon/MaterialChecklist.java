@@ -213,7 +213,7 @@ public class MaterialChecklist {
 
 			itemsWritten++;
 			currentPage.add(new ClipboardEntry(false, entry(new ItemStack(item), amount, true, false))
-				.displayItem(new ItemStack(item)));
+				.displayItem(new ItemStack(item), amount));
 		}
 
 		for (Item item : completed) {
@@ -227,7 +227,7 @@ public class MaterialChecklist {
 
 			itemsWritten++;
 			currentPage.add(new ClipboardEntry(true, entry(new ItemStack(item), getRequiredAmount(item), false, false))
-				.displayItem(new ItemStack(item)));
+				.displayItem(new ItemStack(item), 0));
 		}
 
 		pages.add(currentPage);

@@ -47,10 +47,10 @@ import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPointHan
 import com.simibubi.create.content.kinetics.turntable.TurntableHandler;
 import com.simibubi.create.content.logistics.box.PackageClientInteractionHandler;
 import com.simibubi.create.content.logistics.depot.EjectorTargetHandler;
-import com.simibubi.create.content.logistics.displayCloth.DisplayClothOverlayRenderer;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelConnectionHandler;
 import com.simibubi.create.content.logistics.packagePort.PackagePortTargetSelectionHandler;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedClientHandler;
+import com.simibubi.create.content.logistics.tableCloth.TableClothOverlayRenderer;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyRecipe;
 import com.simibubi.create.content.redstone.displayLink.ClickToLinkBlockItem;
 import com.simibubi.create.content.redstone.link.LinkRenderer;
@@ -76,6 +76,7 @@ import com.simibubi.create.foundation.networking.LeftClickPacket;
 import com.simibubi.create.foundation.sound.SoundScapes;
 import com.simibubi.create.foundation.utility.CameraAngleAnimationService;
 import com.simibubi.create.foundation.utility.ServerSpeedProvider;
+import com.simibubi.create.foundation.utility.TickBasedCache;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.gui.OpenCreateMenuButton;
 
@@ -218,10 +219,10 @@ public class ClientEvents {
 		ChainConveyorConnectionHandler.clientTick();
 		PackagePortTargetSelectionHandler.tick();
 		LogisticallyLinkedClientHandler.tick();
-		DisplayClothOverlayRenderer.tick();
+		TableClothOverlayRenderer.tick();
 		CardboardArmorStealthOverlay.clientTick();
 		FactoryPanelConnectionHandler.clientTick();
-		TrainMapEvents.tick();
+		TickBasedCache.clientTick();
 		// fabric: see comment
 		AllKeys.fixBinds();
 	}

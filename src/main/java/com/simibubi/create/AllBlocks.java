@@ -55,8 +55,10 @@ import com.simibubi.create.content.contraptions.piston.MechanicalPistonHeadBlock
 import com.simibubi.create.content.contraptions.piston.PistonExtensionPoleBlock;
 import com.simibubi.create.content.contraptions.pulley.PulleyBlock;
 import com.simibubi.create.content.decoration.CardboardBlock;
+import com.simibubi.create.content.decoration.CardboardBlockItem;
 import com.simibubi.create.content.decoration.MetalLadderBlock;
 import com.simibubi.create.content.decoration.MetalScaffoldingBlock;
+import com.simibubi.create.content.decoration.RoofBlockCTBehaviour;
 import com.simibubi.create.content.decoration.TrainTrapdoorBlock;
 import com.simibubi.create.content.decoration.TrapdoorCTBehaviour;
 import com.simibubi.create.content.decoration.bracket.BracketBlock;
@@ -167,7 +169,6 @@ import com.simibubi.create.content.logistics.crate.CreativeCrateBlock;
 import com.simibubi.create.content.logistics.depot.DepotBlock;
 import com.simibubi.create.content.logistics.depot.EjectorBlock;
 import com.simibubi.create.content.logistics.depot.EjectorItem;
-import com.simibubi.create.content.logistics.displayCloth.DisplayClothBlock;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlock;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlockItem;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelModel;
@@ -183,12 +184,13 @@ import com.simibubi.create.content.logistics.packagePort.PackagePortItem;
 import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlock;
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlock;
 import com.simibubi.create.content.logistics.packager.PackagerBlock;
-import com.simibubi.create.content.logistics.packager.PackagerGenerator;
+import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlock;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
 import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlock;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlock;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockItem;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlock;
+import com.simibubi.create.content.logistics.tableCloth.TableClothBlock;
 import com.simibubi.create.content.logistics.tunnel.BeltTunnelBlock;
 import com.simibubi.create.content.logistics.tunnel.BrassTunnelBlock;
 import com.simibubi.create.content.logistics.tunnel.BrassTunnelCTBehaviour;
@@ -224,6 +226,7 @@ import com.simibubi.create.content.redstone.displayLink.source.AccumulatedItemCo
 import com.simibubi.create.content.redstone.displayLink.source.BoilerDisplaySource;
 import com.simibubi.create.content.redstone.displayLink.source.CurrentFloorDisplaySource;
 import com.simibubi.create.content.redstone.displayLink.source.EntityNameDisplaySource;
+import com.simibubi.create.content.redstone.displayLink.source.FactoryGaugeDisplaySource;
 import com.simibubi.create.content.redstone.displayLink.source.FillLevelDisplaySource;
 import com.simibubi.create.content.redstone.displayLink.source.FluidAmountDisplaySource;
 import com.simibubi.create.content.redstone.displayLink.source.FluidListDisplaySource;
@@ -550,8 +553,7 @@ public class AllBlocks {
 			.properties(p -> p.noOcclusion()
 				.mapColor(MapColor.PODZOL))
 			.transform(axeOrPickaxe())
-			.transform(BlockStressDefaults.setNoImpact())
-			.tag(AllBlockTags.RELOCATION_NOT_SUPPORTED.tag)
+			.transform(BlockStressDefaults.setImpact(1))
 			.blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.partialBaseModel(c, p)))
 			.item()
 			.transform(customItemModel())
@@ -814,7 +816,10 @@ public class AllBlocks {
 	public static final BlockEntry<ChuteBlock> CHUTE = REGISTRATE.block("chute", ChuteBlock::new)
 		.initialProperties(SharedProperties::softMetal)
 		.properties(p -> p.mapColor(MapColor.COLOR_GRAY)
-			.sound(SoundType.NETHERITE_BLOCK))
+			.sound(SoundType.NETHERITE_BLOCK)
+			.noOcclusion()
+			.isSuffocating((level, pos, state) -> false)
+			.isRedstoneConductor((level, pos, state) -> false))
 		.transform(pickaxeOnly())
 		.addLayer(() -> RenderType::cutoutMipped)
 		.blockstate(new ChuteGenerator()::generate)
@@ -881,7 +886,7 @@ public class AllBlocks {
 		.properties(p -> p.forceSolidOn())
 		.transform(pickaxeOnly())
 		.blockstate(BlockStateGen.pipe())
-		.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::new))
+		.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::withoutAO))
 		.item()
 		.transform(customItemModel())
 		.register();
@@ -896,7 +901,7 @@ public class AllBlocks {
 			.onRegister(CreateRegistrate.connectedTextures(() -> new EncasedCTBehaviour(AllSpriteShifts.COPPER_CASING)))
 			.onRegister(CreateRegistrate.casingConnectivity((block, cc) -> cc.make(block, AllSpriteShifts.COPPER_CASING,
 				(s, f) -> !s.getValue(EncasedPipeBlock.FACING_TO_PROPERTY_MAP.get(f)))))
-			.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::new))
+			.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::withAO))
 			.loot((p, b) -> p.dropOther(b, FLUID_PIPE.get()))
 			.transform(EncasingRegistry.addVariantTo(AllBlocks.FLUID_PIPE))
 			.register();
@@ -904,7 +909,7 @@ public class AllBlocks {
 	public static final BlockEntry<GlassFluidPipeBlock> GLASS_FLUID_PIPE =
 		REGISTRATE.block("glass_fluid_pipe", GlassFluidPipeBlock::new)
 			.initialProperties(SharedProperties::copperMetal)
-			.properties(p -> p.forceSolidOn())
+			.properties(p -> p.noOcclusion())
 			.addLayer(() -> RenderType::cutoutMipped)
 			.transform(pickaxeOnly())
 			.blockstate((c, p) -> {
@@ -920,7 +925,7 @@ public class AllBlocks {
 							.build();
 					}, BlockStateProperties.WATERLOGGED);
 			})
-			.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::new))
+			.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::withoutAO))
 			.loot((p, b) -> p.dropOther(b, FLUID_PIPE.get()))
 			.register();
 
@@ -929,7 +934,7 @@ public class AllBlocks {
 		.properties(p -> p.mapColor(MapColor.STONE))
 		.transform(pickaxeOnly())
 		.blockstate(BlockStateGen.directionalBlockProviderIgnoresWaterlogged(true))
-		.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::new))
+		.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::withoutAO))
 		.transform(BlockStressDefaults.setImpact(4.0))
 		.item()
 		.transform(customItemModel())
@@ -941,7 +946,7 @@ public class AllBlocks {
 			.properties(p -> p.mapColor(MapColor.TERRACOTTA_YELLOW))
 			.transform(pickaxeOnly())
 			.blockstate(new SmartFluidPipeGenerator()::generate)
-			.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::new))
+			.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::withoutAO))
 			.item()
 			.transform(customItemModel())
 			.register();
@@ -949,10 +954,11 @@ public class AllBlocks {
 	public static final BlockEntry<FluidValveBlock> FLUID_VALVE = REGISTRATE.block("fluid_valve", FluidValveBlock::new)
 		.initialProperties(SharedProperties::copperMetal)
 		.transform(pickaxeOnly())
+		.addLayer(() -> RenderType::cutoutMipped)
 		.blockstate((c, p) -> BlockStateGen.directionalAxisBlock(c, p,
 			(state, vertical) -> AssetLookup.partialBaseModel(c, p, vertical ? "vertical" : "horizontal",
 				state.getValue(FluidValveBlock.ENABLED) ? "open" : "closed")))
-		.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::new))
+		.onRegister(CreateRegistrate.blockModel(() -> PipeAttachmentModel::withoutAO))
 		.item()
 		.transform(customItemModel())
 		.register();
@@ -1016,6 +1022,7 @@ public class AllBlocks {
 	public static final BlockEntry<HosePulleyBlock> HOSE_PULLEY = REGISTRATE.block("hose_pulley", HosePulleyBlock::new)
 		.initialProperties(SharedProperties::copperMetal)
 		.properties(BlockBehaviour.Properties::noOcclusion)
+		.addLayer(() -> RenderType::cutoutMipped)
 		.transform(pickaxeOnly())
 		.blockstate(BlockStateGen.horizontalBlockProvider(true))
 		.transform(BlockStressDefaults.setImpact(4.0))
@@ -1203,6 +1210,8 @@ public class AllBlocks {
 	public static final BlockEntry<PulleyBlock> ROPE_PULLEY = REGISTRATE.block("rope_pulley", PulleyBlock::new)
 		.initialProperties(SharedProperties::stone)
 		.properties(p -> p.mapColor(MapColor.PODZOL).pushReaction(PushReaction.BLOCK))
+		.properties(p -> p.noOcclusion())
+		.addLayer(() -> RenderType::cutoutMipped)
 		.transform(axeOrPickaxe())
 		.tag(AllBlockTags.SAFE_NBT.tag)
 		.blockstate(BlockStateGen.horizontalAxisBlockProvider(true))
@@ -1844,18 +1853,12 @@ public class AllBlocks {
 		.register();
 
 	public static final BlockEntry<PackagerBlock> PACKAGER = REGISTRATE.block("packager", PackagerBlock::new)
-		.initialProperties(SharedProperties::softMetal)
-		.properties(p -> p.noOcclusion())
-		.properties(p -> p.isRedstoneConductor(($1, $2, $3) -> false))
-		.properties(p -> p.mapColor(MapColor.TERRACOTTA_BLUE)
-			.sound(SoundType.NETHERITE_BLOCK))
-		.transform(pickaxeOnly())
-		.addLayer(() -> RenderType::cutoutMipped)
-		.blockstate(new PackagerGenerator()::generate)
-		.transform(BlockStressDefaults.setImpact(1.0))
-		.item()
-		.model(AssetLookup::customItemModel)
-		.build()
+		.transform(BuilderTransformers.packager())
+		.register();
+
+	public static final BlockEntry<RepackagerBlock> REPACKAGER = REGISTRATE.block("repackager", RepackagerBlock::new)
+		.transform(BuilderTransformers.packager())
+		.lang("Re-Packager")
 		.register();
 
 	public static final BlockEntry<FrogportBlock> PACKAGE_FROGPORT =
@@ -1920,9 +1923,8 @@ public class AllBlocks {
 			.initialProperties(SharedProperties::softMetal)
 			.properties(p -> p.mapColor(MapColor.TERRACOTTA_BLUE)
 				.sound(SoundType.NETHERITE_BLOCK))
-			.addLayer(() -> RenderType::translucent)
 			.transform(pickaxeOnly())
-			.blockstate((c, p) -> p.directionalBlock(c.get(), AssetLookup.forPowered(c, p)))
+			.blockstate((c, p) -> p.horizontalFaceBlock(c.get(), AssetLookup.forPowered(c, p)))
 			.item(LogisticallyLinkedBlockItem::new)
 			.transform(customItemModel("_", "block"))
 			.register();
@@ -1942,8 +1944,9 @@ public class AllBlocks {
 		REGISTRATE.block("redstone_requester", RedstoneRequesterBlock::new)
 			.initialProperties(SharedProperties::stone)
 			.properties(p -> p.sound(SoundType.WOOD))
+			.properties(p -> p.noOcclusion())
 			.transform(axeOrPickaxe())
-			.blockstate((c, p) -> BlockStateGen.simpleBlock(c, p, AssetLookup.forPowered(c, p)))
+			.blockstate((c, p) -> BlockStateGen.horizontalAxisBlock(c, p, AssetLookup.forPowered(c, p)))
 			.item(RedstoneRequesterBlockItem::new)
 			.transform(customItemModel("_", "block"))
 			.register();
@@ -1957,14 +1960,15 @@ public class AllBlocks {
 			.transform(pickaxeOnly())
 			.blockstate((c, p) -> p.horizontalFaceBlock(c.get(), AssetLookup.partialBaseModel(c, p)))
 			.onRegister(CreateRegistrate.blockModel(() -> FactoryPanelModel::new))
+			.onRegister(assignDataBehaviour(new FactoryGaugeDisplaySource(), "gauge_status"))
 			.item(FactoryPanelBlockItem::new)
 			.model(AssetLookup::customItemModel)
 			.build()
 			.register();
 
-	public static final DyedBlockList<DisplayClothBlock> TABLE_CLOTHS = new DyedBlockList<>(colour -> {
+	public static final DyedBlockList<TableClothBlock> TABLE_CLOTHS = new DyedBlockList<>(colour -> {
 		String colourName = colour.getSerializedName();
-		return REGISTRATE.block(colourName + "_table_cloth", p -> new DisplayClothBlock(p, colour))
+		return REGISTRATE.block(colourName + "_table_cloth", p -> new TableClothBlock(p, colour))
 			.transform(BuilderTransformers.tableCloth(colourName, () -> Blocks.BLACK_CARPET, true))
 			.properties(p -> p.mapColor(colour))
 			.recipe((c, p) -> {
@@ -1982,8 +1986,8 @@ public class AllBlocks {
 			.register();
 	});
 
-	public static final BlockEntry<DisplayClothBlock> ANDESITE_DISPLAY_CLOTH =
-		REGISTRATE.block("andesite_table_cloth", p -> new DisplayClothBlock(p, "andesite"))
+	public static final BlockEntry<TableClothBlock> ANDESITE_TABLE_CLOTH =
+		REGISTRATE.block("andesite_table_cloth", p -> new TableClothBlock(p, "andesite"))
 			.transform(BuilderTransformers.tableCloth("andesite", SharedProperties::stone, false))
 			.properties(p -> p.mapColor(MapColor.STONE)
 				.requiresCorrectToolForDrops())
@@ -1992,8 +1996,8 @@ public class AllBlocks {
 			.transform(pickaxeOnly())
 			.register();
 
-	public static final BlockEntry<DisplayClothBlock> BRASS_DISPLAY_CLOTH =
-		REGISTRATE.block("brass_table_cloth", p -> new DisplayClothBlock(p, "brass"))
+	public static final BlockEntry<TableClothBlock> BRASS_TABLE_CLOTH =
+		REGISTRATE.block("brass_table_cloth", p -> new TableClothBlock(p, "brass"))
 			.transform(BuilderTransformers.tableCloth("brass", SharedProperties::softMetal, false))
 			.properties(p -> p.mapColor(MapColor.TERRACOTTA_YELLOW)
 				.requiresCorrectToolForDrops())
@@ -2002,8 +2006,8 @@ public class AllBlocks {
 			.transform(pickaxeOnly())
 			.register();
 
-	public static final BlockEntry<DisplayClothBlock> COPPER_DISPLAY_CLOTH =
-		REGISTRATE.block("copper_table_cloth", p -> new DisplayClothBlock(p, "copper"))
+	public static final BlockEntry<TableClothBlock> COPPER_TABLE_CLOTH =
+		REGISTRATE.block("copper_table_cloth", p -> new TableClothBlock(p, "copper"))
 			.transform(BuilderTransformers.tableCloth("copper", SharedProperties::copperMetal, false))
 			.properties(p -> p.requiresCorrectToolForDrops())
 			.recipe((c, p) -> p.stonecutting(DataIngredient.tag(AllTags.forgeItemTag("ingots/copper")),
@@ -2542,19 +2546,13 @@ public class AllBlocks {
 		.register();
 
 	public static final BlockEntry<Block> INDUSTRIAL_IRON_BLOCK = REGISTRATE.block("industrial_iron_block", Block::new)
-		.initialProperties(SharedProperties::softMetal)
-		.properties(p -> p.mapColor(MapColor.COLOR_GRAY)
-			.sound(SoundType.NETHERITE_BLOCK)
-			.requiresCorrectToolForDrops())
-		.transform(pickaxeOnly())
-		.blockstate((c, p) -> p.simpleBlock(c.get(), p.models()
-			.cubeColumn(c.getName(), p.modLoc("block/industrial_iron_block"),
-				p.modLoc("block/industrial_iron_block_top"))))
-		.tag(AllBlockTags.WRENCH_PICKUP.tag)
+		.transform(BuilderTransformers.palettesIronBlock())
 		.lang("Block of Industrial Iron")
-		.recipe((c, p) -> p.stonecutting(DataIngredient.tag(Tags.Items.INGOTS_IRON), RecipeCategory.BUILDING_BLOCKS,
-			c::get, 2))
-		.simpleItem()
+		.register();
+
+	public static final BlockEntry<Block> WEATHERED_IRON_BLOCK = REGISTRATE.block("weathered_iron_block", Block::new)
+		.transform(BuilderTransformers.palettesIronBlock())
+		.lang("Block of Weathered Iron")
 		.register();
 
 	public static final BlockEntry<Block> BRASS_BLOCK = REGISTRATE.block("brass_block", Block::new)
@@ -2580,7 +2578,9 @@ public class AllBlocks {
 			.transform(axeOnly())
 			.blockstate(BlockStateGen.horizontalAxisBlockProvider(false))
 			.tag(Tags.Blocks.STORAGE_BLOCKS)
-			.transform(tagBlockAndItem("storage_blocks/cardboard"))
+			.tag(AllTags.forgeBlockTag("storage_blocks/cardboard"))
+			.item(CardboardBlockItem::new)
+			.tag(AllTags.forgeItemTag("storage_blocks/cardboard"))
 			.tag(Tags.Items.STORAGE_BLOCKS)
 			.build()
 			.lang("Block of Cardboard")
@@ -2600,7 +2600,8 @@ public class AllBlocks {
 				.withPool(r.applyExplosionCondition(b, LootPool.lootPool()
 					.setRolls(ConstantValue.exactly(1.0F))
 					.add(LootItem.lootTableItem(AllBlocks.CARDBOARD_BLOCK.asItem()))))))
-			.simpleItem()
+			.item(CardboardBlockItem::new)
+			.build()
 			.lang("Bound block of Cardboard")
 			.register();
 
@@ -2666,13 +2667,15 @@ public class AllBlocks {
 		"copper_roof_top", CopperBlockSet.DEFAULT_VARIANTS, (c, p) -> {
 			p.stonecutting(DataIngredient.tag(AllTags.forgeItemTag("copper_ingots")), RecipeCategory.BUILDING_BLOCKS,
 				c::get, 2);
-		});
+		}, (ws, block) -> connectedTextures(() -> new RoofBlockCTBehaviour(AllSpriteShifts.COPPER_SHINGLES.get(ws)))
+			.accept(block));
 
 	public static final CopperBlockSet COPPER_TILES =
 		new CopperBlockSet(REGISTRATE, "copper_tiles", "copper_roof_top", CopperBlockSet.DEFAULT_VARIANTS, (c, p) -> {
 			p.stonecutting(DataIngredient.tag(AllTags.forgeItemTag("copper_ingots")), RecipeCategory.BUILDING_BLOCKS,
 				c::get, 2);
-		});
+		}, (ws, block) -> connectedTextures(() -> new RoofBlockCTBehaviour(AllSpriteShifts.COPPER_TILES.get(ws)))
+			.accept(block));
 
 	// Load this class
 

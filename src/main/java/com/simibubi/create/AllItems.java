@@ -29,6 +29,7 @@ import com.simibubi.create.content.equipment.armor.CardboardArmorItem;
 import com.simibubi.create.content.equipment.armor.CardboardHelmetItem;
 import com.simibubi.create.content.equipment.armor.DivingBootsItem;
 import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
+import com.simibubi.create.content.equipment.armor.TrimmableArmorModelGenerator;
 import com.simibubi.create.content.equipment.blueprint.BlueprintItem;
 import com.simibubi.create.content.equipment.extendoGrip.ExtendoGripItem;
 import com.simibubi.create.content.equipment.extendoGrip.ExtendoGripItemRenderer;
@@ -52,8 +53,10 @@ import com.simibubi.create.content.legacy.ChromaticCompoundItem;
 import com.simibubi.create.content.legacy.RefinedRadianceItem;
 import com.simibubi.create.content.legacy.ShadowSteelItem;
 import com.simibubi.create.content.logistics.box.PackageItem;
-import com.simibubi.create.content.logistics.displayCloth.ShoppingListItem;
+import com.simibubi.create.content.logistics.box.PackageStyles;
+import com.simibubi.create.content.logistics.box.PackageStyles.PackageStyle;
 import com.simibubi.create.content.logistics.filter.FilterItem;
+import com.simibubi.create.content.logistics.tableCloth.ShoppingListItem;
 import com.simibubi.create.content.materials.ExperienceNuggetItem;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlockItem;
 import com.simibubi.create.content.processing.sequenced.SequencedAssemblyItem;
@@ -69,7 +72,10 @@ import com.simibubi.create.foundation.data.recipe.CompatMetals;
 import com.simibubi.create.foundation.item.CombustibleItem;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.TagDependentIngredientItem;
+import com.tterrag.registrate.builders.ItemBuilder;
+import com.tterrag.registrate.providers.ProviderType;
 import com.tterrag.registrate.util.entry.ItemEntry;
+import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 
 import io.github.fabricators_of_create.porting_lib.tags.Tags;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
@@ -97,7 +103,7 @@ public class AllItems {
 		STURDY_SHEET = taggedIngredient("sturdy_sheet", forgeItemTag("obsidian_plates"), PLATES.tag),
 		PROPELLER = ingredient("propeller"), WHISK = ingredient("whisk"), BRASS_HAND = ingredient("brass_hand"),
 		CRAFTER_SLOT_COVER = ingredient("crafter_slot_cover"), ELECTRON_TUBE = ingredient("electron_tube"),
-		PULP = ingredient("pulp");
+		TRANSMITTER = ingredient("transmitter"), PULP = ingredient("pulp");
 
 	public static final ItemEntry<CombustibleItem> CARDBOARD = REGISTRATE.item("cardboard", CombustibleItem::new)
 		.tag(forgeItemTag("plates/cardboard"))
@@ -333,25 +339,29 @@ public class AllItems {
 	public static final ItemEntry<? extends BaseArmorItem>
 
 	CARDBOARD_HELMET = REGISTRATE.item("cardboard_helmet", p -> new CardboardHelmetItem(ArmorItem.Type.HELMET, p))
-		.tag(forgeItemTag("armors/helmet"))
+		.tag(forgeItemTag("armors/helmet"), ItemTags.TRIMMABLE_ARMOR)
 		.onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "item.create.cardboard_armor"))
+		.model(TrimmableArmorModelGenerator::generate)
 		.register(),
 
 		CARDBOARD_CHESTPLATE =
 			REGISTRATE.item("cardboard_chestplate", p -> new CardboardArmorItem(ArmorItem.Type.CHESTPLATE, p))
-				.tag(forgeItemTag("armors/chestplate"))
+				.tag(forgeItemTag("armors/chestplate"), ItemTags.TRIMMABLE_ARMOR)
 				.onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "item.create.cardboard_armor"))
+				.model(TrimmableArmorModelGenerator::generate)
 				.register(),
 
 		CARDBOARD_LEGGINGS =
 			REGISTRATE.item("cardboard_leggings", p -> new CardboardArmorItem(ArmorItem.Type.LEGGINGS, p))
-				.tag(forgeItemTag("armors/leggings"))
+				.tag(forgeItemTag("armors/leggings"), ItemTags.TRIMMABLE_ARMOR)
 				.onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "item.create.cardboard_armor"))
+				.model(TrimmableArmorModelGenerator::generate)
 				.register(),
 
 		CARDBOARD_BOOTS = REGISTRATE.item("cardboard_boots", p -> new CardboardArmorItem(ArmorItem.Type.BOOTS, p))
-			.tag(forgeItemTag("armors/boots"))
+			.tag(forgeItemTag("armors/boots"), ItemTags.TRIMMABLE_ARMOR)
 			.onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "item.create.cardboard_armor"))
+			.model(TrimmableArmorModelGenerator::generate)
 			.register();
 
 	public static final ItemEntry<SandPaperItem> SAND_PAPER = REGISTRATE.item("sand_paper", SandPaperItem::new)
@@ -427,19 +437,20 @@ public class AllItems {
 
 	// Logistics
 
-	public static final ItemEntry<PackageItem> CARDBOARD_PACKAGE_12x12 =
-		REGISTRATE.item("cardboard_package_12x12", p -> new PackageItem(p, 12, 12, 23f))
-			.transform(BuilderTransformers.packageItem("cardboard", 12, 12))
-			.register(),
-		CARDBOARD_PACKAGE_10x12 = REGISTRATE.item("cardboard_package_10x12", p -> new PackageItem(p, 10, 12, 22f))
-			.transform(BuilderTransformers.packageItem("cardboard", 10, 12))
-			.register(),
-		CARDBOARD_PACKAGE_10x8 = REGISTRATE.item("cardboard_package_10x8", p -> new PackageItem(p, 10, 8, 18f))
-			.transform(BuilderTransformers.packageItem("cardboard", 10, 8))
-			.register(),
-		CARDBOARD_PACKAGE_12x10 = REGISTRATE.item("cardboard_package_12x10", p -> new PackageItem(p, 12, 10, 21f))
-			.transform(BuilderTransformers.packageItem("cardboard", 12, 10))
-			.register();
+	static {
+		boolean rareCreated = false;
+		boolean normalCreated = false;
+		for (PackageStyle style : PackageStyles.STYLES) {
+			ItemBuilder<PackageItem, CreateRegistrate> packageItem = BuilderTransformers.packageItem(style);
+
+			if (rareCreated && style.rare() || normalCreated && !style.rare())
+				packageItem.setData(ProviderType.LANG, NonNullBiConsumer.noop());
+
+			rareCreated |= style.rare();
+			normalCreated |= !style.rare();
+			packageItem.register();
+		}
+	}
 
 	public static final ItemEntry<FilterItem> FILTER = REGISTRATE.item("filter", FilterItem::regular)
 		.lang("List Filter")

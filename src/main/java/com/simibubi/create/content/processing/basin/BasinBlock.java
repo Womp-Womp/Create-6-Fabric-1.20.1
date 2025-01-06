@@ -62,7 +62,7 @@ public class BasinBlock extends Block implements IBE<BasinBlockEntity>, IWrencha
 	protected void createBlockStateDefinition(Builder<Block, BlockState> p_206840_1_) {
 		super.createBlockStateDefinition(p_206840_1_.add(FACING));
 	}
-	
+
 	public static boolean isBasin(LevelReader world, BlockPos pos) {
 		return world.getBlockEntity(pos) instanceof BasinBlockEntity;
 	}
@@ -140,7 +140,6 @@ public class BasinBlock extends Block implements IBE<BasinBlockEntity>, IWrencha
 			ItemStack stack = itemEntity.getItem().copy();
 			try (Transaction t = TransferUtil.getTransaction()) {
 				long inserted = be.inputInventory.insert(ItemVariant.of(stack), stack.getCount(), t);
-				be.inputInventory.withMaxStackSize(16);
 				t.commit();
 
 				if (inserted == stack.getCount()) {

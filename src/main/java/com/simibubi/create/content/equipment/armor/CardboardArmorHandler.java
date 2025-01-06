@@ -7,6 +7,7 @@ import com.simibubi.create.AllItems;
 import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
@@ -16,6 +17,14 @@ import net.minecraft.world.entity.ai.goal.target.TargetGoal;
 import net.minecraft.world.entity.player.Player;
 
 public class CardboardArmorHandler {
+
+	@SubscribeEvent
+	public static void playerHitboxChangesWhenHidingAsBox(EntityEvent.Size event) {
+		if (event.getEntity().isAddedToWorld() && testForStealth(event.getEntity())) {
+			event.setNewSize(EntityDimensions.fixed(0.8F, 0.8F));
+			event.setNewEyeHeight(0.6F);
+		}
+	}
 
 	@SubscribeEvent
 	public static void playersStealthWhenWearingCardboard(LivingEntityEvents.LivingVisibilityEvent event) {

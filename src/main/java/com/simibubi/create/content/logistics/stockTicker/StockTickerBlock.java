@@ -3,6 +3,7 @@ package com.simibubi.create.content.logistics.stockTicker;
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.AllShapes;
+import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
 import com.simibubi.create.foundation.block.IBE;
@@ -24,6 +25,7 @@ import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -67,11 +69,12 @@ public class StockTickerBlock extends HorizontalDirectionalBlock implements IBE<
 						.placeItemBackInInventory(
 							stbe.receivedPayments.extractItem(i, stbe.receivedPayments.getStackInSlot(i)
 								.getCount(), false));
+				AllSoundEvents.playItemPickup(pPlayer);
 				return InteractionResult.SUCCESS;
 			}
 
 			if (pPlayer instanceof ServerPlayer sp && stbe.isKeeperPresent())
-				NetworkHooks.openScreen(sp, stbe, stbe.getBlockPos());
+				NetworkHooks.openScreen(sp, stbe.new CategoryMenuProvider(), stbe.getBlockPos());
 
 			return InteractionResult.SUCCESS;
 		});
@@ -100,6 +103,11 @@ public class StockTickerBlock extends HorizontalDirectionalBlock implements IBE<
 	@Override
 	public BlockEntityType<? extends StockTickerBlockEntity> getBlockEntityType() {
 		return AllBlockEntityTypes.STOCK_TICKER.get();
+	}
+	
+	@Override
+	public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
+		return false;
 	}
 
 }

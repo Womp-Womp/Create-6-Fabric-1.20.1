@@ -170,8 +170,6 @@ import com.simibubi.create.content.logistics.depot.DepotRenderer;
 import com.simibubi.create.content.logistics.depot.EjectorBlockEntity;
 import com.simibubi.create.content.logistics.depot.EjectorRenderer;
 import com.simibubi.create.content.logistics.depot.EjectorVisual;
-import com.simibubi.create.content.logistics.displayCloth.DisplayClothBlockEntity;
-import com.simibubi.create.content.logistics.displayCloth.DisplayClothRenderer;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlockEntity;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelRenderer;
 import com.simibubi.create.content.logistics.funnel.FunnelBlockEntity;
@@ -185,9 +183,12 @@ import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEnt
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxRenderer;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerRenderer;
+import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
 import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlockEntity;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockEntity;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
+import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
+import com.simibubi.create.content.logistics.tableCloth.TableClothRenderer;
 import com.simibubi.create.content.logistics.tunnel.BeltTunnelBlockEntity;
 import com.simibubi.create.content.logistics.tunnel.BeltTunnelRenderer;
 import com.simibubi.create.content.logistics.tunnel.BeltTunnelVisual;
@@ -508,6 +509,12 @@ public class AllBlockEntityTypes {
 		.validBlocks(AllBlocks.PACKAGER)
 		.renderer(() -> PackagerRenderer::new)
 		.register();
+	
+	public static final BlockEntityEntry<RepackagerBlockEntity> REPACKAGER = REGISTRATE
+		.blockEntity("repackager", RepackagerBlockEntity::new)
+		.validBlocks(AllBlocks.REPACKAGER)
+		.renderer(() -> PackagerRenderer::new)
+		.register();
 
 	public static final BlockEntityEntry<FrogportBlockEntity> PACKAGE_FROGPORT = REGISTRATE
 		.blockEntity("package_frogport", FrogportBlockEntity::new)
@@ -522,19 +529,18 @@ public class AllBlockEntityTypes {
 		.renderer(() -> PostboxRenderer::new)
 		.register();
 
-	public static final BlockEntityEntry<DisplayClothBlockEntity> DISPLAY_CLOTH =
-		REGISTRATE.blockEntity("display_cloth", DisplayClothBlockEntity::new)
+	public static final BlockEntityEntry<TableClothBlockEntity> TABLE_CLOTH =
+		REGISTRATE.blockEntity("table_cloth", TableClothBlockEntity::new)
 			.validBlocks(AllBlocks.TABLE_CLOTHS.toArray())
-			.validBlock(AllBlocks.ANDESITE_DISPLAY_CLOTH)
-			.validBlock(AllBlocks.BRASS_DISPLAY_CLOTH)
-			.validBlock(AllBlocks.COPPER_DISPLAY_CLOTH)
-			.renderer(() -> DisplayClothRenderer::new)
+			.validBlock(AllBlocks.ANDESITE_TABLE_CLOTH)
+			.validBlock(AllBlocks.BRASS_TABLE_CLOTH)
+			.validBlock(AllBlocks.COPPER_TABLE_CLOTH)
+			.renderer(() -> TableClothRenderer::new)
 			.register();
 
 	public static final BlockEntityEntry<PackagerLinkBlockEntity> PACKAGER_LINK = REGISTRATE
 		.blockEntity("packager_link", PackagerLinkBlockEntity::new)
 		.validBlocks(AllBlocks.STOCK_LINK)
-		.renderer(() -> LinkBulbRenderer::new)
 		.register();
 
 	public static final BlockEntityEntry<StockTickerBlockEntity> STOCK_TICKER = REGISTRATE

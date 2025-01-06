@@ -1,30 +1,30 @@
 package com.simibubi.create.api.behaviour;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Consumer;
-
 import com.simibubi.create.Create;
 import com.simibubi.create.compat.botania.ApothecaryFilling;
 import com.simibubi.create.compat.tconstruct.SpoutCasting;
 import com.simibubi.create.content.fluids.spout.SpoutBlockEntity;
+import com.simibubi.create.impl.behaviour.BlockSpoutingBehaviourImpl;
+
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
 
 public abstract class BlockSpoutingBehaviour {
-
-	private static final Map<ResourceLocation, BlockSpoutingBehaviour> BLOCK_SPOUTING_BEHAVIOURS = new HashMap<>();
-
-	public static void addCustomSpoutInteraction(ResourceLocation resourceLocation,
-		BlockSpoutingBehaviour movementBehaviour) {
-		BLOCK_SPOUTING_BEHAVIOURS.put(resourceLocation, movementBehaviour);
+	/**
+	 * Register a new custom spout interaction
+	 *
+	 * @param resourceLocation  The interaction id
+	 * @param spoutingBehaviour An instance of your behaviour class
+	 */
+	public static void addCustomSpoutInteraction(ResourceLocation resourceLocation, BlockSpoutingBehaviour spoutingBehaviour) {
+		BlockSpoutingBehaviourImpl.addCustomSpoutInteraction(resourceLocation, spoutingBehaviour);
 	}
 
-	public static void forEach(Consumer<? super BlockSpoutingBehaviour> accept) {
-		BLOCK_SPOUTING_BEHAVIOURS.values()
-			.forEach(accept);
+	public static void registerDefaults() {
+		addCustomSpoutInteraction(Create.asResource("ticon_casting"), new SpoutCasting());
+		addCustomSpoutInteraction(Create.asResource("botania_apothecary_filling"), new ApothecaryFilling());
 	}
 
 	/**
@@ -33,22 +33,16 @@ public abstract class BlockSpoutingBehaviour {
 	 * <br>
 	 * During this animation cycle, fillBlock is called once again with simulate == false but only on the relevant SpoutingBehaviour <br>
 	 * When fillBlock returns &gt; 0 once again, the Spout will drain its content by the returned amount of units <br>
-	 * Perform any other side-effects in this method <br>
+	 * Perform any other side effects in this method <br>
 	 * This method is called server-side only (except in ponder) <br>
 	 *
-	 * @param world
-	 * @param pos            of the affected block
-	 * @param spout
-	 * @param availableFluid do not modify, return the amount to be subtracted instead
-	 * @param simulate       whether the spout is testing or actually performing this behaviour
-	 * @return amount filled into the block, 0 to idle/cancel
+	 * @param level          The current level
+	 * @param pos            The position of the affected block
+	 * @param spout          The spout block entity that is calling this
+	 * @param availableFluid A copy of the fluidStack that is available, modifying this will do nothing, return the amount to be subtracted instead
+	 * @param simulate       Whether the spout is testing or actually performing this behaviour
+	 * @return The amount filled into the block, 0 to idle/cancel
 	 */
-	public abstract long fillBlock(Level world, BlockPos pos, SpoutBlockEntity spout, FluidStack availableFluid,
-		boolean simulate);
-
-	public static void registerDefaults() {
-		addCustomSpoutInteraction(Create.asResource("ticon_casting"), new SpoutCasting());
-		addCustomSpoutInteraction(Create.asResource("botania_apothecary_filling"), new ApothecaryFilling());
-	}
+	public abstract long fillBlock(Level level, BlockPos pos, SpoutBlockEntity spout, FluidStack availableFluid, boolean simulate);
 
 }

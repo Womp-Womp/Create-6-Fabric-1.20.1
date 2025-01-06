@@ -331,6 +331,10 @@ public class FilteringBehaviour extends BlockEntityBehaviour implements ValueSet
 			.translateDirect(filter.isEmpty() ? "logistics.filter.click_to_set" : "logistics.filter.click_to_replace");
 	}
 
+	public MutableComponent getAmountTip() {
+		return CreateLang.translateDirect("logistics.filter.hold_to_set_amount");
+	}
+
 	public MutableComponent getCountLabelForValueBox() {
 		return Components.literal(isCountVisible() ? upTo && filter.item()
 			.getMaxStackSize() == count ? "*" : String.valueOf(count) : "");
@@ -351,6 +355,8 @@ public class FilteringBehaviour extends BlockEntityBehaviour implements ValueSet
 
 	@Override
 	public boolean readFromClipboard(CompoundTag tag, Player player, Direction side, boolean simulate) {
+		if (!mayInteract(player))
+			return false;
 		boolean upstreamResult = ValueSettingsBehaviour.super.readFromClipboard(tag, player, side, simulate);
 		if (!tag.contains("Filter"))
 			return upstreamResult;
@@ -408,7 +414,7 @@ public class FilteringBehaviour extends BlockEntityBehaviour implements ValueSet
 	public boolean bypassesInput(ItemStack mainhandItem) {
 		return false;
 	}
-
+	
 	@Override
 	public int netId() {
 		return 1;

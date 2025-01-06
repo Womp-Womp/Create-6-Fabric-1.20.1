@@ -85,6 +85,8 @@ public class GoggleOverlayRenderer {
 		BlockEntity be = world.getBlockEntity(pos);
 		boolean wearingGoggles = GogglesItem.isWearingGoggles(mc.player);
 
+		boolean isShifting = mc.player.isShiftKeyDown();
+
 		boolean hasGoggleInformation = be instanceof IHaveGoggleInformation;
 		boolean hasHoveringInformation = be instanceof IHaveHoveringInformation;
 
@@ -93,21 +95,21 @@ public class GoggleOverlayRenderer {
 
 		ItemStack item = AllItems.GOGGLES.asStack();
 
+		if (be instanceof IHaveCustomOverlayIcon customOverlayIcon)
+			item = customOverlayIcon.getIcon(isShifting);
+
 		List<Component> tooltip = new ArrayList<>();
 
 		if (hasGoggleInformation && wearingGoggles) {
-			boolean isShifting = mc.player.isShiftKeyDown();
-
 			IHaveGoggleInformation gte = (IHaveGoggleInformation) be;
 			goggleAddedInformation = gte.addToGoggleTooltip(tooltip, isShifting);
-			item = gte.getIcon(isShifting);
 		}
 
 		if (hasHoveringInformation) {
 			if (!tooltip.isEmpty())
 				tooltip.add(Components.immutableEmpty());
 			IHaveHoveringInformation hte = (IHaveHoveringInformation) be;
-			hoverAddedInformation = hte.addToTooltip(tooltip, mc.player.isShiftKeyDown());
+			hoverAddedInformation = hte.addToTooltip(tooltip, isShifting);
 
 			if (goggleAddedInformation && !hoverAddedInformation)
 				tooltip.remove(tooltip.size() - 1);
@@ -123,7 +125,7 @@ public class GoggleOverlayRenderer {
 
 		if (!hasHoveringInformation)
 			if (hasHoveringInformation =
-				hoverAddedInformation = TrainRelocator.addToTooltip(tooltip, mc.player.isShiftKeyDown()))
+				hoverAddedInformation = TrainRelocator.addToTooltip(tooltip, isShifting))
 				hoverTicks = prevHoverTicks + 1;
 
 		// break early if goggle or hover returned false when present

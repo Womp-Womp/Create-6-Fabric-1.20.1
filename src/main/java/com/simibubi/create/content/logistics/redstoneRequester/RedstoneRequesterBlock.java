@@ -5,6 +5,7 @@ import java.util.List;
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllTags.AllItemTags;
+import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
@@ -14,6 +15,8 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
+import net.minecraft.core.Direction.AxisDirection;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -25,18 +28,23 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.pathfinder.PathComputationType;
 import net.minecraft.world.phys.BlockHitResult;
 
-public class RedstoneRequesterBlock extends Block implements IBE<RedstoneRequesterBlockEntity> {
+public class RedstoneRequesterBlock extends Block implements IBE<RedstoneRequesterBlockEntity>, IWrenchable {
 
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
+	public static final EnumProperty<Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 
 	public RedstoneRequesterBlock(Properties pProperties) {
 		super(pProperties);
@@ -46,7 +54,7 @@ public class RedstoneRequesterBlock extends Block implements IBE<RedstoneRequest
 	@Override
 	protected void createBlockStateDefinition(
 		net.minecraft.world.level.block.state.StateDefinition.Builder<Block, BlockState> pBuilder) {
-		super.createBlockStateDefinition(pBuilder.add(POWERED));
+		super.createBlockStateDefinition(pBuilder.add(POWERED, AXIS));
 	}
 
 	@Override
@@ -54,8 +62,10 @@ public class RedstoneRequesterBlock extends Block implements IBE<RedstoneRequest
 		BlockState stateForPlacement = super.getStateForPlacement(pContext);
 		if (stateForPlacement == null)
 			return null;
-		return stateForPlacement.setValue(POWERED, pContext.getLevel()
-			.hasNeighborSignal(pContext.getClickedPos()));
+		return stateForPlacement.setValue(AXIS, pContext.getHorizontalDirection()
+			.getAxis())
+			.setValue(POWERED, pContext.getLevel()
+				.hasNeighborSignal(pContext.getClickedPos()));
 	}
 
 	@Override
@@ -161,6 +171,17 @@ public class RedstoneRequesterBlock extends Block implements IBE<RedstoneRequest
 	@Override
 	public BlockEntityType<? extends RedstoneRequesterBlockEntity> getBlockEntityType() {
 		return AllBlockEntityTypes.REDSTONE_REQUESTER.get();
+	}
+
+	@Override
+	public boolean isPathfindable(BlockState pState, BlockGetter pLevel, BlockPos pPos, PathComputationType pType) {
+		return false;
+	}
+
+	@Override
+	public BlockState rotate(BlockState pState, Rotation pRotation) {
+		return pState.setValue(AXIS, pRotation.rotate(Direction.get(AxisDirection.POSITIVE, pState.getValue(AXIS)))
+			.getAxis());
 	}
 
 }

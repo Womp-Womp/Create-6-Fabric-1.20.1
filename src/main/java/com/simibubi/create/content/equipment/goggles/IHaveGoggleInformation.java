@@ -2,7 +2,6 @@ package com.simibubi.create.content.equipment.goggles;
 
 import java.util.List;
 
-import com.simibubi.create.AllItems;
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import com.simibubi.create.infrastructure.config.AllConfigs;
@@ -16,32 +15,20 @@ import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.createmod.catnip.utility.lang.LangBuilder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
-/*
- * Implement this Interface in the BlockEntity class that wants to add info to the screen
- * */
-public interface IHaveGoggleInformation {
+/**
+ * Implement this interface on the {@link BlockEntity} that wants to add info to the goggle overlay
+ */
+public non-sealed interface IHaveGoggleInformation extends IHaveCustomOverlayIcon {
 	/**
-	 * this method will be called when looking at a BlockEntity that implemented this
-	 * interface
+	 * This method will be called when looking at a {@link BlockEntity} that implements this interface
 	 *
 	 * @return {@code true} if the tooltip creation was successful and should be
 	 * displayed, or {@code false} if the overlay should not be displayed
 	 */
 	default boolean addToGoggleTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
 		return false;
-	}
-
-	/**
-	 * this method will be called when looking at a BlockEntity that implemented this
-	 * interface
-	 * <p>
-	 * return the item of your choosing after checking for any logic you wish, and the goggle on the goggle
-	 * tooltip will be replaced with the item you have returned
-	 */
-	default ItemStack getIcon(boolean isPlayerSneaking) {
-		return AllItems.GOGGLES.asStack();
 	}
 
 	default boolean containedFluidTooltip(List<Component> tooltip, boolean isPlayerSneaking, Storage<FluidVariant> handler) {

@@ -4,6 +4,7 @@ import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.contraptions.elevator.ElevatorControlsHandler;
 import com.simibubi.create.content.contraptions.wrench.RadialWrenchHandler;
 import com.simibubi.create.content.equipment.toolbox.ToolboxHandlerClient;
+import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorConnectionHandler;
 import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorInteractionHandler;
 import com.simibubi.create.content.kinetics.chainConveyor.ChainPackageInteractionHandler;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelConnectionHandler;
@@ -64,6 +65,22 @@ public class InputEvents {
 	public static InteractionResult onUse(Minecraft mc, HitResult hit, InteractionHand hand) {
 		if (mc.screen != null)
 			return InteractionResult.PASS;
+
+		if (CurvedTrackInteraction.onClickInput(event)) {
+			return InteractionResult.SUCCESS;
+		}
+
+		KeyMapping key = event.getKeyMapping();
+
+		if (key == mc.options.keyUse || key == mc.options.keyAttack) {
+			if (CreateClient.GLUE_HANDLER.onMouseInput(key == mc.options.keyAttack))
+				return InteractionResult.SUCCESS;
+		}
+
+		if (key == mc.options.keyUse
+			&& (FactoryPanelConnectionHandler.onRightClick() || ChainConveyorConnectionHandler.onRightClick())) {
+			return InteractionResult.SUCCESS;
+		}
 
 		if (CurvedTrackInteraction.onClickInput(true, false)) {
 			return InteractionResult.SUCCESS;

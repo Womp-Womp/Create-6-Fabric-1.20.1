@@ -12,6 +12,8 @@ import java.util.zip.GZIPInputStream;
 
 import javax.annotation.Nonnull;
 
+import net.createmod.catnip.platform.CatnipServices;
+
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -122,7 +124,7 @@ public class SchematicItem extends Item {
 		Path dir;
 		Path file;
 
-//		if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.SERVER) {
+//		if (CatnipServices.PLATFORM.getEnv().isServer()) {
 //			dir = Paths.get("schematics", "uploaded").toAbsolutePath();
 //			file = Paths.get(owner, schematic);
 //		} else {

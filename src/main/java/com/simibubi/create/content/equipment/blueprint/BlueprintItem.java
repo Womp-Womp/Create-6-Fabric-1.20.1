@@ -3,7 +3,8 @@ package com.simibubi.create.content.equipment.blueprint;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.content.logistics.filter.AttributeFilterMenu.WhitelistMode;
 import com.simibubi.create.content.logistics.filter.FilterItem;
-import com.simibubi.create.content.logistics.filter.ItemAttribute;
+import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
+import com.simibubi.create.content.logistics.item.filter.attribute.attributes.InTagAttribute;
 
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import io.github.fabricators_of_create.porting_lib.util.MultiItemValue;
@@ -123,9 +124,7 @@ public class BlueprintItem extends Item {
 			filterItem.getOrCreateTag()
 					.putInt("WhitelistMode", WhitelistMode.WHITELIST_DISJ.ordinal());
 			ListTag attributes = new ListTag();
-			ItemAttribute at = new ItemAttribute.InTag(TagKey.create(Registries.ITEM, resourcelocation));
-			CompoundTag compoundNBT = new CompoundTag();
-			at.serializeNBT(compoundNBT);
+			CompoundTag compoundNBT = ItemAttribute.saveStatic(new InTagAttribute(TagKey.create(Registries.ITEM, resourcelocation)));
 			compoundNBT.putBoolean("Inverted", false);
 			attributes.add(compoundNBT);
 			filterItem.getOrCreateTag()

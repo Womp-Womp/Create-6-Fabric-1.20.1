@@ -2,13 +2,12 @@ package com.simibubi.create.content.equipment.armor;
 
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.logistics.box.PackageRenderer;
+import com.simibubi.create.foundation.utility.TickBasedCache;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import net.createmod.catnip.utility.AnimationTickHolder;
@@ -19,9 +18,7 @@ import net.minecraft.world.entity.player.Player;
 
 public class CardboardArmorHandlerClient {
 
-	private static final Cache<UUID, Integer> BOXES_PLAYERS_ARE_HIDING_AS = CacheBuilder.newBuilder()
-		.expireAfterAccess(1, TimeUnit.SECONDS)
-		.build();
+	private static final Cache<UUID, Integer> BOXES_PLAYERS_ARE_HIDING_AS = new TickBasedCache<>(20, true);
 
 	@SubscribeEvent
 	public static void keepCacheAliveDesignDespiteNotRendering(PlayerTickEvent event) {
@@ -65,7 +62,7 @@ public class CardboardArmorHandlerClient {
 		float interpolatedYaw = Mth.lerp(event.getPartialTick(), player.yRotO, player.getYRot());
 
 		try {
-			PartialModel model = AllPartialModels.PACKAGES_AS_LIST.get(getCurrentBoxIndex(player));
+			PartialModel model = AllPartialModels.PACKAGES_TO_HIDE_AS.get(getCurrentBoxIndex(player));
 			PackageRenderer.renderBox(player, -interpolatedYaw + -90, ms, event.getMultiBufferSource(),
 				event.getPackedLight(), model);
 		} catch (ExecutionException e) {
@@ -77,7 +74,7 @@ public class CardboardArmorHandlerClient {
 
 	private static Integer getCurrentBoxIndex(Player player) throws ExecutionException {
 		return BOXES_PLAYERS_ARE_HIDING_AS.get(player.getUUID(),
-			() -> player.level().random.nextInt(AllPartialModels.PACKAGES_AS_LIST.size()));
+			() -> player.level().random.nextInt(AllPartialModels.PACKAGES_TO_HIDE_AS.size()));
 	}
 
 }

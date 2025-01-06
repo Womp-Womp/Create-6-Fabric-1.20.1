@@ -1,13 +1,18 @@
 package com.simibubi.create.content.logistics.packagePort.frogport;
 
+import java.util.List;
+
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllItems;
+import com.simibubi.create.content.equipment.goggles.IHaveHoveringInformation;
 import com.simibubi.create.content.logistics.box.PackageItem;
+import com.simibubi.create.content.logistics.box.PackageStyles;
 import com.simibubi.create.content.logistics.packagePort.PackagePortBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerItemHandler;
 import com.simibubi.create.foundation.item.ItemHelper;
+import com.simibubi.create.foundation.item.TooltipHelper;
 
 import net.createmod.catnip.utility.Iterate;
+import net.createmod.catnip.utility.NBTHelper;
 import net.createmod.catnip.utility.animation.LerpedFloat;
 import net.createmod.catnip.utility.animation.LerpedFloat.Chaser;
 import net.minecraft.core.BlockPos;
@@ -15,6 +20,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -23,7 +29,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class FrogportBlockEntity extends PackagePortBlockEntity {
+public class FrogportBlockEntity extends PackagePortBlockEntity implements IHaveHoveringInformation {
 
 	public ItemStack animatedPackage;
 	public LerpedFloat manualOpenAnimationProgress;
@@ -35,8 +41,12 @@ public class FrogportBlockEntity extends PackagePortBlockEntity {
 
 	public float passiveYaw;
 
+	private boolean failedLastExport;
+	private FrogportSounds sounds;
+
 	public FrogportBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
+		sounds = new FrogportSounds();
 		animationProgress = LerpedFloat.linear();
 		anticipationProgress = LerpedFloat.linear();
 		manualOpenAnimationProgress = LerpedFloat.linear()
@@ -62,8 +72,13 @@ public class FrogportBlockEntity extends PackagePortBlockEntity {
 		super.lazyTick();
 		if (level.isClientSide() || isAnimationInProgress())
 			return;
+
+		boolean prevFail = failedLastExport;
 		tryPushingToAdjacentInventories();
 		tryPullingFromOwnAndAdjacentInventories();
+
+		if (failedLastExport != prevFail)
+			sendData();
 	}
 
 	public void sendAnticipate() {
@@ -90,9 +105,13 @@ public class FrogportBlockEntity extends PackagePortBlockEntity {
 			anticipationProgress.updateChaseTarget(0);
 
 		manualOpenAnimationProgress.updateChaseTarget(openTracker.openCount > 0 ? 1 : 0);
+		boolean wasOpen = manualOpenAnimationProgress.getValue() > 0;
 
 		anticipationProgress.tickChaser();
 		manualOpenAnimationProgress.tickChaser();
+
+		if (level.isClientSide() && wasOpen && manualOpenAnimationProgress.getValue() == 0)
+			sounds.close(level, worldPosition);
 
 		if (!isAnimationInProgress())
 			return;
@@ -119,6 +138,7 @@ public class FrogportBlockEntity extends PackagePortBlockEntity {
 		anticipationProgress.startWithValue(0);
 		animationProgress.startWithValue(0);
 		if (level.isClientSide()) {
+//			sounds.close(level, worldPosition);
 			animatedPackage = null;
 			return;
 		}
@@ -133,7 +153,7 @@ public class FrogportBlockEntity extends PackagePortBlockEntity {
 	}
 
 	public void startAnimation(ItemStack box, boolean deposit) {
-		if (!(box.getItem() instanceof PackageItem))
+		if (!PackageItem.isPackage(box))
 			return;
 
 		if (deposit && (target == null
@@ -145,13 +165,18 @@ public class FrogportBlockEntity extends PackagePortBlockEntity {
 		animatedPackage = box;
 		currentlyDepositing = deposit;
 
-		if (level != null && level.isClientSide() && !currentlyDepositing) {
-			Vec3 vec = target.getExactTargetLocation(this, level, worldPosition);
-			if (vec != null) {
-				for (int i = 0; i < 5; i++) {
-					level.addParticle(new BlockParticleOption(ParticleTypes.BLOCK, AllBlocks.ROPE.getDefaultState()),
-						vec.x, vec.y - level.random.nextFloat() * 0.25, vec.z, 0, 0, 0);
-				}
+		if (level != null && level.isClientSide()) {
+			if (currentlyDepositing) {
+				sounds.depositPackage(level, worldPosition);
+
+			} else {
+				sounds.catchPackage(level, worldPosition);
+				Vec3 vec = target.getExactTargetLocation(this, level, worldPosition);
+				if (vec != null)
+					for (int i = 0; i < 5; i++)
+						level.addParticle(
+							new BlockParticleOption(ParticleTypes.BLOCK, AllBlocks.ROPE.getDefaultState()), vec.x,
+							vec.y - level.random.nextFloat() * 0.25, vec.z, 0, 0, 0);
 			}
 		}
 
@@ -162,28 +187,33 @@ public class FrogportBlockEntity extends PackagePortBlockEntity {
 	}
 
 	protected void tryPushingToAdjacentInventories() {
-		if (inventory.isEmpty())
+		failedLastExport = false;
+		IItemHandler inventory = itemHandler.orElse(null);
+
+		if (inventory == null)
 			return;
-		for (Direction side : Iterate.directions) {
-			if (side != Direction.DOWN)
+
+		boolean empty = true;
+		for (int i = 0; i < inventory.getSlots(); i++)
+			if (!inventory.getStackInSlot(i)
+				.isEmpty())
+				empty = false;
+		if (empty)
+			return;
+		IItemHandler handler = getAdjacentInventory(Direction.DOWN);
+		if (handler == null)
+			return;
+
+		for (int i = 0; i < inventory.getSlots(); i++) {
+			ItemStack stackInSlot = inventory.extractItem(i, 1, true);
+			if (stackInSlot.isEmpty())
 				continue;
-			IItemHandler handler = getAdjacentInventory(side);
-			if (handler == null)
-				continue;
-			boolean anyLeft = false;
-			for (int i = 0; i < inventory.getSlots(); i++) {
-				ItemStack stackInSlot = inventory.getStackInSlot(i);
-				if (stackInSlot.isEmpty())
-					continue;
-				ItemStack remainder = ItemHandlerHelper.insertItemStacked(handler, stackInSlot, false);
-				if (remainder.isEmpty()) {
-					inventory.setStackInSlot(i, ItemStack.EMPTY);
-					level.blockEntityChanged(worldPosition);
-				} else
-					anyLeft = true;
-			}
-			if (!anyLeft)
-				break;
+			ItemStack remainder = ItemHandlerHelper.insertItemStacked(handler, stackInSlot, false);
+			if (remainder.isEmpty()) {
+				inventory.extractItem(i, 1, false);
+				level.blockEntityChanged(worldPosition);
+			} else
+				failedLastExport = true;
 		}
 	}
 
@@ -193,7 +223,7 @@ public class FrogportBlockEntity extends PackagePortBlockEntity {
 	public void tryPullingFromOwnAndAdjacentInventories() {
 		if (isAnimationInProgress())
 			return;
-		if (target == null || !target.export(level, worldPosition, AllItems.CARDBOARD_PACKAGE_10x12.asStack(), true))
+		if (target == null || !target.export(level, worldPosition, PackageStyles.getDefaultBox(), true))
 			return;
 		if (tryPullingFrom(inventory))
 			return;
@@ -243,12 +273,15 @@ public class FrogportBlockEntity extends PackagePortBlockEntity {
 			sendAnticipate = false;
 			tag.putBoolean("Anticipate", true);
 		}
+		if (failedLastExport)
+			NBTHelper.putMarker(tag, "FailedLastExport");
 	}
 
 	@Override
 	protected void read(CompoundTag tag, boolean clientPacket) {
 		super.read(tag, clientPacket);
 		passiveYaw = tag.getFloat("PlacedYaw");
+		failedLastExport = tag.getBoolean("FailedLastExport");
 		if (!clientPacket)
 			animatedPackage = null;
 		if (tag.contains("AnimatedPackage"))
@@ -263,6 +296,21 @@ public class FrogportBlockEntity extends PackagePortBlockEntity {
 		Vec3 diff = target.getExactTargetLocation(this, level, worldPosition)
 			.subtract(Vec3.atCenterOf(worldPosition));
 		return (float) (Mth.atan2(diff.x, diff.z) * Mth.RAD_TO_DEG) + 180;
+	}
+
+	@Override
+	public boolean addToTooltip(List<Component> tooltip, boolean isPlayerSneaking) {
+		boolean superTip = IHaveHoveringInformation.super.addToTooltip(tooltip, isPlayerSneaking);
+		if (!failedLastExport)
+			return superTip;
+		TooltipHelper.addHint(tooltip, "hint.blocked_frogport");
+		return true;
+	}
+
+	@Override
+	protected void onOpenedManually() {
+		if (level.isClientSide())
+			sounds.open(level, worldPosition);
 	}
 
 }

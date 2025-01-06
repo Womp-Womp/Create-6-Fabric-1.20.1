@@ -4,6 +4,16 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import com.simibubi.create.AllRegistries;
+import com.simibubi.create.content.kinetics.mechanicalArm.ArmInteractionPointType;
+
+import net.minecraft.resources.ResourceLocation;
+
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.registries.DeferredRegister;
 
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import io.github.fabricators_of_create.porting_lib.transfer.item.RecipeWrapper;
@@ -61,16 +71,18 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.phys.Vec3;
 
 public class AllFanProcessingTypes {
-	public static final NoneType NONE = register("none", new NoneType());
-	public static final BlastingType BLASTING = register("blasting", new BlastingType());
-	public static final HauntingType HAUNTING = register("haunting", new HauntingType());
-	public static final SmokingType SMOKING = register("smoking", new SmokingType());
-	public static final SplashingType SPLASHING = register("splashing", new SplashingType());
+	private static final DeferredRegister<FanProcessingType> REGISTER = DeferredRegister.create(AllRegistries.Keys.FAN_PROCESSING_TYPES, Create.ID);
 
-	private static final Map<String, FanProcessingType> LEGACY_NAME_MAP;
+	public static final Supplier<NoneType> NONE = register("none", new NoneType());
+	public static final Supplier<BlastingType> BLASTING = register("blasting", new BlastingType());
+	public static final Supplier<HauntingType> HAUNTING = register("haunting", new HauntingType());
+	public static final Supplier<SmokingType> SMOKING = register("smoking", new SmokingType());
+	public static final Supplier<SplashingType> SPLASHING = register("splashing", new SplashingType());
+
+	private static final Map<String, Supplier<? extends FanProcessingType>> LEGACY_NAME_MAP;
 
 	static {
-		Object2ReferenceOpenHashMap<String, FanProcessingType> map = new Object2ReferenceOpenHashMap<>();
+		Object2ReferenceOpenHashMap<String, Supplier<? extends FanProcessingType>> map = new Object2ReferenceOpenHashMap<>();
 		map.put("NONE", NONE);
 		map.put("BLASTING", BLASTING);
 		map.put("HAUNTING", HAUNTING);
@@ -80,17 +92,17 @@ public class AllFanProcessingTypes {
 		LEGACY_NAME_MAP = map;
 	}
 
-	private static <T extends FanProcessingType> T register(String id, T type) {
-		FanProcessingTypeRegistry.register(Create.asResource(id), type);
-		return type;
+	private static <T extends FanProcessingType> Supplier<T> register(String name, T type) {
+		return REGISTER.register(name, () -> type);
+	}
+
+	public static void register(IEventBus eventBus) {
+		REGISTER.register(eventBus);
 	}
 
 	@Nullable
 	public static FanProcessingType ofLegacyName(String name) {
-		return LEGACY_NAME_MAP.get(name);
-	}
-
-	public static void register() {
+		return LEGACY_NAME_MAP.get(name).get();
 	}
 
 	public static FanProcessingType parseLegacy(String str) {
@@ -194,7 +206,7 @@ public class AllFanProcessingTypes {
 			Optional<? extends AbstractCookingRecipe> smeltingRecipe = level.getRecipeManager()
 				.getRecipeFor(RecipeType.SMELTING, RECIPE_WRAPPER, level)
 				.filter(AllRecipeTypes.CAN_BE_AUTOMATED);
-			
+
 			if (!smeltingRecipe.isPresent()) {
 				RECIPE_WRAPPER.setItem(0, stack);
 				smeltingRecipe = level.getRecipeManager()
@@ -399,7 +411,7 @@ public class AllFanProcessingTypes {
 			Optional<SmokingRecipe> recipe = level.getRecipeManager()
 				.getRecipeFor(RecipeType.SMOKING, RECIPE_WRAPPER, level)
 				.filter(AllRecipeTypes.CAN_BE_AUTOMATED);
-			
+
 			return recipe.isPresent();
 		}
 

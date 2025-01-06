@@ -6,8 +6,10 @@ import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllShapes;
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.api.schematic.requirement.ISpecialBlockItemRequirement;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
+import com.simibubi.create.content.schematics.requirement.ItemRequirement;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
 import com.simibubi.create.foundation.utility.CreateLang;
@@ -33,6 +35,7 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
@@ -48,7 +51,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FactoryPanelBlock extends FaceAttachedHorizontalDirectionalBlock
-	implements ProperWaterloggedBlock, IBE<FactoryPanelBlockEntity>, IWrenchable {
+	implements ProperWaterloggedBlock, IBE<FactoryPanelBlockEntity>, IWrenchable, ISpecialBlockItemRequirement {
 
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
@@ -110,22 +113,24 @@ public class FactoryPanelBlock extends FaceAttachedHorizontalDirectionalBlock
 		FactoryPanelBlockEntity fpbe = getBlockEntity(level, pos);
 
 		Vec3 location = pContext.getClickLocation();
-		if (blockState.is(this) && location != null && fpbe != null && !level.isClientSide()) {
-			PanelSlot targetedSlot = getTargetedSlot(pos, blockState, location);
-			UUID networkFromStack = LogisticallyLinkedBlockItem.networkFromStack(pContext.getItemInHand());
-			Player pPlayer = pContext.getPlayer();
+		if (blockState.is(this) && location != null && fpbe != null) {
+			if (!level.isClientSide()) {
+				PanelSlot targetedSlot = getTargetedSlot(pos, blockState, location);
+				UUID networkFromStack = LogisticallyLinkedBlockItem.networkFromStack(pContext.getItemInHand());
+				Player pPlayer = pContext.getPlayer();
 
-			if (fpbe.addPanel(targetedSlot, networkFromStack) && pPlayer != null) {
-				pPlayer.displayClientMessage(CreateLang.translateDirect("logistically_linked.connected"), true);
+				if (fpbe.addPanel(targetedSlot, networkFromStack) && pPlayer != null) {
+					pPlayer.displayClientMessage(CreateLang.translateDirect("logistically_linked.connected"), true);
 
-				if (!pPlayer.isCreative()) {
-					ItemStack item = pContext.getItemInHand();
-					item.shrink(1);
-					if (item.isEmpty())
-						pPlayer.setItemInHand(pContext.getHand(), ItemStack.EMPTY);
+					if (!pPlayer.isCreative()) {
+						ItemStack item = pContext.getItemInHand();
+						item.shrink(1);
+						if (item.isEmpty())
+							pPlayer.setItemInHand(pContext.getHand(), ItemStack.EMPTY);
+					}
 				}
 			}
-
+			stateForPlacement = blockState;
 		}
 
 		return withWater(stateForPlacement, pContext);
@@ -313,17 +318,7 @@ public class FactoryPanelBlock extends FaceAttachedHorizontalDirectionalBlock
 
 	@Override
 	public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-		boolean blockChanged = !pState.is(pNewState.getBlock());
-		if (!pIsMoving && blockChanged)
-			if (pState.getValue(POWERED))
-				updateNeighbours(pState, pLevel, pPos);
-
 		IBE.onRemove(pState, pLevel, pPos, pNewState);
-	}
-
-	public static void updateNeighbours(BlockState pState, Level pLevel, BlockPos pPos) {
-		pLevel.updateNeighborsAt(pPos, pState.getBlock());
-		pLevel.updateNeighborsAt(pPos.relative(getConnectedDirection(pState).getOpposite()), pState.getBlock());
 	}
 
 	public PanelSlot getTargetedSlot(BlockPos pos, BlockState blockState, Vec3 clickLocation) {
@@ -371,6 +366,11 @@ public class FactoryPanelBlock extends FaceAttachedHorizontalDirectionalBlock
 		AttachFace face = state.getOptionalValue(FactoryPanelBlock.FACE)
 			.orElse(AttachFace.FLOOR);
 		return (face == AttachFace.CEILING ? Mth.PI : 0) + AngleHelper.rad(AngleHelper.horizontalAngle(facing));
+	}
+
+	@Override
+	public ItemRequirement getRequiredItems(BlockState state, BlockEntity blockEntity) {
+		return ItemRequirement.NONE;
 	}
 
 }

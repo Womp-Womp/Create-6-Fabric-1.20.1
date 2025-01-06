@@ -1,7 +1,6 @@
 {
   "replace": false,
   "values": [
-    "create:chain_conveyor",
     "create:track"
   ]
 }

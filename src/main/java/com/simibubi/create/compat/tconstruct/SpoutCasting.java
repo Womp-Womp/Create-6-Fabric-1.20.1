@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 
 public class SpoutCasting extends BlockSpoutingBehaviour {
 
-	static Boolean TICON_PRESENT = null;
+	private static final boolean TICON_PRESENT = Mods.TCONSTRUCT.isLoaded();
 
 	ResourceLocation TABLE = new ResourceLocation("tconstruct", "table");
 	ResourceLocation BASIN = new ResourceLocation("tconstruct", "basin");
@@ -60,8 +60,6 @@ public class SpoutCasting extends BlockSpoutingBehaviour {
 	}
 
 	private boolean enabled() {
-		if (TICON_PRESENT == null)
-			TICON_PRESENT = Mods.TCONSTRUCT.isLoaded();
 		if (!TICON_PRESENT)
 			return false;
 		return AllConfigs.server().recipes.allowCastingBySpout.get();

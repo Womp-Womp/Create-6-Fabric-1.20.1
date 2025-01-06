@@ -1,5 +1,9 @@
 package com.simibubi.create.content.logistics.factoryBoard;
 
+import static com.simibubi.create.foundation.gui.AllGuiTextures.FACTORY_GAUGE_BOTTOM;
+import static com.simibubi.create.foundation.gui.AllGuiTextures.FACTORY_GAUGE_RECIPE;
+import static com.simibubi.create.foundation.gui.AllGuiTextures.FACTORY_GAUGE_RESTOCK;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -12,11 +16,11 @@ import javax.annotation.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllItems;
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.content.logistics.AddressEditBox;
 import com.simibubi.create.content.logistics.BigItemStack;
+import com.simibubi.create.content.logistics.box.PackageStyles;
 import com.simibubi.create.content.trains.station.NoShadowFontWrapper;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.gui.AllIcons;
@@ -26,12 +30,12 @@ import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.createmod.catnip.gui.AbstractSimiScreen;
 import net.createmod.catnip.gui.element.GuiGameElement;
-import net.createmod.catnip.utility.Iterate;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
@@ -46,11 +50,14 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 
 	private EditBox addressBox;
 	private IconButton confirmButton;
+	private IconButton deleteButton;
 	private IconButton newInputButton;
+	private IconButton activateCraftingButton;
 	private ScrollInput promiseExpiration;
 	private FactoryPanelBehaviour behaviour;
-	private int displayedExtraRows;
 	private boolean restocker;
+	private boolean sendReset;
+	private boolean sendRedstoneReset;
 
 	private BigItemStack outputConfig;
 	private List<BigItemStack> inputConfig;
@@ -65,6 +72,7 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 		minecraft = Minecraft.getInstance();
 		restocker = behaviour.panelBE().restocker;
 		availableCraftingRecipe = null;
+		craftingActive = !behaviour.activeCraftingArrangement.isEmpty();
 		updateConfigs();
 	}
 
@@ -78,93 +86,130 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 			})
 			.toList();
 
-//		searchForCraftingRecipe(); TODO finish crafter integration
+		searchForCraftingRecipe();
 
-		craftingActive = false;
-		if (availableCraftingRecipe == null)
+		if (availableCraftingRecipe == null) {
+			craftingActive = false;
 			return;
-
-		outputConfig.count = availableCraftingRecipe.getResultItem(minecraft.level.registryAccess())
-			.getCount();
-		craftingIngredients = new ArrayList<>();
-		craftingActive = true;
-
-		Ingredients: for (Ingredient ingredient : availableCraftingRecipe.getIngredients()) {
-			if (ingredient.isEmpty()) {
-				craftingIngredients.add(new BigItemStack(ItemStack.EMPTY, 1));
-				continue;
-			}
-			for (BigItemStack bigItemStack : inputConfig) {
-				if (!ingredient.test(bigItemStack.stack))
-					continue;
-				craftingIngredients.add(bigItemStack);
-				continue Ingredients;
-			}
-			while (craftingIngredients.size() < 9)
-				craftingIngredients.add(new BigItemStack(ItemStack.EMPTY, 1));
 		}
+
+		craftingIngredients = new ArrayList<>();
+		NonNullList<Ingredient> ingredients = availableCraftingRecipe.getIngredients();
+		BigItemStack emptyIngredient = new BigItemStack(ItemStack.EMPTY, 1);
+
+		int width = Math.min(3, ingredients.size());
+		int height = Math.min(3, ingredients.size() / 3 + 1);
+
+		if (availableCraftingRecipe instanceof IShapedRecipe<?> shaped) {
+			width = shaped.getRecipeWidth();
+			height = shaped.getRecipeHeight();
+		}
+
+		if (height == 1)
+			for (int i = 0; i < 3; i++)
+				craftingIngredients.add(emptyIngredient);
+		if (width == 1)
+			craftingIngredients.add(emptyIngredient);
+
+		for (int i = 0; i < ingredients.size(); i++) {
+			Ingredient ingredient = ingredients.get(i);
+			BigItemStack craftingIngredient = emptyIngredient;
+
+			if (!ingredient.isEmpty())
+				for (BigItemStack bigItemStack : inputConfig)
+					if (ingredient.test(bigItemStack.stack))
+						craftingIngredient = bigItemStack;
+
+			craftingIngredients.add(craftingIngredient);
+			if (width < 3 && (i + 1) % width == 0)
+				for (int j = 0; j < 3 - width; j++)
+					craftingIngredients.add(emptyIngredient);
+		}
+
+		while (craftingIngredients.size() < 9)
+			craftingIngredients.add(emptyIngredient);
 	}
 
 	@Override
 	protected void init() {
-		int sizeX = 200;
-		int sizeY = 75 + middleHeight();
+		int sizeX = FACTORY_GAUGE_BOTTOM.getWidth();
+		int sizeY =
+			(restocker ? FACTORY_GAUGE_RESTOCK : FACTORY_GAUGE_RECIPE).getHeight() + FACTORY_GAUGE_BOTTOM.getHeight();
+
 		setWindowSize(sizeX, sizeY);
 		super.init();
 		clearWidgets();
+
 		int x = guiLeft;
 		int y = guiTop;
 
 		if (addressBox == null) {
-			addressBox = new AddressEditBox(this, new NoShadowFontWrapper(font), x + 38, y + 30 + middleHeight(), 110,
-				10, false);
+			addressBox =
+				new AddressEditBox(this, new NoShadowFontWrapper(font), x + 36, y + windowHeight - 51, 108, 10, false);
 			addressBox.setValue(behaviour.recipeAddress);
 			addressBox.setTextColor(0x555555);
 		}
-		addressBox.setX(x + 38);
-		addressBox.setY(y + 30 + middleHeight());
+		addressBox.setX(x + 36);
+		addressBox.setY(y + windowHeight - 51);
 		addRenderableWidget(addressBox);
 
-		confirmButton = new IconButton(x + sizeX - 51, y + sizeY - 22, AllIcons.I_CONFIRM);
+		confirmButton = new IconButton(x + sizeX - 33, y + sizeY - 25, AllIcons.I_CONFIRM);
 		confirmButton.withCallback(() -> minecraft.setScreen(null));
+		confirmButton.setToolTip(CreateLang.translate("gui.factory_panel.save_and_close")
+			.component());
 		addRenderableWidget(confirmButton);
 
-		promiseExpiration = new ScrollInput(x + 112, y + 54 + middleHeight(), 25, 16).withRange(-1, 31)
+		deleteButton = new IconButton(x + sizeX - 55, y + sizeY - 25, AllIcons.I_TRASH);
+		deleteButton.withCallback(() -> {
+			sendReset = true;
+			minecraft.setScreen(null);
+		});
+		deleteButton.setToolTip(CreateLang.translate("gui.factory_panel.reset")
+			.component());
+		addRenderableWidget(deleteButton);
+
+		promiseExpiration = new ScrollInput(x + 97, y + windowHeight - 24, 28, 16).withRange(-1, 31)
 			.titled(CreateLang.translate("gui.factory_panel.promises_expire_title")
 				.component());
 		promiseExpiration.setState(behaviour.promiseClearingInterval);
 		addRenderableWidget(promiseExpiration);
 
-		if (!craftingActive && !restocker && behaviour.targetedBy.size() < 9) {
-			int slot = behaviour.targetedBy.size();
-			newInputButton = new IconButton(x + 24 + (slot % 3 * 18), y + 27 + (slot / 3 * 18), AllIcons.I_ADD);
-			newInputButton.withCallback(() -> {
-				FactoryPanelConnectionHandler.startConnection(behaviour);
-				minecraft.setScreen(null);
-			});
-			newInputButton.setToolTip(CreateLang.translate("gui.factory_panel.connect_input")
-				.component());
+		newInputButton = new IconButton(x + 31, y + 67, AllIcons.I_ADD);
+		newInputButton.withCallback(() -> {
+			FactoryPanelConnectionHandler.startConnection(behaviour);
+			minecraft.setScreen(null);
+		});
+		newInputButton.setToolTip(CreateLang.translate("gui.factory_panel.connect_input")
+			.component());
+		if (!restocker)
 			addRenderableWidget(newInputButton);
+
+		activateCraftingButton = null;
+		if (availableCraftingRecipe != null) {
+			activateCraftingButton = new IconButton(x + 31, y + 47, AllIcons.I_3x3);
+			activateCraftingButton.withCallback(() -> {
+				craftingActive = !craftingActive;
+				init();
+				if (craftingActive) {
+					outputConfig.count = availableCraftingRecipe.getResultItem(minecraft.level.registryAccess())
+						.getCount();
+				}
+			});
+			activateCraftingButton.setToolTip(CreateLang.translate("gui.factory_panel.activate_crafting")
+				.component());
+			addRenderableWidget(activateCraftingButton);
 		}
-
-		displayedExtraRows = rowsToDisplay();
-	}
-
-	private int rowsToDisplay() {
-		return craftingActive ? 2 : Math.min((behaviour.targetedBy.size() / 3), 2);
-	}
-
-	private int middleHeight() {
-		return AllGuiTextures.FACTORY_PANEL_MIDDLE.getHeight() + rowsToDisplay() * 18;
 	}
 
 	@Override
 	public void tick() {
 		super.tick();
-		if (inputConfig.size() != behaviour.targetedBy.size() || displayedExtraRows != rowsToDisplay()) {
+		if (inputConfig.size() != behaviour.targetedBy.size()) {
 			updateConfigs();
 			init();
 		}
+		if (activateCraftingButton != null)
+			activateCraftingButton.green = craftingActive;
 		addressBox.tick();
 		promiseExpiration.titled(CreateLang
 			.translate(promiseExpiration.getState() == -1 ? "gui.factory_panel.promises_do_not_expire"
@@ -178,32 +223,18 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 		int y = guiTop;
 
 		// BG
-		AllGuiTextures.FACTORY_PANEL_TOP.render(graphics, x, y);
-		y += AllGuiTextures.FACTORY_PANEL_TOP.getHeight();
-		for (int i = 0; i < displayedExtraRows + 1; i++)
-			AllGuiTextures.FACTORY_PANEL_MIDDLE.render(graphics, x, y + i * 18);
-		y += middleHeight();
-		AllGuiTextures.FACTORY_PANEL_BOTTOM.render(graphics, x, y);
+		AllGuiTextures bg = restocker ? FACTORY_GAUGE_RESTOCK : FACTORY_GAUGE_RECIPE;
+		if (restocker)
+			FACTORY_GAUGE_RECIPE.render(graphics, x, y - 16);
+		bg.render(graphics, x, y);
+		FACTORY_GAUGE_BOTTOM.render(graphics, x, y + bg.getHeight());
 		y = guiTop;
 
 		// RECIPE
 		int slot = 0;
-		int slotsToRender = craftingActive ? 9 : behaviour.targetedBy.size();
-		for (int frame : Iterate.zeroAndOne) {
-			AllGuiTextures sprite =
-				frame == 0 ? AllGuiTextures.FACTORY_PANEL_SLOT_FRAME : AllGuiTextures.FACTORY_PANEL_SLOT;
-			for (slot = 0; slot < slotsToRender; slot++)
-				sprite.render(graphics, x + 23 + frame + (slot % 3 * 18), y + 26 + frame + (slot / 3 * 18));
-			if (slot < 9)
-				sprite.render(graphics, x + 23 + frame + (slot % 3 * 18), y + 26 + frame + (slot / 3 * 18));
-		}
-
-		slot = 0;
-
 		if (craftingActive) {
 			for (BigItemStack itemStack : craftingIngredients)
 				renderInputItem(graphics, slot++, itemStack, mouseX, mouseY);
-
 		} else
 			for (BigItemStack itemStack : inputConfig)
 				renderInputItem(graphics, slot++, itemStack, mouseX, mouseY);
@@ -211,35 +242,31 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 		if (restocker)
 			renderInputItem(graphics, slot, new BigItemStack(behaviour.getFilter(), 1), mouseX, mouseY);
 
-		if (inputConfig.size() > 0) {
-			int arrowOffset = Mth.clamp(slotsToRender, 0, 2);
-			AllGuiTextures.FACTORY_PANEL_ARROW.render(graphics, x + 75 + arrowOffset * 9, y + 16 + middleHeight() / 2);
-			int outputX = x + 130;
-			int outputY = y + 16 + middleHeight() / 2;
-			AllGuiTextures.FACTORY_PANEL_SLOT_FRAME.render(graphics, outputX - 2, outputY - 2);
+		if (!restocker) {
+			int outputX = x + 160;
+			int outputY = y + 48;
 			graphics.renderItem(outputConfig.stack, outputX, outputY);
 			graphics.renderItemDecorations(font, behaviour.getFilter(), outputX, outputY, outputConfig.count + "");
 
 			if (mouseX >= outputX - 1 && mouseX < outputX - 1 + 18 && mouseY >= outputY - 1
 				&& mouseY < outputY - 1 + 18) {
-				graphics.renderComponentTooltip(font,
-					List.of(
-						CreateLang
-							.translate("gui.factory_panel.expected_output", CreateLang.itemName(outputConfig.stack)
-								.add(CreateLang.text(" x" + outputConfig.count))
-								.string())
-							.color(ScrollInput.HEADER_RGB)
-							.component(),
-						CreateLang.translate("gui.factory_panel.expected_output_tip")
-							.style(ChatFormatting.GRAY)
-							.component(),
-						CreateLang.translate("gui.factory_panel.expected_output_tip_1")
-							.style(ChatFormatting.GRAY)
-							.component(),
-						CreateLang.translate("gui.factory_panel.expected_output_tip_2")
-							.style(ChatFormatting.DARK_GRAY)
-							.style(ChatFormatting.ITALIC)
-							.component()),
+				MutableComponent c1 = CreateLang
+					.translate("gui.factory_panel.expected_output", CreateLang.itemName(outputConfig.stack)
+						.add(CreateLang.text(" x" + outputConfig.count))
+						.string())
+					.color(ScrollInput.HEADER_RGB)
+					.component();
+				MutableComponent c2 = CreateLang.translate("gui.factory_panel.expected_output_tip")
+					.style(ChatFormatting.GRAY)
+					.component();
+				MutableComponent c3 = CreateLang.translate("gui.factory_panel.expected_output_tip_1")
+					.style(ChatFormatting.GRAY)
+					.component();
+				MutableComponent c4 = CreateLang.translate("gui.factory_panel.expected_output_tip_2")
+					.style(ChatFormatting.DARK_GRAY)
+					.style(ChatFormatting.ITALIC)
+					.component();
+				graphics.renderComponentTooltip(font, craftingActive ? List.of(c1, c2, c3) : List.of(c1, c2, c3, c4),
 					mouseX, mouseY);
 			}
 		}
@@ -256,41 +283,55 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 		Component title = CreateLang
 			.translate(restocker ? "gui.factory_panel.title_as_restocker" : "gui.factory_panel.title_as_recipe")
 			.component();
-		graphics.drawString(font, title, x + 87 - font.width(title) / 2, y + 7, 0x3D3C48, false);
+		graphics.drawString(font, title, x + 97 - font.width(title) / 2, y + (restocker ? -12 : 4), 0x3D3C48, false);
 
 		// ITEM PREVIEW
+		int previewY = restocker ? 0 : 60;
+
 		ms.pushPose();
-		ms.translate(0, middleHeight() - 25, 0);
+		ms.translate(0, previewY, 0);
 		GuiGameElement.of(AllBlocks.FACTORY_GAUGE.asStack())
 			.scale(4)
 			.at(0, 0, -200)
-			.render(graphics, x + 175, y + 55);
+			.render(graphics, x + 195, y + 55);
 		if (!behaviour.getFilter()
 			.isEmpty()) {
 			GuiGameElement.of(behaviour.getFilter())
 				.scale(1.625)
 				.at(0, 0, 100)
-				.render(graphics, x + 194, y + 68);
+				.render(graphics, x + 214, y + 68);
 		}
 
-		ms.translate(0, 0, 350);
-		MutableComponent countLabelForValueBox = behaviour.getCountLabelForValueBox();
-		graphics.drawString(font, countLabelForValueBox, x + 210 - font.width(countLabelForValueBox) / 2, y + 98,
-			0xffffffff);
 		ms.popPose();
 
-		if (mouseX >= x + 190 - 1 && mouseX < x + 190 - 1 + 48 && mouseY >= y + middleHeight() - 25 + 90 - 1
-			&& mouseY < y + middleHeight() - 25 + 94 - 1 + 26)
-			showStockLevelTooltip(graphics, mouseX, mouseY);
+		// REDSTONE LINKS
+		if (!behaviour.targetedByLinks.isEmpty()) {
+			ItemStack asStack = AllBlocks.REDSTONE_LINK.asStack();
+			int itemX = x + 9;
+			int itemY = y + windowHeight - 24;
+			AllGuiTextures.FROGPORT_SLOT.render(graphics, itemX - 1, itemY - 1);
+			graphics.renderItem(asStack, itemX, itemY);
+
+			if (mouseX >= itemX && mouseX < itemX + 16 && mouseY >= itemY && mouseY < itemY + 16) {
+				List<Component> linkTip = List.of(CreateLang.translate("gui.factory_panel.has_link_connections")
+					.color(ScrollInput.HEADER_RGB)
+					.component(),
+					CreateLang.translate("gui.factory_panel.left_click_disconnect")
+						.style(ChatFormatting.DARK_GRAY)
+						.style(ChatFormatting.ITALIC)
+						.component());
+				graphics.renderComponentTooltip(font, linkTip, mouseX, mouseY);
+			}
+		}
 
 		// PROMISES
 		int state = promiseExpiration.getState();
 		graphics.drawString(font, CreateLang.text(state == -1 ? " /" : state == 0 ? "30s" : state + "m")
 			.component(), promiseExpiration.getX() + 3, promiseExpiration.getY() + 4, 0xffeeeeee, true);
 
-		ItemStack asStack = AllItems.CARDBOARD_PACKAGE_12x12.asStack();
-		int itemY = y + 54 + middleHeight();
-		int itemX = x + 88;
+		ItemStack asStack = PackageStyles.getDefaultBox();
+		int itemX = x + 68;
+		int itemY = y + windowHeight - 24;
 		graphics.renderItem(asStack, itemX, itemY);
 		int promised = behaviour.getPromised();
 		graphics.renderItemDecorations(font, asStack, itemX, itemY, promised + "");
@@ -338,18 +379,29 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 	//
 
 	private void renderInputItem(GuiGraphics graphics, int slot, BigItemStack itemStack, int mouseX, int mouseY) {
-		int inputX = guiLeft + 25 + (slot % 3 * 18);
-		int inputY = guiTop + 28 + (slot / 3 * 18);
+		int inputX = guiLeft + (restocker ? 88 : 68 + (slot % 3 * 20));
+		int inputY = guiTop + (restocker ? 12 : 28) + (slot / 3 * 20);
 
 		graphics.renderItem(itemStack.stack, inputX, inputY);
 		if (!craftingActive && !restocker && !itemStack.stack.isEmpty())
 			graphics.renderItemDecorations(font, itemStack.stack, inputX, inputY, itemStack.count + "");
 
-		if (mouseX < inputX - 1 || mouseX >= inputX - 1 + 18 || mouseY < inputY - 1 || mouseY >= inputY - 1 + 18)
+		if (mouseX < inputX - 2 || mouseX >= inputX - 2 + 20 || mouseY < inputY - 2 || mouseY >= inputY - 2 + 20)
 			return;
 
-		if (craftingActive)
+		if (craftingActive) {
+			graphics.renderComponentTooltip(font, List.of(CreateLang.translate("gui.factory_panel.crafting_input")
+				.color(ScrollInput.HEADER_RGB)
+				.component(),
+				CreateLang.translate("gui.factory_panel.crafting_input_tip")
+					.style(ChatFormatting.GRAY)
+					.component(),
+				CreateLang.translate("gui.factory_panel.crafting_input_tip_1")
+					.style(ChatFormatting.GRAY)
+					.component()),
+				mouseX, mouseY);
 			return;
+		}
 
 		if (itemStack.stack.isEmpty()) {
 			graphics.renderComponentTooltip(font, List.of(CreateLang.translate("gui.factory_panel.empty_panel")
@@ -392,24 +444,6 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 				CreateLang.translate("gui.factory_panel.left_click_disconnect")
 					.style(ChatFormatting.DARK_GRAY)
 					.style(ChatFormatting.ITALIC)
-					.component()),
-			mouseX, mouseY);
-	}
-
-	private void showStockLevelTooltip(GuiGraphics graphics, int mouseX, int mouseY) {
-		graphics.renderComponentTooltip(font,
-			List.of(
-				(behaviour.count > 0 ? CreateLang.translate("gui.factory_panel.storage_level_and_target")
-					: CreateLang.translate("gui.factory_panel.storage_level")).color(ScrollInput.HEADER_RGB)
-						.component(),
-				CreateLang.translate("gui.factory_panel.storage_level_tip")
-					.style(ChatFormatting.GRAY)
-					.component(),
-				CreateLang.translate("gui.factory_panel.storage_level_tip_1")
-					.style(ChatFormatting.GRAY)
-					.component(),
-				CreateLang.translate("gui.factory_panel.storage_level_tip_2")
-					.style(ChatFormatting.GRAY)
 					.component()),
 			mouseX, mouseY);
 	}
@@ -477,8 +511,8 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 		// Remove connections
 		if (!craftingActive)
 			for (int i = 0; i < connections.size(); i++) {
-				int inputX = x + 25 + (i % 3 * 18);
-				int inputY = y + 28 + (i / 3 * 18);
+				int inputX = x + 68 + (i % 3 * 20);
+				int inputY = y + 28 + (i / 3 * 20);
 				if (mouseX >= inputX && mouseX < inputX + 16 && mouseY >= inputY && mouseY < inputY + 16) {
 					sendIt(connections.get(i).from, false);
 					return true;
@@ -486,10 +520,19 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 			}
 
 		// Clear promises
-		int itemY = y + 54 + middleHeight();
-		int itemX = x + 88;
+		int itemX = x + 68;
+		int itemY = y + windowHeight - 24;
 		if (mouseX >= itemX && mouseX < itemX + 16 && mouseY >= itemY && mouseY < itemY + 16) {
 			sendIt(null, true);
+			return true;
+		}
+
+		// remove redstone connections
+		itemX = x + 9;
+		itemY = y + windowHeight - 24;
+		if (mouseX >= itemX && mouseX < itemX + 16 && mouseY >= itemY && mouseY < itemY + 16) {
+			sendRedstoneReset = true;
+			sendIt(null, false);
 			return true;
 		}
 
@@ -505,8 +548,8 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 			return super.mouseScrolled(mouseX, mouseY, pDelta);
 
 		for (int i = 0; i < inputConfig.size(); i++) {
-			int inputX = x + 25 + (i % 3 * 18);
-			int inputY = y + 28 + (i / 3 * 18);
+			int inputX = x + 68 + (i % 3 * 20);
+			int inputY = y + 26 + (i / 3 * 20);
 			if (mouseX >= inputX && mouseX < inputX + 16 && mouseY >= inputY && mouseY < inputY + 16) {
 				BigItemStack itemStack = inputConfig.get(i);
 				if (itemStack.stack.isEmpty())
@@ -517,9 +560,9 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 			}
 		}
 
-		if (inputConfig.size() > 0) {
-			int outputX = x + 130;
-			int outputY = y + 16 + middleHeight() / 2;
+		if (!restocker) {
+			int outputX = x + 160;
+			int outputY = y + 48;
 			if (mouseX >= outputX && mouseX < outputX + 16 && mouseY >= outputY && mouseY < outputY + 16) {
 				BigItemStack itemStack = outputConfig;
 				itemStack.count =
@@ -558,7 +601,7 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 		String address = addressBox.getValue();
 
 		FactoryPanelConfigurationPacket packet = new FactoryPanelConfigurationPacket(pos, address, inputs,
-			craftingArrangement, outputConfig.count, promiseExp, toRemove, clearPromises);
+			craftingArrangement, outputConfig.count, promiseExp, toRemove, clearPromises, sendReset, sendRedstoneReset);
 		AllPackets.getChannel()
 			.sendToServer(packet);
 	}

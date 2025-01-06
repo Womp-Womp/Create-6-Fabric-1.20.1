@@ -6,7 +6,7 @@ import java.util.Set;
 import com.simibubi.create.Create;
 import com.simibubi.create.CreateClient;
 import com.simibubi.create.content.kinetics.belt.BeltHelper;
-import com.simibubi.create.content.logistics.displayCloth.DisplayClothModel;
+import com.simibubi.create.content.logistics.tableCloth.TableClothModel;
 import com.simibubi.create.foundation.sound.SoundScapes;
 
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
@@ -25,7 +25,7 @@ public class ClientResourceReloadListener implements ResourceManagerReloadListen
 		CreateClient.invalidateRenderers();
 		SoundScapes.invalidateAll();
 		BeltHelper.uprightCache.clear();
-		DisplayClothModel.reload();
+		TableClothModel.reload();
 	}
 
 	@Override

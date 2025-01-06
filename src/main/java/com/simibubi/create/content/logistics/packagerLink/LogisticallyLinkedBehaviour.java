@@ -6,7 +6,6 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -15,7 +14,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
 import com.simibubi.create.Create;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
@@ -25,6 +23,7 @@ import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.utility.CreateLang;
+import com.simibubi.create.foundation.utility.TickBasedCache;
 
 import net.createmod.catnip.utility.Pair;
 import net.minecraft.ChatFormatting;
@@ -52,9 +51,10 @@ public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 	}
 
 	private static final Cache<UUID, Cache<Integer, WeakReference<LogisticallyLinkedBehaviour>>> LINKS =
-		CacheBuilder.newBuilder()
-			.expireAfterAccess(1, TimeUnit.SECONDS)
-			.build();
+		new TickBasedCache<>(20, true);
+
+	private static final Cache<UUID, Cache<Integer, WeakReference<LogisticallyLinkedBehaviour>>> CLIENT_LINKS =
+		new TickBasedCache<>(20, true, true);
 
 	public LogisticallyLinkedBehaviour(SmartBlockEntity be, boolean global) {
 		super(be);
@@ -64,7 +64,13 @@ public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 	}
 
 	public static Collection<LogisticallyLinkedBehaviour> getAllPresent(UUID freq, boolean sortByPriority) {
-		Cache<Integer, WeakReference<LogisticallyLinkedBehaviour>> cache = LINKS.getIfPresent(freq);
+		return getAllPresent(freq, sortByPriority, false);
+	}
+
+	public static Collection<LogisticallyLinkedBehaviour> getAllPresent(UUID freq, boolean sortByPriority,
+		boolean clientSide) {
+		Cache<Integer, WeakReference<LogisticallyLinkedBehaviour>> cache =
+			(clientSide ? CLIENT_LINKS : LINKS).getIfPresent(freq);
 		if (cache == null)
 			return Collections.emptyList();
 		Stream<LogisticallyLinkedBehaviour> stream = new LinkedList<>(cache.asMap()
@@ -79,21 +85,19 @@ public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 	}
 
 	public static void keepAlive(LogisticallyLinkedBehaviour behaviour) {
+		boolean onClient = behaviour.blockEntity.getLevel().isClientSide;
 		if (behaviour.redstonePower == 15)
 			return;
 		try {
-			Cache<Integer, WeakReference<LogisticallyLinkedBehaviour>> cache = LINKS.get(behaviour.freqId,
-				() -> CacheBuilder.newBuilder()
-					.expireAfterAccess(60, TimeUnit.SECONDS)
-					.build());
+			Cache<Integer, WeakReference<LogisticallyLinkedBehaviour>> cache =
+				(onClient ? CLIENT_LINKS : LINKS).get(behaviour.freqId, () -> new TickBasedCache<>(400, false));
 
 			if (cache == null)
 				return;
 
 			WeakReference<LogisticallyLinkedBehaviour> reference =
 				cache.get(behaviour.linkId, () -> new WeakReference<>(behaviour));
-			if (reference.get() != behaviour)
-				cache.put(behaviour.linkId, new WeakReference<>(behaviour));
+			cache.put(behaviour.linkId, reference.get() != behaviour ? new WeakReference<>(behaviour) : reference);
 
 		} catch (ExecutionException e) {
 			e.printStackTrace();
@@ -208,7 +212,12 @@ public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 	public boolean isSafeNBT() {
 		return true;
 	}
-
+	
+	@Override
+	public void writeSafe(CompoundTag tag) {
+		tag.putUUID("Freq", freqId);
+	}
+	
 	@Override
 	public void write(CompoundTag tag, boolean clientPacket) {
 		super.write(tag, clientPacket);

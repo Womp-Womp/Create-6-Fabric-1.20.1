@@ -8,6 +8,8 @@ import javax.annotation.Nullable;
 
 import io.github.fabricators_of_create.porting_lib.mixin.accessors.common.accessor.BucketItemAccessor;
 
+import net.minecraft.world.item.MobBucketItem;
+
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.google.common.collect.Multimap;
@@ -133,7 +135,7 @@ public class DeployerHandler {
 			.addTransientAttributeModifiers(attributeModifiers);
 		activateInner(player, vec, clickedPos, extensionVector, mode);
 		player.getAttributes()
-			.addTransientAttributeModifiers(attributeModifiers);
+			.removeAttributeModifiers(attributeModifiers);
 	}
 
 	private static void activateInner(DeployerFakePlayer player, Vec3 vec, BlockPos clickedPos, Vec3 extensionVector,
@@ -334,6 +336,10 @@ public class DeployerHandler {
 			itemUseWorld = new ItemUseWorld(world, face, pos);
 
 		InteractionResultHolder<ItemStack> onItemRightClick = item.use(itemUseWorld, player, hand);
+
+		if (onItemRightClick.getResult().consumesAction() && item instanceof MobBucketItem bucketItem)
+			bucketItem.checkExtraContent(player, world, stack, clickedPos);
+
 		ItemStack resultStack = onItemRightClick.getObject();
 		if (resultStack != stack || resultStack.getCount() != stack.getCount() || resultStack.getUseDuration() > 0
 			|| resultStack.getDamageValue() != stack.getDamageValue()) {

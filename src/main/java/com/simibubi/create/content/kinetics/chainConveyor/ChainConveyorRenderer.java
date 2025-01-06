@@ -65,8 +65,8 @@ public class ChainConveyorRenderer extends KineticBlockEntityRenderer<ChainConve
 		}
 	}
 
-	private void renderBox(ChainConveyorBlockEntity be, PoseStack ms, MultiBufferSource buffer, int overlay, BlockPos pos,
-		ChainConveyorPackage box, float partialTicks) {
+	private void renderBox(ChainConveyorBlockEntity be, PoseStack ms, MultiBufferSource buffer, int overlay,
+		BlockPos pos, ChainConveyorPackage box, float partialTicks) {
 		if (box.worldPosition == null)
 			return;
 		if (box.item == null || box.item.isEmpty())
@@ -127,7 +127,8 @@ public class ChainConveyorRenderer extends KineticBlockEntityRenderer<ChainConve
 		}
 	}
 
-	private void renderChains(ChainConveyorBlockEntity be, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
+	private void renderChains(ChainConveyorBlockEntity be, PoseStack ms, MultiBufferSource buffer, int light,
+		int overlay) {
 		float time = LevelTickHolder.getRenderTime(be.getLevel()) / (360f / Math.abs(be.getSpeed()));
 		time %= 1;
 		if (time < 0)
@@ -152,7 +153,8 @@ public class ChainConveyorRenderer extends KineticBlockEntityRenderer<ChainConve
 				.subtract(Vec3.atCenterOf(tilePos));
 
 			if (!BackendManager.isBackendOn()) {
-				SuperByteBuffer guard = CachedBuffers.partial(AllPartialModels.CHAIN_CONVEYOR_GUARD, be.getBlockState());
+				SuperByteBuffer guard =
+					CachedBuffers.partial(AllPartialModels.CHAIN_CONVEYOR_GUARD, be.getBlockState());
 				// guard.translate(startOffset.multiply(0, 1, 0));
 				guard.center();
 				guard.rotateYDegrees((float) yaw);
@@ -178,7 +180,7 @@ public class ChainConveyorRenderer extends KineticBlockEntityRenderer<ChainConve
 			int light2 = LightTexture.pack(level.getBrightness(LightLayer.BLOCK, tilePos.offset(blockPos)),
 				level.getBrightness(LightLayer.SKY, tilePos.offset(blockPos)));
 
-			boolean far = !Minecraft.getInstance()
+			boolean far = Minecraft.getInstance().level == be.getLevel() && !Minecraft.getInstance()
 				.getBlockEntityRenderDispatcher().camera.getPosition()
 					.closerThan(Vec3.atCenterOf(tilePos)
 						.add(blockPos.getX() / 2f, blockPos.getY() / 2f, blockPos.getZ() / 2f), MIP_DISTANCE);
@@ -252,7 +254,7 @@ public class ChainConveyorRenderer extends KineticBlockEntityRenderer<ChainConve
 
 	@Override
 	public boolean shouldRenderOffScreen(ChainConveyorBlockEntity be) {
-		return !be.connections.isEmpty();
+		return true;
 	}
 
 	@Override

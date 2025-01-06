@@ -2,6 +2,7 @@ package com.simibubi.create.foundation.data;
 
 import static com.simibubi.create.AllInteractionBehaviours.interactionBehaviour;
 import static com.simibubi.create.AllMovementBehaviours.movementBehaviour;
+import static com.simibubi.create.Create.REGISTRATE;
 import static com.simibubi.create.foundation.data.BlockStateGen.axisBlock;
 import static com.simibubi.create.foundation.data.CreateRegistrate.casingConnectivity;
 import static com.simibubi.create.foundation.data.CreateRegistrate.connectedTextures;
@@ -37,8 +38,10 @@ import com.simibubi.create.content.kinetics.simpleRelays.encased.EncasedCogCTBeh
 import com.simibubi.create.content.kinetics.simpleRelays.encased.EncasedCogwheelBlock;
 import com.simibubi.create.content.kinetics.simpleRelays.encased.EncasedShaftBlock;
 import com.simibubi.create.content.logistics.box.PackageItem;
-import com.simibubi.create.content.logistics.displayCloth.DisplayClothBlockItem;
-import com.simibubi.create.content.logistics.displayCloth.DisplayClothModel;
+import com.simibubi.create.content.logistics.box.PackageStyles.PackageStyle;
+import com.simibubi.create.content.logistics.packager.PackagerGenerator;
+import com.simibubi.create.content.logistics.tableCloth.TableClothBlockItem;
+import com.simibubi.create.content.logistics.tableCloth.TableClothModel;
 import com.simibubi.create.content.logistics.tunnel.BeltTunnelBlock;
 import com.simibubi.create.content.logistics.tunnel.BeltTunnelBlock.Shape;
 import com.simibubi.create.content.logistics.tunnel.BeltTunnelItem;
@@ -104,7 +107,6 @@ public class BuilderTransformers {
 			.build();
 	}
 
-	@SuppressWarnings("deprecation")
 	public static <B extends StandardBogeyBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> bogey() {
 		return b -> b.initialProperties(SharedProperties::softMetal)
 			.properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
@@ -469,36 +471,46 @@ public class BuilderTransformers {
 			.build();
 	}
 
-	public static <B extends PackageItem> NonNullUnaryOperator<ItemBuilder<B, CreateRegistrate>> packageItem(
-		String material, int diameter, int height) {
-		return b -> b.properties(p -> p.stacksTo(1))
-			.model((c, p) -> p.withExistingParent(c.getName(),
-				p.modLoc("item/packages/" + material + "_" + diameter + "x" + height)))
-			.lang(material.substring(0, 1)
-				.toUpperCase(Locale.ROOT) + material.substring(1) + " Package");
+	public static ItemBuilder<PackageItem, CreateRegistrate> packageItem(PackageStyle style) {
+		String size = "_" + style.width() + "x" + style.height();
+		return REGISTRATE.item(style.getItemId()
+			.getPath(), p -> new PackageItem(p, style))
+			.properties(p -> p.stacksTo(1))
+			.tag(AllItemTags.PACKAGES.tag)
+			.model((c, p) -> {
+				if (style.rare())
+					p.withExistingParent(c.getName(), p.modLoc("item/package/custom" + size))
+						.texture("2", p.modLoc("item/package/" + style.type()));
+				else
+					p.withExistingParent(c.getName(), p.modLoc("item/package/" + style.type() + size));
+			})
+			.lang((style.rare() ? "Rare"
+				: style.type()
+					.substring(0, 1)
+					.toUpperCase(Locale.ROOT)
+					+ style.type()
+						.substring(1))
+				+ " Package");
 	}
 
 	public static <B extends Block, P> NonNullUnaryOperator<BlockBuilder<B, P>> tableCloth(String name,
 		NonNullSupplier<? extends Block> initialProps, boolean dyed) {
 		return b -> {
-			ItemBuilder<DisplayClothBlockItem, BlockBuilder<B, P>> item = b.initialProperties(initialProps)
+			ItemBuilder<TableClothBlockItem, BlockBuilder<B, P>> item = b.initialProperties(initialProps)
 				.addLayer(() -> RenderType::cutoutMipped)
 				.blockstate((c, p) -> p.simpleBlock(c.get(), p.models()
 					.withExistingParent(name + "_table_cloth", p.modLoc("block/table_cloth/block"))
 					.texture("0", p.modLoc("block/table_cloth/" + name))))
-				.onRegister(CreateRegistrate.blockModel(() -> DisplayClothModel::new))
+				.onRegister(CreateRegistrate.blockModel(() -> TableClothModel::new))
 				.tag(AllBlockTags.TABLE_CLOTHS.tag)
 				.onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "block.create.table_cloth"))
-				.item(DisplayClothBlockItem::new);
+				.item(TableClothBlockItem::new);
 
 			if (dyed)
 				item.tag(AllItemTags.DYED_TABLE_CLOTHS.tag);
 
-			return item
-				.model((c, p) -> p
-					.withExistingParent(name + "_table_cloth",
-						p.modLoc("block/table_cloth/item" + (!dyed ? "_lower" : "")))
-					.texture("0", p.modLoc("block/table_cloth/" + name)))
+			return item.model((c, p) -> p.withExistingParent(name + "_table_cloth", p.modLoc("block/table_cloth/item"))
+				.texture("0", p.modLoc("block/table_cloth/" + name)))
 				.tag(AllItemTags.TABLE_CLOTHS.tag)
 				.recipe((c, p) -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, c.get())
 					.requires(c.get())
@@ -506,6 +518,34 @@ public class BuilderTransformers {
 					.save(p, Create.asResource("crafting/logistics/" + c.getName() + "_clear")))
 				.build();
 		};
+	}
+
+	public static <B extends Block, P> NonNullUnaryOperator<BlockBuilder<B, P>> packager() {
+		return b -> b.initialProperties(SharedProperties::softMetal)
+			.properties(p -> p.noOcclusion())
+			.properties(p -> p.isRedstoneConductor(($1, $2, $3) -> false))
+			.properties(p -> p.mapColor(MapColor.TERRACOTTA_BLUE)
+				.sound(SoundType.NETHERITE_BLOCK))
+			.transform(pickaxeOnly())
+			.addLayer(() -> RenderType::cutoutMipped)
+			.blockstate(new PackagerGenerator()::generate)
+			.item()
+			.model(AssetLookup::customItemModel)
+			.build();
+	}
+
+	public static <B extends Block, P> NonNullUnaryOperator<BlockBuilder<B, P>> palettesIronBlock() {
+		return b -> b.initialProperties(SharedProperties::softMetal)
+			.properties(p -> p.mapColor(MapColor.COLOR_GRAY)
+				.sound(SoundType.NETHERITE_BLOCK)
+				.requiresCorrectToolForDrops())
+			.transform(pickaxeOnly())
+			.blockstate((c, p) -> p.simpleBlock(c.get(), p.models()
+				.cubeColumn(c.getName(), p.modLoc("block/" + c.getName()), p.modLoc("block/" + c.getName() + "_top"))))
+			.tag(AllBlockTags.WRENCH_PICKUP.tag)
+			.recipe((c, p) -> p.stonecutting(DataIngredient.tag(Tags.Items.INGOTS_IRON), RecipeCategory.BUILDING_BLOCKS,
+				c::get, 2))
+			.simpleItem();
 	}
 
 }

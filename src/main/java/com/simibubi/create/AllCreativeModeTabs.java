@@ -15,8 +15,9 @@ import com.simibubi.create.content.decoration.palettes.AllPaletteBlocks;
 import com.simibubi.create.content.equipment.armor.BacktankUtil;
 import com.simibubi.create.content.equipment.toolbox.ToolboxBlock;
 import com.simibubi.create.content.kinetics.crank.ValveHandleBlock;
-import com.simibubi.create.content.logistics.displayCloth.DisplayClothBlock;
+import com.simibubi.create.content.logistics.box.PackageStyles;
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlock;
+import com.simibubi.create.content.logistics.tableCloth.TableClothBlock;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.item.TagDependentIngredientItem;
 import com.tterrag.registrate.util.entry.BlockEntry;
@@ -157,6 +158,8 @@ public class AllCreativeModeTabs {
 					AllItems.CRUSHED_NICKEL
 			);
 
+			exclusions.addAll(PackageStyles.RARE_BOXES);
+
 			for (ItemProviderEntry<?> entry : simpleExclusions) {
 				exclusions.add(entry.asItem());
 			}
@@ -182,11 +185,7 @@ public class AllCreativeModeTabs {
 			);
 
 			Map<ItemProviderEntry<?>, ItemProviderEntry<?>> simpleAfterOrderings = Map.of(
-					AllItems.VERTICAL_GEARBOX, AllBlocks.GEARBOX,
-					AllItems.CARDBOARD_PACKAGE_10x12, AllBlocks.PACKAGER,
-					AllItems.CARDBOARD_PACKAGE_12x12, AllBlocks.PACKAGER,
-					AllItems.CARDBOARD_PACKAGE_10x8, AllBlocks.PACKAGER,
-					AllItems.CARDBOARD_PACKAGE_12x10, AllBlocks.PACKAGER
+					AllItems.VERTICAL_GEARBOX, AllBlocks.GEARBOX
 			);
 
 			simpleBeforeOrderings.forEach((entry, otherEntry) -> {
@@ -195,6 +194,10 @@ public class AllCreativeModeTabs {
 
 			simpleAfterOrderings.forEach((entry, otherEntry) -> {
 				orderings.add(ItemOrdering.after(entry.asItem(), otherEntry.asItem()));
+			});
+
+			PackageStyles.STANDARD_BOXES.forEach(item -> {
+				orderings.add(ItemOrdering.after(item, AllBlocks.PACKAGER.asItem()));
 			});
 
 			return orderings;
@@ -251,8 +254,8 @@ public class AllCreativeModeTabs {
 				}
 			}
 
-			for (BlockEntry<DisplayClothBlock> entry : AllBlocks.TABLE_CLOTHS) {
-				DisplayClothBlock block = entry.get();
+			for (BlockEntry<TableClothBlock> entry : AllBlocks.TABLE_CLOTHS) {
+				TableClothBlock block = entry.get();
 				if (block.getColor() != DyeColor.RED) {
 					visibilities.put(entry.asItem(), TabVisibility.SEARCH_TAB_ONLY);
 				}

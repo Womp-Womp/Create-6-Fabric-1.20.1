@@ -1,5 +1,6 @@
 package com.simibubi.create.content.logistics.factoryBoard;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -34,7 +35,9 @@ import com.simibubi.create.content.logistics.packagerLink.LogisticsManager;
 import com.simibubi.create.content.logistics.packagerLink.RequestPromise;
 import com.simibubi.create.content.logistics.packagerLink.RequestPromiseQueue;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.schematics.requirement.ItemRequirement;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.ValueSettingsBoard;
 import com.simibubi.create.foundation.blockEntity.behaviour.ValueSettingsFormatter;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
@@ -47,6 +50,7 @@ import net.createmod.catnip.utility.animation.LerpedFloat.Chaser;
 import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
@@ -69,6 +73,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 	public static final int REQUEST_INTERVAL = 100;
 
 	public Map<FactoryPanelPosition, FactoryPanelConnection> targetedBy;
+	public Map<BlockPos, FactoryPanelConnection> targetedByLinks;
 	public Set<FactoryPanelPosition> targeting;
 	public List<ItemStack> activeCraftingArrangement;
 
@@ -83,6 +88,8 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 	public boolean forceClearPromises;
 	public UUID network;
 
+	public boolean redstonePowered;
+
 	public RequestPromiseQueue restockerPromises;
 	private boolean promisePrimedForMarkDirty;
 
@@ -96,6 +103,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 		super(be, new FactoryPanelSlotPositioning(slot));
 		this.slot = slot;
 		this.targetedBy = new HashMap<>();
+		this.targetedByLinks = new HashMap<>();
 		this.targeting = new HashSet<>();
 		this.count = 0;
 		this.satisfied = false;
@@ -106,17 +114,29 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 		this.recipeOutput = 1;
 		this.active = false;
 		this.forceClearPromises = false;
+		this.redstonePowered = false;
 		this.promiseClearingInterval = -1;
 		this.bulb = LerpedFloat.linear()
 			.startWithValue(0)
-			.chase(0, 0.45, Chaser.EXP);
+			.chase(0, 0.125, Chaser.EXP);
 		this.restockerPromises = new RequestPromiseQueue(be::setChanged);
 		this.promisePrimedForMarkDirty = true;
 		this.network = UUID.randomUUID();
+		setLazyTickRate(40);
 	}
 
 	public void setNetwork(UUID network) {
 		this.network = network;
+	}
+
+	@Nullable
+	public static FactoryPanelBehaviour at(BlockAndTintGetter world, FactoryPanelConnection connection) {
+		Object cached = connection.cachedSource.get();
+		if (cached instanceof FactoryPanelBehaviour fbe && !fbe.blockEntity.isRemoved())
+			return fbe;
+		FactoryPanelBehaviour result = at(world, connection.from);
+		connection.cachedSource = new WeakReference<Object>(result);
+		return result;
 	}
 
 	@Nullable
@@ -131,11 +151,34 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 		return behaviour;
 	}
 
+	@Nullable
+	public static FactoryPanelSupportBehaviour linkAt(BlockAndTintGetter world, FactoryPanelConnection connection) {
+		Object cached = connection.cachedSource.get();
+		if (cached instanceof FactoryPanelSupportBehaviour fpsb && !fpsb.blockEntity.isRemoved())
+			return fpsb;
+		FactoryPanelSupportBehaviour result = linkAt(world, connection.from);
+		connection.cachedSource = new WeakReference<Object>(result);
+		return result;
+	}
+
+	@Nullable
+	public static FactoryPanelSupportBehaviour linkAt(BlockAndTintGetter world, FactoryPanelPosition pos) {
+		if (world instanceof Level l && !l.isLoaded(pos.pos()))
+			return null;
+		return BlockEntityBehaviour.get(world, pos.pos(), FactoryPanelSupportBehaviour.TYPE);
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+		notifyRedstoneOutputs();
+	}
+
 	@Override
 	public void tick() {
 		super.tick();
 		if (getWorld().isClientSide()) {
-			bulb.updateChaseTarget(satisfied ? 1 : 0);
+			bulb.updateChaseTarget(redstonePowered || satisfied ? 1 : 0);
 			bulb.tickChaser();
 			return;
 		}
@@ -147,6 +190,47 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 
 		tickStorageMonitor();
 		tickRequests();
+	}
+
+	@Override
+	public void lazyTick() {
+		super.lazyTick();
+		if (getWorld().isClientSide())
+			return;
+		checkForRedstoneInput();
+	}
+
+	public void checkForRedstoneInput() {
+		if (!active)
+			return;
+
+		boolean shouldPower = false;
+		for (FactoryPanelConnection connection : targetedByLinks.values()) {
+			if (!getWorld().isLoaded(connection.from.pos()))
+				return;
+			FactoryPanelSupportBehaviour linkAt = linkAt(getWorld(), connection);
+			if (linkAt == null)
+				return;
+			shouldPower |= linkAt.shouldPanelBePowered();
+		}
+
+		if (shouldPower == redstonePowered)
+			return;
+
+		redstonePowered = shouldPower;
+		blockEntity.notifyUpdate();
+		timer = 1;
+	}
+
+	private void notifyRedstoneOutputs() {
+		for (FactoryPanelConnection connection : targetedByLinks.values()) {
+			if (!getWorld().isLoaded(connection.from.pos()))
+				return;
+			FactoryPanelSupportBehaviour linkAt = linkAt(getWorld(), connection);
+			if (linkAt == null || linkAt.isOutput())
+				return;
+			linkAt.notifyLink();
+		}
 	}
 
 	private void tickStorageMonitor() {
@@ -164,6 +248,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 			&& promisedSatisfied == shouldPromiseSatisfy && waitingForNetwork == shouldWait)
 			return;
 
+		boolean notifyOutputs = satisfied != shouldSatisfy;
 		lastReportedLevelInStorage = inStorage;
 		satisfied = shouldSatisfy;
 		lastReportedPromises = promised;
@@ -171,13 +256,15 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 		lastReportedUnloadedLinks = unloadedLinkCount;
 		waitingForNetwork = shouldWait;
 		blockEntity.sendData();
+		if (notifyOutputs)
+			notifyRedstoneOutputs();
 	}
 
 	private void tickRequests() {
 		FactoryPanelBlockEntity panelBE = panelBE();
 		if (targetedBy.isEmpty() && !panelBE.restocker)
 			return;
-		if (satisfied || promisedSatisfied || waitingForNetwork)
+		if (satisfied || promisedSatisfied || waitingForNetwork || redstonePowered)
 			return;
 		if (timer > 0) {
 			timer = Math.min(timer, REQUEST_INTERVAL);
@@ -187,13 +274,13 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 
 		timer = REQUEST_INTERVAL;
 
+		if (recipeAddress.isBlank())
+			return;
+
 		if (panelBE.restocker) {
 			tryRestock();
 			return;
 		}
-
-		if (recipeAddress.isBlank())
-			return;
 
 		boolean failed = false;
 
@@ -201,7 +288,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 		List<BigItemStack> toRequestAsList = new ArrayList<>();
 
 		for (FactoryPanelConnection connection : targetedBy.values()) {
-			FactoryPanelBehaviour source = at(getWorld(), connection.from);
+			FactoryPanelBehaviour source = at(getWorld(), connection);
 			if (source == null)
 				return;
 
@@ -298,11 +385,23 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 	}
 
 	public void addConnection(FactoryPanelPosition fromPos) {
+		FactoryPanelSupportBehaviour link = linkAt(getWorld(), fromPos);
+		if (link != null) {
+			targetedByLinks.put(fromPos.pos(), new FactoryPanelConnection(fromPos, 1));
+			link.connect(this);
+			blockEntity.notifyUpdate();
+			return;
+		}
+
+		if (panelBE().restocker)
+			return;
 		if (targetedBy.size() >= 9)
 			return;
+
 		FactoryPanelBehaviour source = at(getWorld(), fromPos);
 		if (source == null)
 			return;
+
 		source.targeting.add(getPanelPosition());
 		targetedBy.put(fromPos, new FactoryPanelConnection(fromPos, 1));
 		blockEntity.notifyUpdate();
@@ -327,6 +426,8 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 
 		if (AllItemTags.WRENCH.matches(player.getItemInHand(hand))) {
 			int sharedMode = -1;
+			boolean notifySelf = false;
+
 			for (FactoryPanelPosition target : targeting) {
 				FactoryPanelBehaviour at = at(getWorld(), target);
 				if (at == null)
@@ -340,6 +441,15 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 				if (!player.level().isClientSide)
 					at.blockEntity.notifyUpdate();
 			}
+
+			for (FactoryPanelConnection connection : targetedByLinks.values()) {
+				if (sharedMode == -1)
+					sharedMode = (connection.arrowBendMode + 1) % 4;
+				connection.arrowBendMode = sharedMode;
+				if (!player.level().isClientSide)
+					notifySelf = true;
+			}
+
 			if (sharedMode == -1)
 				return;
 
@@ -347,6 +457,8 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 			boxes[sharedMode] = '\u25a0';
 			player.displayClientMessage(CreateLang.translate("factory_panel.cycled_arrow_path", new String(boxes))
 				.component(), true);
+			if (notifySelf)
+				blockEntity.notifyUpdate();
 
 			return;
 		}
@@ -391,11 +503,21 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 		return active;
 	}
 
+	public boolean isMissingAddress() {
+		return !targetedBy.isEmpty() && count != 0 && recipeAddress.isBlank();
+	}
+
 	@Override
 	public void destroy() {
+		disconnectAll();
+		super.destroy();
+	}
+
+	public void disconnectAll() {
 		FactoryPanelPosition panelPosition = getPanelPosition();
-		for (FactoryPanelPosition position : targetedBy.keySet()) {
-			FactoryPanelBehaviour source = at(getWorld(), position);
+		disconnectAllLinks();
+		for (FactoryPanelConnection connection : targetedBy.values()) {
+			FactoryPanelBehaviour source = at(getWorld(), connection);
 			if (source != null) {
 				source.targeting.remove(panelPosition);
 				source.blockEntity.sendData();
@@ -408,8 +530,17 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 				target.blockEntity.sendData();
 			}
 		}
+		targetedBy.clear();
+		targeting.clear();
+	}
 
-		super.destroy();
+	public void disconnectAllLinks() {
+		for (FactoryPanelConnection connection : targetedByLinks.values()) {
+			FactoryPanelSupportBehaviour source = linkAt(getWorld(), connection);
+			if (source != null)
+				source.disconnect(this);
+		}
+		targetedByLinks.clear();
 	}
 
 	public int getUnloadedLinks() {
@@ -476,6 +607,21 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 	}
 
 	@Override
+	public void writeSafe(CompoundTag nbt) {
+		if (!active)
+			return;
+
+		CompoundTag panelTag = new CompoundTag();
+		panelTag.put("Filter", getFilter().serializeNBT());
+		panelTag.putInt("FilterAmount", count);
+		panelTag.putUUID("Freq", network);
+		panelTag.putString("RecipeAddress", recipeAddress);
+		panelTag.putInt("PromiseClearingInterval", -1);
+		panelTag.putInt("RecipeOutput", 1);
+		nbt.put(CreateLang.asId(slot.name()), panelTag);
+	}
+
+	@Override
 	public void write(CompoundTag nbt, boolean clientPacket) {
 		if (!active)
 			return;
@@ -489,8 +635,11 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 		panelTag.putBoolean("Satisfied", satisfied);
 		panelTag.putBoolean("PromisedSatisfied", promisedSatisfied);
 		panelTag.putBoolean("Waiting", waitingForNetwork);
+		panelTag.putBoolean("RedstonePowered", redstonePowered);
 		panelTag.put("Targeting", NBTHelper.writeCompoundList(targeting, FactoryPanelPosition::write));
 		panelTag.put("TargetedBy", NBTHelper.writeCompoundList(targetedBy.values(), FactoryPanelConnection::write));
+		panelTag.put("TargetedByLinks",
+			NBTHelper.writeCompoundList(targetedByLinks.values(), FactoryPanelConnection::write));
 		panelTag.putString("RecipeAddress", recipeAddress);
 		panelTag.putInt("RecipeOutput", recipeOutput);
 		panelTag.putInt("PromiseClearingInterval", promiseClearingInterval);
@@ -521,6 +670,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 		satisfied = panelTag.getBoolean("Satisfied");
 		promisedSatisfied = panelTag.getBoolean("PromisedSatisfied");
 		waitingForNetwork = panelTag.getBoolean("Waiting");
+		redstonePowered = panelTag.getBoolean("RedstonePowered");
 		promiseClearingInterval = panelTag.getInt("PromiseClearingInterval");
 		if (panelTag.hasUUID("Freq"))
 			network = panelTag.getUUID("Freq");
@@ -532,6 +682,11 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 		targetedBy.clear();
 		NBTHelper.iterateCompoundList(panelTag.getList("TargetedBy", Tag.TAG_COMPOUND),
 			c -> targetedBy.put(FactoryPanelPosition.read(c), FactoryPanelConnection.read(c)));
+
+		targetedByLinks.clear();
+		NBTHelper.iterateCompoundList(panelTag.getList("TargetedByLinks", Tag.TAG_COMPOUND),
+			c -> targetedByLinks.put(FactoryPanelPosition.read(c)
+				.pos(), FactoryPanelConnection.read(c)));
 
 		activeCraftingArrangement = NBTHelper.readItemList(panelTag.getList("Craft", Tag.TAG_COMPOUND));
 		recipeAddress = panelTag.getString("RecipeAddress");
@@ -551,7 +706,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 
 	@Override
 	public MutableComponent formatValue(ValueSettings value) {
-		return value.value() == 0 ? Components.literal("*")
+		return value.value() == 0 ? CreateLang.translateDirect("gui.factory_panel.inactive")
 			: Components.literal(Math.max(0, value.value()) + ((value.row() == 0) ? "" : "\u25A4"));
 	}
 
@@ -594,6 +749,16 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 	public MutableComponent getLabel() {
 		String key = "";
 
+		if (!targetedBy.isEmpty() && count == 0)
+			return CreateLang.translate("gui.factory_panel.no_target_amount_set")
+				.style(ChatFormatting.RED)
+				.component();
+
+		if (isMissingAddress())
+			return CreateLang.translate("gui.factory_panel.address_missing")
+				.style(ChatFormatting.RED)
+				.component();
+
 		if (getFilter().isEmpty())
 			key = "factory_panel.new_factory_task";
 		else if (waitingForNetwork)
@@ -602,10 +767,12 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 			return getFilter().getHoverName()
 				.plainCopy();
 		else {
-			String stacks = upTo ? "" : "\u25A4";
 			key = getFilter().getHoverName()
-				.getString() + " -> " + getAmount() + stacks;
-			if (!satisfied)
+				.getString();
+			if (redstonePowered)
+				key += " " + CreateLang.translate("factory_panel.redstone_paused")
+					.string();
+			else if (!satisfied)
 				key += " " + CreateLang.translate("factory_panel.in_progress")
 					.string();
 			return CreateLang.text(key)
@@ -627,6 +794,10 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 			.translateDirect(filter.isEmpty() ? "logistics.filter.click_to_set" : "factory_panel.click_to_configure");
 	}
 
+	public MutableComponent getAmountTip() {
+		return CreateLang.translateDirect("factory_panel.hold_to_set_amount");
+	}
+
 	@Override
 	public MutableComponent getCountLabelForValueBox() {
 		if (filter.isEmpty())
@@ -634,17 +805,19 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 		if (waitingForNetwork)
 			return Components.literal("?");
 
-		int inStorage = getLevelInStorage() / (upTo ? 1 : getFilter().getMaxStackSize());
+		int levelInStorage = getLevelInStorage();
+		boolean inf = levelInStorage >= BigItemStack.INF;
+		int inStorage = levelInStorage / (upTo ? 1 : getFilter().getMaxStackSize());
 		int promised = getPromised();
 		String stacks = upTo ? "" : "\u25A4";
 
 		if (count == 0) {
-			return CreateLang.text(inStorage + stacks)
+			return CreateLang.text(inf ? "  \u221e" : inStorage + stacks)
 				.color(0xF1EFE8)
 				.component();
 		}
 
-		return CreateLang.text("   " + inStorage + stacks)
+		return CreateLang.text(inf ? "  \u221e" : "   " + inStorage + stacks)
 			.color(satisfied ? 0xD7FFA8 : promisedSatisfied ? 0xffcd75 : 0xFFBFA8)
 			.add(CreateLang.text(promised == 0 ? "" : "\u23F6"))
 			.add(CreateLang.text("/")
@@ -682,6 +855,17 @@ public class FactoryPanelBehaviour extends FilteringBehaviour {
 	public void displayScreen(Player player) {
 		if (player instanceof LocalPlayer)
 			ScreenOpener.open(new FactoryPanelScreen(this));
+	}
+
+	public int getIngredientStatusColor() {
+		return count == 0 || isMissingAddress() || redstonePowered ? 0x888898
+			: waitingForNetwork ? 0x5B3B3B : satisfied ? 0x9EFF7F : promisedSatisfied ? 0x22AFAF : 0x3D6EBD;
+	}
+
+	@Override
+	public ItemRequirement getRequiredItems() {
+		return isActive() ? new ItemRequirement(ItemRequirement.ItemUseType.CONSUME, AllBlocks.FACTORY_GAUGE.asItem())
+			: ItemRequirement.NONE;
 	}
 
 }

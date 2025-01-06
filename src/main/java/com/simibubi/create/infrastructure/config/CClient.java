@@ -22,8 +22,6 @@ public class CClient extends ConfigBase {
 	public final ConfigFloat filterItemRenderDistance = f(10f, 1, "filterItemRenderDistance", Comments.filterItemRenderDistance);
 	public final ConfigBool rainbowDebug = b(false, "enableRainbowDebug",
 			Comments.rainbowDebug);
-	public final ConfigInt maxContraptionLightVolume = i(16384, 0, Integer.MAX_VALUE, "maximumContraptionLightVolume",
-			Comments.maxContraptionLightVolume);
 	// no group
 	public final ConfigInt mainMenuConfigButtonRow = i(2, 0, 4, "mainMenuConfigButtonRow",
 			Comments.mainMenuConfigButtonRow);
@@ -82,7 +80,6 @@ public class CClient extends ConfigBase {
 	public final ConfigBool showTrackGraphOnF3 = b(false, "showTrackGraphOnF3", Comments.showTrackGraphOnF3);
 	public final ConfigBool showExtendedTrackGraphOnF3 = b(false, "showExtendedTrackGraphOnF3", Comments.showExtendedTrackGraphOnF3);
 	public final ConfigBool showTrainMapOverlay = b(true, "showTrainMapOverlay", Comments.showTrainMapOverlay);
-	public final ConfigBool trainMapOverlay = b(true, "showTrainMapOverlay", Comments.showTrainMapOverlay);
 	public final ConfigEnum<TrainMapTheme> trainMapColorTheme =
 		e(TrainMapTheme.RED, "trainMapColorTheme", Comments.trainMapColorTheme);
 
@@ -110,7 +107,6 @@ public class CClient extends ConfigBase {
 				"Maximum Distance to the player at which items in Blocks' filter slots will be displayed"
 		};
 		static String rainbowDebug = "Show kinetic debug information on blocks while the F3-Menu is open.";
-		static String maxContraptionLightVolume = "The maximum amount of blocks for which to try and calculate dynamic contraption lighting. Decrease if large contraption cause too much lag";
 		static String[] mainMenuConfigButtonRow = new String[]{
 				"Choose the menu row that the Create config button appears on in the main menu",
 				"Set to 0 to disable the button altogether"

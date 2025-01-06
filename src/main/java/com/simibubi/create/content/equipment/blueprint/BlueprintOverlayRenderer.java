@@ -13,14 +13,15 @@ import com.simibubi.create.AllItems;
 import com.simibubi.create.content.equipment.blueprint.BlueprintEntity.BlueprintCraftingInventory;
 import com.simibubi.create.content.equipment.blueprint.BlueprintEntity.BlueprintSection;
 import com.simibubi.create.content.logistics.BigItemStack;
-import com.simibubi.create.content.logistics.displayCloth.BlueprintOverlayShopContext;
-import com.simibubi.create.content.logistics.displayCloth.DisplayClothBlockEntity;
-import com.simibubi.create.content.logistics.displayCloth.ShoppingListItem.ShoppingList;
 import com.simibubi.create.content.logistics.filter.AttributeFilterMenu.WhitelistMode;
 import com.simibubi.create.content.logistics.filter.FilterItem;
 import com.simibubi.create.content.logistics.filter.FilterItemStack;
-import com.simibubi.create.content.logistics.filter.ItemAttribute;
+import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
+import com.simibubi.create.content.logistics.item.filter.attribute.attributes.InTagAttribute;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
+import com.simibubi.create.content.logistics.tableCloth.BlueprintOverlayShopContext;
+import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
+import com.simibubi.create.content.logistics.tableCloth.ShoppingListItem.ShoppingList;
 import com.simibubi.create.content.trains.track.TrackPlacement.PlacementInfo;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 
@@ -36,6 +37,7 @@ import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.createmod.catnip.gui.element.GuiGameElement;
 import net.createmod.catnip.utility.AnimationTickHolder;
 import net.createmod.catnip.utility.Couple;
+import net.createmod.catnip.utility.Iterate;
 import net.createmod.catnip.utility.Pair;
 import net.createmod.catnip.utility.lang.Components;
 import net.createmod.ponder.utility.LevelTickHolder;
@@ -47,11 +49,13 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.GameType;
@@ -142,7 +146,7 @@ public class BlueprintOverlayRenderer {
 		}
 	}
 
-	public static void displayClothShop(DisplayClothBlockEntity dce, int alreadyPurchased, ShoppingList list) {
+	public static void displayClothShop(TableClothBlockEntity dce, int alreadyPurchased, ShoppingList list) {
 		if (active)
 			return;
 		prepareCustomOverlay();
@@ -150,8 +154,10 @@ public class BlueprintOverlayRenderer {
 
 		shopContext = new BlueprintOverlayShopContext(false, dce.getStockLevelForTrade(list), alreadyPurchased);
 
-		ingredients.add(Pair.of(dce.paymentItem.copyWithCount(dce.paymentAmount),
-			!dce.paymentItem.isEmpty() && shopContext.stockLevel() > shopContext.purchases()));
+		ingredients.add(Pair.of(dce.getPaymentItem()
+			.copyWithCount(dce.getPaymentAmount()),
+			!dce.getPaymentItem()
+				.isEmpty() && shopContext.stockLevel() > shopContext.purchases()));
 		for (BigItemStack entry : dce.requestData.encodedRequest.stacks())
 			results.add(entry.stack.copyWithCount(entry.count));
 	}
@@ -319,7 +325,7 @@ public class BlueprintOverlayRenderer {
 
 	public static void renderOverlay(GuiGraphics graphics, float partialTicks, Window window) {
 		Minecraft mc = Minecraft.getInstance();
-		if (mc.options.hideGui)
+		if (mc.options.hideGui || mc.screen != null)
 			return;
 		if (!active || empty)
 			return;
@@ -342,7 +348,7 @@ public class BlueprintOverlayRenderer {
 			TooltipRenderUtil.renderTooltipBackground(graphics, x - 2, y + 1, w + 4, 19, 0, 0x55_000000, 0x55_000000, 0,
 				0);
 
-			AllGuiTextures.TRADE_OVERLAY.render(graphics, window.getGuiScaledWidth() / 2 - 49, y - 19);
+			AllGuiTextures.TRADE_OVERLAY.render(graphics, window.getGuiScaledWidth() / 2 - 48, y - 19);
 			if (shopContext.purchases() > 0) {
 				graphics.renderItem(AllItems.SHOPPING_LIST.asStack(), window.getGuiScaledWidth() / 2 + 20, y - 20);
 				graphics.drawString(mc.font, Components.literal("x" + shopContext.purchases()), window.getGuiScaledWidth() / 2 + 20 + 16,
@@ -390,9 +396,26 @@ public class BlueprintOverlayRenderer {
 			}
 		}
 
-//		if (shopContext != null) Display stock level?
-//			graphics.drawString(mc.font, Components.literal(shopContext.stockLevel() + "x in Stock"), x + 2, y + 13,
-//				0xff_797979, true);
+		if (shopContext != null && !shopContext.checkout()) {
+			int cycle = 0;
+			for (boolean count : Iterate.trueAndFalse)
+				for (int i = 0; i < results.size(); i++) {
+					ItemStack result = results.get(i);
+					List<Component> tooltipLines = result.getTooltipLines(mc.player, TooltipFlag.NORMAL);
+					if (tooltipLines.size() <= 1)
+						continue;
+					if (count) {
+						cycle++;
+						continue;
+					}
+					if ((gui.getGuiTicks() / 40) % cycle != i)
+						continue;
+					graphics.renderComponentTooltip(gui.getFont(), tooltipLines, mc.getWindow()
+						.getGuiScaledWidth(),
+						mc.getWindow()
+							.getGuiScaledHeight());
+				}
+		}
 
 		RenderSystem.disableBlend();
 	}
@@ -424,15 +447,15 @@ public class BlueprintOverlayRenderer {
 					if (!stackInSlot.isEmpty())
 						list.add(stackInSlot);
 				}
-				return list.toArray(new ItemStack[list.size()]);
+				return list.toArray(ItemStack[]::new);
 			}
 
 			if (AllItems.ATTRIBUTE_FILTER.isIn(itemStack)) {
 				WhitelistMode whitelistMode = WhitelistMode.values()[tag.getInt("WhitelistMode")];
 				ListTag attributes = tag.getList("MatchedAttributes", net.minecraft.nbt.Tag.TAG_COMPOUND);
 				if (whitelistMode == WhitelistMode.WHITELIST_DISJ && attributes.size() == 1) {
-					ItemAttribute fromNBT = ItemAttribute.fromNBT((CompoundTag) attributes.get(0));
-					if (fromNBT instanceof ItemAttribute.InTag inTag) {
+					ItemAttribute fromNBT = ItemAttribute.loadStatic((CompoundTag) attributes.get(0));
+					if (fromNBT instanceof InTagAttribute inTag) {
 						List<ItemStack> stacks = new ArrayList<>();
 						for (Holder<Item> holder : BuiltInRegistries.ITEM.getTagOrEmpty(inTag.tag)) {
 							stacks.add(new ItemStack(holder.value()));

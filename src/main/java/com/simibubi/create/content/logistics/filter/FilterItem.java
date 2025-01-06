@@ -3,12 +3,17 @@ package com.simibubi.create.content.logistics.filter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.Nonnull;
 
+import org.jetbrains.annotations.NotNull;
+
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllKeys;
+import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.filter.AttributeFilterMenu.WhitelistMode;
+import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.utility.CreateLang;
 
@@ -129,7 +134,7 @@ public class FilterItem extends Item implements MenuProvider {
 				.getList("MatchedAttributes", Tag.TAG_COMPOUND);
 			for (Tag inbt : attributes) {
 				CompoundTag compound = (CompoundTag) inbt;
-				ItemAttribute attribute = ItemAttribute.fromNBT(compound);
+				ItemAttribute attribute = ItemAttribute.loadStatic(compound);
 				if (attribute == null)
 					continue;
 				boolean inverted = compound.getBoolean("Inverted");
@@ -166,8 +171,8 @@ public class FilterItem extends Item implements MenuProvider {
 		ItemStack heldItem = player.getItemInHand(hand);
 
 		if (!player.isShiftKeyDown() && hand == InteractionHand.MAIN_HAND) {
-			if (!world.isClientSide && player instanceof ServerPlayer)
-				NetworkHooks.openScreen((ServerPlayer) player, this, buf -> {
+			if (!world.isClientSide && player instanceof ServerPlayer serverPlayer)
+				NetworkHooks.openScreen(serverPlayer, this, buf -> {
 					buf.writeItem(heldItem);
 				});
 			return InteractionResultHolder.success(heldItem);
@@ -206,10 +211,36 @@ public class FilterItem extends Item implements MenuProvider {
 
 	public static boolean testDirect(ItemStack filter, ItemStack stack, boolean matchNBT) {
 		if (matchNBT) {
+			if (PackageItem.isPackage(filter) && PackageItem.isPackage(stack))
+				return doPackagesHaveSameData(filter, stack);
+
 			return ItemHandlerHelper.canItemStacksStack(filter, stack);
-		} else {
-			return ItemHelper.sameItem(filter, stack);
 		}
+
+		if (PackageItem.isPackage(filter) && PackageItem.isPackage(stack))
+			return true;
+
+		return ItemHelper.sameItem(filter, stack);
+	}
+
+	public static boolean doPackagesHaveSameData(@NotNull ItemStack a, @NotNull ItemStack b) {
+		if (a.isEmpty() || a.hasTag() != b.hasTag())
+			return false;
+		if (!a.hasTag())
+			return true;
+		if (!a.areCapsCompatible(b))
+			return false;
+		for (String key : a.getTag()
+			.getAllKeys()) {
+			if (key.equals("Fragment"))
+				continue;
+			if (!Objects.equals(a.getTag()
+				.get(key),
+				b.getTag()
+					.get(key)))
+				return false;
+		}
+		return true;
 	}
 
 }

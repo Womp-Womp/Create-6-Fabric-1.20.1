@@ -179,8 +179,7 @@ public class SchematicPrinter {
 		BlockPos target = getCurrentTarget();
 
 		if (printStage == PrintStage.ENTITIES) {
-			Entity entity = blockReader.getEntityStream()
-					.collect(Collectors.toList())
+			Entity entity = blockReader.getEntityList()
 					.get(printingEntityIndex);
 			entityHandler.handle(target, entity);
 		} else {
@@ -244,8 +243,7 @@ public class SchematicPrinter {
 
 	public ItemRequirement getCurrentRequirement() {
 		if (printStage == PrintStage.ENTITIES)
-			return ItemRequirement.of(blockReader.getEntityStream()
-					.collect(Collectors.toList())
+			return ItemRequirement.of(blockReader.getEntityList()
 					.get(printingEntityIndex));
 
 		BlockPos target = getCurrentTarget();
@@ -279,19 +277,18 @@ public class SchematicPrinter {
 	}
 
 	public void markAllEntityRequirements(MaterialChecklist checklist) {
-		blockReader.getEntityStream()
-				.forEach(entity -> {
+		for (Entity entity : blockReader.getEntityList()) {
 					ItemRequirement requirement = ItemRequirement.of(entity);
 					if (requirement.isEmpty())
 						return;
 					if (requirement.isInvalid())
 						return;
 					checklist.require(requirement);
-				});
+				}
 	}
 
 	public boolean advanceCurrentPos() {
-		List<Entity> entities = blockReader.getEntityStream().collect(Collectors.toList());
+		List<Entity> entities = blockReader.getEntityList();
 
 		do {
 			if (printStage == PrintStage.BLOCKS) {

@@ -23,10 +23,21 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class PipeAttachmentModel extends ForwardingBakedModel {
+public class PipeAttachmentModel extends BakedModelWrapperWithData {
 
-	public PipeAttachmentModel(BakedModel template) {
+	private boolean ao;
+
+	public static PipeAttachmentModel withAO(BakedModel template) {
+		return new PipeAttachmentModel(template, true);
+	}
+
+	public static PipeAttachmentModel withoutAO(BakedModel template) {
+		return new PipeAttachmentModel(template, false);
+	}
+
+	public PipeAttachmentModel(BakedModel template, boolean ao) {
 		wrapped = template;
+		this.ao = ao;
 	}
 
 	@Override
@@ -86,6 +97,21 @@ public class PipeAttachmentModel extends ForwardingBakedModel {
 		if (pipeData.isEncased())
 			((FabricBakedModel) AllPartialModels.FLUID_PIPE_CASING.get())
 				.emitBlockQuads(world, state, pos, randomSupplier, context);
+	}
+
+	@Override
+	public boolean useAmbientOcclusion(BlockState state, RenderType renderType) {
+		return ao;
+	}
+
+	@Override
+	public boolean useAmbientOcclusion(BlockState state) {
+		return ao;
+	}
+
+	@Override
+	public boolean useAmbientOcclusion() {
+		return ao;
 	}
 
 	private static class PipeModelData {

@@ -38,6 +38,7 @@ import com.simibubi.create.foundation.collision.Matrix3d;
 import com.simibubi.create.foundation.mixin.accessor.ServerLevelAccessor;
 import com.simibubi.create.foundation.utility.AdventureUtil;
 
+import dev.engine_room.flywheel.api.backend.BackendManager;
 import io.github.fabricators_of_create.porting_lib.entity.IEntityAdditionalSpawnData;
 import io.github.fabricators_of_create.porting_lib.entity.PortingLibEntity;
 import io.github.fabricators_of_create.porting_lib.mixin.accessors.common.accessor.EntityAccessor;
@@ -390,7 +391,8 @@ public abstract class AbstractContraptionEntity extends Entity implements IEntit
 
 		if (level().isClientSide())
 			EnvExecutor.runWhenOn(EnvType.CLIENT, () -> () -> {
-				if (!contraption.deferInvalidate)
+				// The visual will handle this with flywheel on.
+				if (!contraption.deferInvalidate || BackendManager.isBackendOn())
 					return;
 				contraption.deferInvalidate = false;
 				ContraptionRenderInfo.invalidate(contraption);
@@ -929,6 +931,12 @@ public abstract class AbstractContraptionEntity extends Entity implements IEntit
 		// Contraptions no longer catch fire
 	}
 
+	// Contraptions shouldn't activate pressure plates and tripwires
+	@Override
+	public boolean isIgnoringBlockTriggers() {
+		return true;
+	}
+
 	public boolean isReadyForRender() {
 		return initialized;
 	}
@@ -937,4 +945,7 @@ public abstract class AbstractContraptionEntity extends Entity implements IEntit
 		return isAlive() || level().isClientSide() ? staleTicks > 0 : false;
 	}
 
+	public boolean isPrevPosInvalid() {
+		return prevPosInvalid;
+	}
 }

@@ -205,6 +205,8 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity implements 
 		if (phaseBefore != phase && phase == Phase.CRAFTING)
 			groupedItemsBeforeCraft = before;
 		if (phaseBefore == Phase.EXPORTING && phase == Phase.WAITING) {
+			if (before.onlyEmptyItems())
+				return;
 			Direction facing = getBlockState().getValue(MechanicalCrafterBlock.HORIZONTAL_FACING);
 			Vec3 vec = Vec3.atLowerCornerOf(facing.getNormal())
 				.scale(.75)
@@ -254,7 +256,7 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity implements 
 					return;
 				if (RecipeGridHandler.getTargetingCrafter(this) != null) {
 					phase = Phase.EXPORTING;
-					countDown = 1000;
+					countDown = groupedItems.onlyEmptyItems() ? 0 : 1000;
 					sendData();
 					return;
 				}
@@ -306,12 +308,15 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity implements 
 					return;
 				}
 
+				boolean empty = groupedItems.onlyEmptyItems();
 				Pointing pointing = getBlockState().getValue(MechanicalCrafterBlock.POINTING);
 				groupedItems.mergeOnto(targetingCrafter.groupedItems, pointing);
 				groupedItems = new GroupedItems();
 
 				float pitch = targetingCrafter.groupedItems.grid.size() * 1 / 16f + .5f;
-				AllSoundEvents.CRAFTER_CLICK.playOnServer(level, worldPosition, 1, pitch);
+				
+				if (!empty)
+					AllSoundEvents.CRAFTER_CLICK.playOnServer(level, worldPosition, 1, pitch);
 
 				phase = Phase.WAITING;
 				countDown = 0;
@@ -477,7 +482,7 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity implements 
 			.isEmpty() || covered;
 	}
 
-	protected void checkCompletedRecipe(boolean poweredStart) {
+	public void checkCompletedRecipe(boolean poweredStart) {
 		if (getSpeed() == 0)
 			return;
 		if (level.isClientSide && !isVirtual())
@@ -498,7 +503,7 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity implements 
 		if (RecipeGridHandler.getPrecedingCrafters(this)
 			.isEmpty()) {
 			phase = Phase.ASSEMBLING;
-			countDown = 500;
+			countDown = 1;
 		}
 		sendData();
 	}
@@ -515,7 +520,7 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity implements 
 				return;
 
 		phase = Phase.ASSEMBLING;
-		countDown = Math.max(100, getCountDownSpeed() + 1);
+		countDown = 1;
 	}
 
 	@Nullable

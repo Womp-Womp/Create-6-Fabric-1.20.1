@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.simibubi.create.content.fluids.FluidTransportBehaviour;
+import com.simibubi.create.content.logistics.box.PackageStyles;
+import com.simibubi.create.content.logistics.box.PackageStyles.PackageStyle;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import net.createmod.catnip.utility.Couple;
@@ -70,7 +72,7 @@ public class AllPartialModels {
 		ROPE_COIL = block("rope_pulley/rope_coil"), ROPE_HALF = block("rope_pulley/rope_half"),
 		ROPE_HALF_MAGNET = block("rope_pulley/rope_half_magnet"),
 
-		HOSE_COIL = block("hose_pulley/rope_coil"), HOSE = block("hose_pulley/rope"),
+		HOSE_COIL = block("hose_pulley/hose_coil"), HOSE = block("hose_pulley/rope"),
 		HOSE_MAGNET = block("hose_pulley/pulley_magnet"), HOSE_HALF = block("hose_pulley/rope_half"),
 		HOSE_HALF_MAGNET = block("hose_pulley/rope_half_magnet"),
 
@@ -123,8 +125,11 @@ public class AllPartialModels {
 		FROGPORT_TONGUE = block("package_frogport/tongue"),
 		POSTBOX_FLAG = block("package_postbox/flag"),
 
-		PACKAGER_TRAY_REGULAR = block("packager/tray_regular"), PACKAGER_TRAY_DEFRAG = block("packager/tray_defrag"),
+		PACKAGER_TRAY_REGULAR = block("packager/tray"), PACKAGER_TRAY_DEFRAG = block("repackager/tray"),
 		PACKAGER_HATCH_OPEN = block("packager/hatch_open"), PACKAGER_HATCH_CLOSED = block("packager/hatch_closed"),
+		
+		TABLE_CLOTH_PRICE_SIDE = block("table_cloth/price_tag_side"),
+		TABLE_CLOTH_PRICE_TOP = block("table_cloth/price_tag_top"),
 
 		COPPER_BACKTANK_SHAFT = block("copper_backtank/block_shaft_input"),
 		COPPER_BACKTANK_COGS = block("copper_backtank/block_cogs"),
@@ -188,11 +193,12 @@ public class AllPartialModels {
 		FACTORY_PANEL_RESTOCKER = block("factory_gauge/panel_restocker"),
 		FACTORY_PANEL_RESTOCKER_WITH_BULB = block("factory_gauge/panel_restocker_with_bulb"),
 		FACTORY_PANEL_LIGHT = block("factory_gauge/bulb_light"),
+		FACTORY_PANEL_RED_LIGHT = block("factory_gauge/bulb_red"),
 
-		DISPLAY_CLOTH_NW = block("table_cloth/north_west"),
-		DISPLAY_CLOTH_NE = block("table_cloth/north_east"),
-		DISPLAY_CLOTH_SW = block("table_cloth/south_west"),
-		DISPLAY_CLOTH_SE = block("table_cloth/south_east"),
+		TABLE_CLOTH_NW = block("table_cloth/north_west"),
+		TABLE_CLOTH_NE = block("table_cloth/north_east"),
+		TABLE_CLOTH_SW = block("table_cloth/south_west"),
+		TABLE_CLOTH_SE = block("table_cloth/south_east"),
 		
 		CRAFTING_BLUEPRINT_1x1 = entity("crafting_blueprint_small"),
 		CRAFTING_BLUEPRINT_2x2 = entity("crafting_blueprint_medium"),
@@ -210,6 +216,7 @@ public class AllPartialModels {
 
 	public static final Map<Direction, PartialModel> FACTORY_PANEL_ARROWS = new EnumMap<>(Direction.class);
 	public static final Map<Direction, PartialModel> FACTORY_PANEL_LINES = new EnumMap<>(Direction.class);
+	public static final Map<Direction, PartialModel> FACTORY_PANEL_DOTTED = new EnumMap<>(Direction.class);
 	
 	public static final Map<Direction, PartialModel> METAL_GIRDER_BRACKETS = new EnumMap<>(Direction.class);
 	public static final Map<DyeColor, PartialModel> TOOLBOX_LIDS = new EnumMap<>(DyeColor.class);
@@ -217,7 +224,7 @@ public class AllPartialModels {
 	public static final List<PartialModel> CONTRAPTION_CONTROLS_INDICATOR = new ArrayList<>();
 
 	public static final Map<ResourceLocation, PartialModel> PACKAGES = new HashMap<>();
-	public static final List<PartialModel> PACKAGES_AS_LIST = new ArrayList<>();
+	public static final List<PartialModel> PACKAGES_TO_HIDE_AS = new ArrayList<>();
 	public static final Map<ResourceLocation, PartialModel> PACKAGE_RIGGING = new HashMap<>();
 
 	static {
@@ -236,6 +243,7 @@ public class AllPartialModels {
 			METAL_GIRDER_BRACKETS.put(d, block("metal_girder/bracket_" + Lang.asId(d.name())));
 			FACTORY_PANEL_ARROWS.put(d, block("factory_gauge/connections/arrow_" + Lang.asId(d.name())));
 			FACTORY_PANEL_LINES.put(d, block("factory_gauge/connections/line_" + Lang.asId(d.name())));
+			FACTORY_PANEL_DOTTED.put(d, block("factory_gauge/connections/dotted_" + Lang.asId(d.name())));
 		}
 		for (int i = 0; i < 8; i++)
 			CONTRAPTION_CONTROLS_INDICATOR.add(block("contraption_controls/indicator_" + i));
@@ -243,13 +251,13 @@ public class AllPartialModels {
 		putFoldingDoor("andesite_door");
 		putFoldingDoor("copper_door");
 
-		for (String size : new String[] { "12x12", "10x12", "12x10", "10x8" }) {
-			ResourceLocation key = Create.asResource("cardboard_package_" + size);
-			PartialModel model = PartialModel.of(Create.asResource("item/packages/cardboard_" + size));
+		for (PackageStyle style : PackageStyles.STYLES) {
+			ResourceLocation key = style.getItemId();
+			PartialModel model = PartialModel.of(Create.asResource("item/" + key.getPath()));
 			PACKAGES.put(key, model);
-			PACKAGES_AS_LIST.add(model);
-			PACKAGE_RIGGING.put(key,
-				PartialModel.of(Create.asResource("item/packages/cardboard_" + size + "_rigging")));
+			if (!style.rare())
+				PACKAGES_TO_HIDE_AS.add(model);
+			PACKAGE_RIGGING.put(key, PartialModel.of(style.getRiggingModel()));
 		}
 	}
 

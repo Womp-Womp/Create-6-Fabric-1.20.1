@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlock.PanelSlot;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
+import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
@@ -86,6 +87,8 @@ public class FactoryPanelBlockEntity extends SmartBlockEntity {
 		BlockEntity be = level.getBlockEntity(packagerPos);
 		if (be == null || !(be instanceof PackagerBlockEntity pbe))
 			return null;
+		if (pbe instanceof RepackagerBlockEntity)
+			return null;
 		return pbe;
 	}
 
@@ -95,6 +98,14 @@ public class FactoryPanelBlockEntity extends SmartBlockEntity {
 			if (panelBehaviour.isActive())
 				result++;
 		return result;
+	}
+	
+	@Override
+	public void remove() {
+		for (FactoryPanelBehaviour panelBehaviour : panels.values())
+			if (panelBehaviour.isActive())
+				panelBehaviour.disconnectAll();
+		super.remove();
 	}
 
 	@Override

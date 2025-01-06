@@ -25,6 +25,8 @@ import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour
 import com.simibubi.create.foundation.blockEntity.behaviour.fluid.SmartFluidTankBehaviour;
 import com.simibubi.create.foundation.fluid.FluidHelper;
 
+import com.simibubi.create.impl.behaviour.BlockSpoutingBehaviourImpl;
+
 import io.github.fabricators_of_create.porting_lib.block.CustomRenderBoundingBoxBlockEntity;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import net.createmod.catnip.utility.NBTHelper;
@@ -202,10 +204,10 @@ public class SpoutBlockEntity extends SmartBlockEntity implements IHaveGoggleInf
 
 		FluidStack currentFluidInTank = getCurrentFluidInTank();
 		if (processingTicks == -1 && (isVirtual() || !level.isClientSide()) && !currentFluidInTank.isEmpty()) {
-			BlockSpoutingBehaviour.forEach(behaviour -> {
+			BlockSpoutingBehaviourImpl.forEach(behaviour -> {
 				if (customProcess != null)
 					return;
-				if (behaviour.fillBlock(level, worldPosition.below(2), this, currentFluidInTank, true) > 0) {
+				if (behaviour.fillBlock(level, worldPosition.below(2), this, currentFluidInTank.copy(), true) > 0) {
 					processingTicks = FILLING_TIME;
 					customProcess = behaviour;
 					notifyUpdate();
@@ -216,7 +218,7 @@ public class SpoutBlockEntity extends SmartBlockEntity implements IHaveGoggleInf
 		if (processingTicks >= 0) {
 			processingTicks--;
 			if (processingTicks == 5 && customProcess != null) {
-				long fillBlock = customProcess.fillBlock(level, worldPosition.below(2), this, currentFluidInTank, false);
+				long fillBlock = customProcess.fillBlock(level, worldPosition.below(2), this, currentFluidInTank.copy(), false);
 				customProcess = null;
 				if (fillBlock > 0) {
 					// fabric: if the FluidStack is empty it should actually be empty

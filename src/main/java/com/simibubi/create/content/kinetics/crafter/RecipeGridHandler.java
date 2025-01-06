@@ -52,7 +52,6 @@ public class RecipeGridHandler {
 		Set<MechanicalCrafterBlockEntity> visited = new HashSet<>();
 		frontier.add(Pair.of(root, null));
 
-		boolean powered = false;
 		boolean empty = false;
 		boolean allEmpty = true;
 
@@ -67,9 +66,6 @@ public class RecipeGridHandler {
 				empty = true;
 			else
 				allEmpty = false;
-			if (poweredStart && current.getLevel()
-				.hasNeighborSignal(current.getBlockPos()))
-				powered = true;
 
 			crafters.add(current);
 			visited.add(current);
@@ -82,7 +78,7 @@ public class RecipeGridHandler {
 					frontier.add(Pair.of(preceding, current));
 		}
 
-		return empty && !powered || allEmpty ? null : crafters;
+		return empty && !poweredStart || allEmpty ? null : crafters;
 	}
 
 	public static MechanicalCrafterBlockEntity getTargetingCrafter(MechanicalCrafterBlockEntity crafter) {
@@ -242,6 +238,13 @@ public class RecipeGridHandler {
 
 			width = maxX - minX + 1;
 			height = maxY - minY + 1;
+		}
+
+		public boolean onlyEmptyItems() {
+			for (ItemStack stack : grid.values())
+				if (!stack.isEmpty())
+					return false;
+			return true;
 		}
 
 	}

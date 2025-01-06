@@ -10,13 +10,13 @@ import org.apache.commons.lang3.mutable.MutableBoolean;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
+import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlockEntity;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import com.simibubi.create.content.redstone.displayLink.LinkWithBulbBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
 import net.createmod.catnip.utility.Pair;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -35,7 +35,7 @@ public class PackagerLinkBlockEntity extends LinkWithBulbBlockEntity {
 
 	public InventorySummary fetchSummaryFromPackager(@Nullable IItemHandler ignoredHandler) {
 		PackagerBlockEntity packager = getPackager();
-		if (packager == null || packager.defragmenterActive)
+		if (packager == null)
 			return InventorySummary.EMPTY;
 		if (packager.isTargetingSameInventory(ignoredHandler))
 			return InventorySummary.EMPTY;
@@ -49,7 +49,7 @@ public class PackagerLinkBlockEntity extends LinkWithBulbBlockEntity {
 		int linkIndex, MutableBoolean finalLink, int orderId, @Nullable PackageOrder orderContext,
 		@Nullable IItemHandler ignoredHandler) {
 		PackagerBlockEntity packager = getPackager();
-		if (packager == null || packager.defragmenterActive)
+		if (packager == null)
 			return null;
 		if (packager.isTargetingSameInventory(ignoredHandler))
 			return null;
@@ -99,10 +99,11 @@ public class PackagerLinkBlockEntity extends LinkWithBulbBlockEntity {
 		BlockState blockState = getBlockState();
 		if (behaviour.redstonePower == 15)
 			return null;
-		BlockPos source = worldPosition.relative(blockState.getOptionalValue(PackagerLinkBlock.FACING)
-			.orElse(Direction.UP)
+		BlockPos source = worldPosition.relative(PackagerLinkBlock.getConnectedDirection(blockState)
 			.getOpposite());
 		if (!(level.getBlockEntity(source) instanceof PackagerBlockEntity packager))
+			return null;
+		if (packager instanceof RepackagerBlockEntity)
 			return null;
 		return packager;
 	}

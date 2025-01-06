@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllPackets;
@@ -26,6 +28,7 @@ import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 
 public class RedstoneRequesterScreen extends AbstractSimiContainerScreen<RedstoneRequesterMenu> {
@@ -70,17 +73,17 @@ public class RedstoneRequesterScreen extends AbstractSimiContainerScreen<Redston
 		int y = topPos;
 
 		if (addressBox == null) {
-			addressBox = new AddressEditBox(this, new NoShadowFontWrapper(font), x + 50, y + 53, 110, 10, false);
+			addressBox = new AddressEditBox(this, new NoShadowFontWrapper(font), x + 55, y + 68, 110, 10, false);
 			addressBox.setValue(menu.contentHolder.encodedTargetAdress);
 			addressBox.setTextColor(0x555555);
 		}
 		addRenderableWidget(addressBox);
 
-		confirmButton = new IconButton(x + bgWidth - 33, y + bgHeight - 24, AllIcons.I_CONFIRM);
+		confirmButton = new IconButton(x + bgWidth - 30, y + bgHeight - 25, AllIcons.I_CONFIRM);
 		confirmButton.withCallback(() -> minecraft.player.closeContainer());
 		addRenderableWidget(confirmButton);
 
-		allowPartial = new IconButton(x + 12, y + bgHeight - 24, AllIcons.I_PARTIAL_REQUESTS);
+		allowPartial = new IconButton(x + 12, y + bgHeight - 25, AllIcons.I_PARTIAL_REQUESTS);
 		allowPartial.withCallback(() -> {
 			allowPartial.green = true;
 			dontAllowPartial.green = false;
@@ -90,7 +93,7 @@ public class RedstoneRequesterScreen extends AbstractSimiContainerScreen<Redston
 			.component());
 		addRenderableWidget(allowPartial);
 
-		dontAllowPartial = new IconButton(x + 12 + 18, y + bgHeight - 24, AllIcons.I_FULL_REQUESTS);
+		dontAllowPartial = new IconButton(x + 12 + 18, y + bgHeight - 25, AllIcons.I_FULL_REQUESTS);
 		dontAllowPartial.withCallback(() -> {
 			allowPartial.green = false;
 			dontAllowPartial.green = true;
@@ -107,18 +110,18 @@ public class RedstoneRequesterScreen extends AbstractSimiContainerScreen<Redston
 	protected void renderBg(GuiGraphics pGuiGraphics, float pPartialTick, int pMouseX, int pMouseY) {
 		int x = leftPos;
 		int y = topPos;
-		AllGuiTextures.REDSTONE_REQUESTER.render(pGuiGraphics, x, y);
-		renderPlayerInventory(pGuiGraphics, x - 3, y + 106);
+		AllGuiTextures.REDSTONE_REQUESTER.render(pGuiGraphics, x + 3, y);
+		renderPlayerInventory(pGuiGraphics, x - 3, y + 124);
 
 		ItemStack stack = AllBlocks.REDSTONE_REQUESTER.asStack();
 		Component title = CreateLang.text(stack.getHoverName()
 			.getString())
 			.component();
-		pGuiGraphics.drawString(font, title, x + 100 - font.width(title) / 2, y + 4, 0x3D3C48, false);
+		pGuiGraphics.drawString(font, title, x + 117 - font.width(title) / 2, y + 4, 0x3D3C48, false);
 
 		GuiGameElement.of(stack)
 			.scale(3)
-			.render(pGuiGraphics, x + 220, y + 60);
+			.render(pGuiGraphics, x + 245, y + 80);
 	}
 
 	@Override
@@ -128,8 +131,8 @@ public class RedstoneRequesterScreen extends AbstractSimiContainerScreen<Redston
 		int y = topPos;
 
 		for (int i = 0; i < amounts.size(); i++) {
-			int inputX = x + 21 + i * 18;
-			int inputY = y + 25;
+			int inputX = x + 27 + i * 20;
+			int inputY = y + 28;
 			ItemStack itemStack = menu.ghostInventory.getStackInSlot(i);
 			if (itemStack.isEmpty())
 				continue;
@@ -176,8 +179,8 @@ public class RedstoneRequesterScreen extends AbstractSimiContainerScreen<Redston
 		int y = topPos;
 
 		for (int i = 0; i < amounts.size(); i++) {
-			int inputX = x + 21 + i * 18;
-			int inputY = y + 25;
+			int inputX = x + 27 + i * 20;
+			int inputY = y + 28;
 			if (mouseX >= inputX && mouseX < inputX + 16 && mouseY >= inputY && mouseY < inputY + 16) {
 				ItemStack itemStack = menu.ghostInventory.getStackInSlot(i);
 				if (itemStack.isEmpty())
@@ -189,6 +192,15 @@ public class RedstoneRequesterScreen extends AbstractSimiContainerScreen<Redston
 		}
 
 		return super.mouseScrolled(mouseX, mouseY, pDelta);
+	}
+
+	/*
+	 * Fixes InventorySorter nabbing the scroll event. This screen needs it for
+	 * amount control
+	 */
+	@Override
+	public @Nullable Slot getSlotUnderMouse() {
+		return null;
 	}
 
 	@Override

@@ -61,10 +61,12 @@ import com.simibubi.create.content.kinetics.base.BlockBreakingMovementBehaviour;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.belt.BeltBlock;
+import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorBlockEntity;
 import com.simibubi.create.content.kinetics.gantry.GantryShaftBlock;
 import com.simibubi.create.content.kinetics.simpleRelays.ShaftBlock;
 import com.simibubi.create.content.kinetics.steamEngine.PoweredShaftBlockEntity;
 import com.simibubi.create.content.logistics.crate.CreativeCrateBlockEntity;
+import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlockEntity;
 import com.simibubi.create.content.redstone.contact.RedstoneContactBlock;
 import com.simibubi.create.content.trains.bogey.AbstractBogeyBlock;
 import com.simibubi.create.foundation.blockEntity.IMultiBlockEntityContainer;
@@ -340,6 +342,9 @@ public abstract class Contraption {
 					&& !BlockMovementChecks.isNotSupportive(world.getBlockState(attached), offset.getOpposite()))
 				frontier.add(attached);
 		}
+		
+		if (world.getBlockEntity(pos) instanceof ChainConveyorBlockEntity ccbe)
+			ccbe.notifyConnectedToValidate();
 
 		// Double Chest halves stick together
 		if (state.hasProperty(ChestBlock.TYPE) && state.hasProperty(ChestBlock.FACING)
@@ -628,6 +633,9 @@ public abstract class Contraption {
 		BlockEntity blockEntity = world.getBlockEntity(pos);
 		if (blockEntity instanceof PoweredShaftBlockEntity)
 			blockEntity = AllBlockEntityTypes.BRACKETED_KINETIC.create(pos, blockstate);
+		if (blockEntity instanceof FactoryPanelBlockEntity fpbe)
+			fpbe.writeSafe(compoundnbt);
+
 		return Pair.of(new StructureBlockInfo(pos, blockstate, compoundnbt), blockEntity);
 	}
 
@@ -1152,7 +1160,9 @@ public abstract class Contraption {
 					storage.addStorageToWorld(block, blockEntity);
 				}
 
-				transform.apply(blockEntity);
+				if (blockEntity != null) {
+					transform.apply(blockEntity);
+				}
 			}
 		}
 

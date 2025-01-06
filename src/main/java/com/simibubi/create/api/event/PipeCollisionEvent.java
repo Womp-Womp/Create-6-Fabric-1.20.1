@@ -31,15 +31,14 @@ public class PipeCollisionEvent {
 			callback.handleSpill(event);
 	});
 
+	protected final Fluid firstFluid, secondFluid;
 	private final Level level;
 	private final BlockPos pos;
-	protected final Fluid firstFluid, secondFluid;
-
 	@Nullable
 	private BlockState state;
 
 	protected PipeCollisionEvent(Level level, BlockPos pos, Fluid firstFluid, Fluid secondFluid,
-		@Nullable BlockState defaultState) {
+								 @Nullable BlockState defaultState) {
 		this.level = level;
 		this.pos = pos;
 		this.firstFluid = firstFluid;

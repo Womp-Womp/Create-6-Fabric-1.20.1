@@ -18,6 +18,7 @@ import com.simibubi.create.content.fluids.tank.BoilerHeaters;
 import com.simibubi.create.content.kinetics.TorquePropagator;
 import com.simibubi.create.content.kinetics.fan.processing.AllFanProcessingTypes;
 import com.simibubi.create.content.kinetics.mechanicalArm.AllArmInteractionPointTypes;
+import com.simibubi.create.content.logistics.item.filter.attribute.AllItemAttributeTypes;
 import com.simibubi.create.content.logistics.packagerLink.GlobalLogisticsManager;
 import com.simibubi.create.content.redstone.displayLink.AllDisplayBehaviours;
 import com.simibubi.create.content.redstone.link.RedstoneLinkNetworkHandler;
@@ -116,15 +117,17 @@ public class Create implements ModInitializer {
 
 		AllConfigs.register();
 
+		AllArmInteractionPointTypes.register(modEventBus);
+		AllFanProcessingTypes.register(modEventBus);
+		AllItemAttributeTypes.register(modEventBus);
+		BlockSpoutingBehaviour.registerDefaults();
+
 		// FIXME: some of these registrations are not thread-safe
 		AllMovementBehaviours.registerDefaults();
 		AllInteractionBehaviours.registerDefaults();
 		AllPortalTracks.registerDefaults();
 		AllDisplayBehaviours.registerDefaults();
 		ContraptionMovementSetting.registerDefaults();
-		AllArmInteractionPointTypes.register();
-		AllFanProcessingTypes.register();
-		BlockSpoutingBehaviour.registerDefaults();
 		BogeySizes.init();
 		AllBogeyStyles.init();
 		// ----
