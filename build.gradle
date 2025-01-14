@@ -253,6 +253,11 @@ jar {
     }
 }
 
+tasks.named("compileJava", JavaCompile) {
+    options.compilerArgs.add("-Xmaxerrs")
+    options.compilerArgs.add("10000")
+}
+
 // see gradle/publishing.gradle for publishing
 apply from: "gradle/publishing/publishing.gradle"
 apply from: "gradle/compat/compat.gradle"
