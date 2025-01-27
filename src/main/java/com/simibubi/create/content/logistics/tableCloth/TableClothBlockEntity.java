@@ -116,7 +116,7 @@ public class TableClothBlockEntity extends SmartBlockEntity {
 			if (manuallyAddedItems.isEmpty()) {
 				level.setBlock(worldPosition, getBlockState().setValue(TableClothBlock.HAS_BE, false), 3);
 				AllPackets.getChannel()
-					.send(packetTarget(), new RemoveBlockEntityPacket(worldPosition));
+					.sendToClientsTracking(new RemoveBlockEntityPacket(worldPosition), this);
 			} else
 				notifyUpdate();
 

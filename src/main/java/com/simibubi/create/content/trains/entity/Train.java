@@ -23,6 +23,8 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import com.simibubi.create.AllMovementBehaviours;
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.Create;
+import com.simibubi.create.api.contraption.storage.fluid.MountedFluidStorageWrapper;
+import com.simibubi.create.api.contraption.storage.item.MountedItemStorageWrapper;
 import com.simibubi.create.content.contraptions.behaviour.MovementBehaviour;
 import com.simibubi.create.content.logistics.filter.FilterItemStack;
 import com.simibubi.create.content.trains.bogey.AbstractBogeyBlockEntity;
@@ -46,7 +48,6 @@ import com.simibubi.create.content.trains.signal.SignalEdgeGroup;
 import com.simibubi.create.content.trains.station.GlobalStation;
 import com.simibubi.create.content.trains.station.StationBlockEntity;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
-import com.simibubi.create.foundation.fluid.CombinedTankWrapper;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
@@ -74,8 +75,10 @@ import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.registry.FuelRegistry;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedSlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
@@ -221,8 +224,8 @@ public class Train {
 				if (shouldActivate)
 					break;
 
-				ContraptionInvWrapper inv = carriage.storage.getAllItems();
-				CombinedTankWrapper tank = carriage.storage.getFluids();
+				CombinedSlottedStorage<ItemVariant, ? extends SlottedStorage<ItemVariant>> inv = carriage.storage.getAllItems();
+				MountedFluidStorageWrapper tank = carriage.storage.getFluids();
 				try (Transaction t = TransferUtil.getTransaction()) {
 					shouldActivate = StorageUtil.findExtractableResource(inv, variant -> filter.test(level, variant.toStack()), t) != null
 						|| StorageUtil.findExtractableResource(tank, variant -> filter.test(level, new FluidStack(variant, 1)), t) != null;
@@ -1079,7 +1082,7 @@ public class Train {
 		for (int index = 0; index < carriageCount; index++) {
 			int i = iterateFromBack ? carriageCount - 1 - index : index;
 			Carriage carriage = carriages.get(i);
-			ContraptionInvWrapper fuelItems = carriage.storage.getFuelItems();
+			MountedItemStorageWrapper fuelItems = carriage.storage.getFuelItems();
 			if (fuelItems == null)
 				continue;
 

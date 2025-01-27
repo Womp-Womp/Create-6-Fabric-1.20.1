@@ -23,13 +23,13 @@ public class RadialWrenchMenuSubmitPacket extends SimplePacketBase {
 
 	public RadialWrenchMenuSubmitPacket(FriendlyByteBuf buffer) {
 		this.blockPos = buffer.readBlockPos();
-		this.newState = buffer.readById(GameData.getBlockStateIDMap());
+		this.newState = buffer.readById(Block.BLOCK_STATE_REGISTRY);
 	}
 
 	@Override
 	public void write(FriendlyByteBuf buffer) {
 		buffer.writeBlockPos(blockPos);
-		buffer.writeId(GameData.getBlockStateIDMap(), newState);
+		buffer.writeId(Block.BLOCK_STATE_REGISTRY, newState);
 	}
 
 	@Override

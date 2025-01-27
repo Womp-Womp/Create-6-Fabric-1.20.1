@@ -9,9 +9,7 @@ import java.util.Set;
 
 import com.simibubi.create.api.lookup.BlockLookup;
 
-import net.minecraftforge.event.TagsUpdatedEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
+import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEvents.ChangeTarget.ChangeTargetEvent;
 
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +19,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 
 @ApiStatus.Internal
-@Mod.EventBusSubscriber
 public class BlockLookupImpl<T> implements BlockLookup<T> {
 	private static final List<BlockLookupImpl<?>> allLookups = new ArrayList<>();
 

@@ -32,6 +32,7 @@ import net.createmod.catnip.data.Pair;
 import net.createmod.catnip.gui.element.GuiGameElement;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.tooltip.TooltipRenderUtil;
 import net.minecraft.core.Holder;
@@ -322,7 +323,7 @@ public class BlueprintOverlayRenderer {
 		}
 	}
 
-	public static void renderOverlay(GuiGraphics graphics, float partialTicks, Window window) {
+	public static void renderOverlay(Gui gui, GuiGraphics graphics, float partialTicks, Window window) {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.options.hideGui || mc.screen != null)
 			return;
@@ -341,11 +342,10 @@ public class BlueprintOverlayRenderer {
 		}
 
 		int x = (window.getGuiScaledWidth() - w) / 2;
-		int y = (int) (window.getGuiScaledHeight() - 100);
+		int y = window.getGuiScaledHeight() - 100;
 
 		if (shopContext != null) {
-			TooltipRenderUtil.renderTooltipBackground(graphics, x - 2, y + 1, w + 4, 19, 0, 0x55_000000, 0x55_000000, 0,
-				0);
+			TooltipRenderUtil.renderTooltipBackground(graphics, x - 2, y + 1, w + 4, 19, 0);
 
 			AllGuiTextures.TRADE_OVERLAY.render(graphics, window.getGuiScaledWidth() / 2 - 48, y - 19);
 			if (shopContext.purchases() > 0) {

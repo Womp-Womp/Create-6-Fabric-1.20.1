@@ -23,7 +23,7 @@ public class CardboardArmorHandler {
 
 	public static void playerHitboxChangesWhenHidingAsBox(EntityEvents.Size event) {
 		Entity entity = event.getEntity();
-		if (!entity.isAddedToWorld())
+		if (!entity.isAlive())
 			return;
 		if (!testForStealth(entity))
 			return;

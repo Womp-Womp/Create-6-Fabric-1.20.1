@@ -2,11 +2,11 @@ package com.simibubi.create.content.processing.burner;
 
 import java.util.function.Consumer;
 
-import net.createmod.catnip.animation.AnimationTickHolder;
 import org.jetbrains.annotations.Nullable;
 
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.AllSpriteShifts;
+import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.foundation.render.AllInstanceTypes;
 
 import dev.engine_room.flywheel.api.instance.Instance;
@@ -21,8 +21,9 @@ import dev.engine_room.flywheel.lib.transform.Translate;
 import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
-import net.createmod.catnip.render.SpriteShiftEntry;
+import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.math.AngleHelper;
+import net.createmod.catnip.render.SpriteShiftEntry;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -91,10 +92,10 @@ public class BlazeBurnerVisual extends AbstractBlockEntityVisual<BlazeBurnerBloc
 			PartialModel blazeModel = BlazeBurnerRenderer.getBlazeModel(heatLevel, validBlockAbove);
 			instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(blazeModel))
 					.stealInstance(head);
-			
+
 			boolean needsRods = heatLevel.isAtLeast(BlazeBurnerBlock.HeatLevel.FADING);
 			boolean hasRods = this.heatLevel.isAtLeast(HeatLevel.FADING);
-			
+
 			if (needsRods && !hasRods) {
 				PartialModel rodsModel = heatLevel == BlazeBurnerBlock.HeatLevel.SEETHING ? AllPartialModels.BLAZE_BURNER_SUPER_RODS
 						: AllPartialModels.BLAZE_BURNER_RODS;
@@ -108,7 +109,7 @@ public class BlazeBurnerVisual extends AbstractBlockEntityVisual<BlazeBurnerBloc
 
 				smallRods.light(LightTexture.FULL_BRIGHT);
 				largeRods.light(LightTexture.FULL_BRIGHT);
-				
+
 			} else if (!needsRods && hasRods) {
 				if (smallRods != null)
 					smallRods.delete();
@@ -117,7 +118,7 @@ public class BlazeBurnerVisual extends AbstractBlockEntityVisual<BlazeBurnerBloc
 				smallRods = null;
 				largeRods = null;
 			}
-			
+
 			this.heatLevel = heatLevel;
 		}
 

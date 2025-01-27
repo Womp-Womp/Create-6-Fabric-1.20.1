@@ -1,7 +1,5 @@
 package com.simibubi.create.foundation.blockEntity.behaviour;
 
-import com.simibubi.create.foundation.utility.AdventureUtil;
-
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import com.simibubi.create.AllBlocks;
@@ -25,8 +23,8 @@ import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
 
 public class ValueSettingsInputHandler {
 
-	public static InteractionResult onBlockActivated(Player player, Level world, InteractionHand hand, BlockHitResult hit) {
-		BlockPos pos = hit.getBlockPos();
+	public static InteractionResult onBlockActivated(Player player, Level world, InteractionHand hand, BlockHitResult ray) {
+		BlockPos pos = ray.getBlockPos();
 
 		if (!canInteract(player))
 			return InteractionResult.PASS;
@@ -51,7 +49,6 @@ public class ValueSettingsInputHandler {
 			if (!valueSettingsBehaviour.mayInteract(player))
 				continue;
 
-			BlockHitResult ray = event.getHitVec();
 			if (ray == null)
 				return InteractionResult.PASS;
 			if (behaviour instanceof SidedFilteringBehaviour) {

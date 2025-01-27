@@ -6,6 +6,8 @@ import java.util.Set;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.content.contraptions.BlockMovementChecks;
+import com.simibubi.create.foundation.utility.AdventureUtil;
+import com.simibubi.create.foundation.utility.fabric.ReachUtil;
 
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.levelWrappers.RayTraceLevel;

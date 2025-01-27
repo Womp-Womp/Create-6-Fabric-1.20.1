@@ -47,6 +47,7 @@ import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.GraphicsStatus;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Gui;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
@@ -133,16 +134,17 @@ public class CreateClient implements ClientModInitializer {
 	private static void registerOverlays() {
 		HudRenderCallback.EVENT.register((graphics, partialTicks) -> {
 			Window window = Minecraft.getInstance().getWindow();
+			Gui gui = Minecraft.getInstance().gui;
 
 			RemainingAirOverlay.render(graphics, window.getGuiScaledWidth(), window.getGuiScaledHeight()); // Create's Remaining Air
 			TrainHUD.renderOverlay(graphics, partialTicks, window); // Create's Train Driver HUD
 			GoggleOverlayRenderer.renderOverlay(graphics, partialTicks, window.getGuiScaledWidth(), window.getGuiScaledHeight()); // Create's Goggle Information
-			BlueprintOverlayRenderer.renderOverlay(graphics, partialTicks, window); // Create's Blueprints
+			BlueprintOverlayRenderer.renderOverlay(gui, graphics, partialTicks, window); // Create's Blueprints
 			LinkedControllerClientHandler.renderOverlay(graphics, partialTicks, window); // Create's Linked Controller
 			SCHEMATIC_HANDLER.renderOverlay(graphics, partialTicks, window); // Create's Schematics
 			ToolboxHandlerClient.renderOverlay(graphics, partialTicks, window); // Create's Toolboxes
 			VALUE_SETTINGS_HANDLER.render(graphics, window.getGuiScaledWidth(), window.getGuiScaledHeight()); // Create's Value Settings
-			TrackPlacementOverlay.renderOverlay(Minecraft.getInstance().gui, graphics); // Create's Track Placement
+			TrackPlacementOverlay.renderOverlay(gui, graphics); // Create's Track Placement
 		});
 	}
 

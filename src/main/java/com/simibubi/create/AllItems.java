@@ -172,7 +172,7 @@ public class AllItems {
 				.nutrition(1)
 				.saturationMod(.6F)
 				.alwaysEat()
-				.effect(() -> new MobEffectInstance(MobEffects.DIG_SPEED, 3 * 60 * 20, 0, false, false, false), 1F)
+				.effect(new MobEffectInstance(MobEffects.DIG_SPEED, 3 * 60 * 20, 0, false, false, false), 1F)
 				.build()
 			)
 		)
