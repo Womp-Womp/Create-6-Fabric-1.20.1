@@ -15,14 +15,15 @@ import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
 import com.simibubi.create.foundation.utility.CreateLang;
 
-import net.createmod.catnip.utility.Pair;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.data.Pair;
+import net.createmod.catnip.lang.Lang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
@@ -254,7 +255,7 @@ public class SequencedAssemblyRecipe implements Recipe<Container> {
 		int length = sequencedAssemblyRecipe.sequence.size();
 		int step = sequencedAssemblyRecipe.getStep(stack);
 		int total = length * sequencedAssemblyRecipe.loops;
-		tooltip.add(Components.immutableEmpty());
+		tooltip.add(Lang.IMMUTABLE_EMPTY);
 		tooltip.add(CreateLang.translateDirect("recipe.sequenced_assembly")
 			.withStyle(ChatFormatting.GRAY));
 		tooltip.add(CreateLang.translateDirect("recipe.assembly.progress", step, total)
@@ -270,9 +271,10 @@ public class SequencedAssemblyRecipe implements Recipe<Container> {
 			if (i == 0)
 				tooltip.add(CreateLang.translateDirect("recipe.assembly.next", textComponent)
 					.withStyle(ChatFormatting.AQUA));
-			else
-				tooltip.add(Components.literal("-> ").append(textComponent)
-					.withStyle(ChatFormatting.DARK_AQUA));
+			else {
+                tooltip.add(Component.literal("-> ").append(textComponent)
+                    .withStyle(ChatFormatting.DARK_AQUA));
+            }
 		}
 
 	}

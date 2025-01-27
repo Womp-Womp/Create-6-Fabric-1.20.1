@@ -14,7 +14,7 @@ import com.simibubi.create.foundation.utility.TreeCutter;
 import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
-import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -84,7 +84,7 @@ public class SawMovementBehaviour extends BlockBreakingMovementBehaviour {
 	}
 
 	public void dropItemFromCutTree(MovementContext context, BlockPos pos, ItemStack stack) {
-		long inserted = TransferUtil.insertItem(context.contraption.getSharedInventory(), stack);
+		long inserted = TransferUtil.insertItem(context.contraption.getStorage().getAllItems(), stack);
 		if (inserted == stack.getCount())
 			return;
 		long remaining = stack.getCount() - inserted;

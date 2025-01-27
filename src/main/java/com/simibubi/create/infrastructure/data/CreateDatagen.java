@@ -5,6 +5,7 @@ import java.util.function.BiConsumer;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.simibubi.create.AllKeys;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
 import com.simibubi.create.compat.archEx.ArchExCompat;
@@ -73,6 +74,7 @@ public class CreateDatagen implements DataGeneratorEntrypoint {
 			provideDefaultLang("tooltips", langConsumer);
 			AllAdvancements.provideLang(langConsumer);
 			AllSoundEvents.provideLang(langConsumer);
+			AllKeys.provideLang(langConsumer);
 			providePonderLang(langConsumer);
 		});
 	}

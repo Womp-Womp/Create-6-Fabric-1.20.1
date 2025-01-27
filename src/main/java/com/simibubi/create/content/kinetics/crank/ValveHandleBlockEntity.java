@@ -2,8 +2,14 @@ package com.simibubi.create.content.kinetics.crank;
 
 import java.util.List;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.ImmutableList;
 import com.simibubi.create.AllBlocks;
+import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
 import com.simibubi.create.content.kinetics.transmission.sequencer.SequencedGearshiftBlockEntity.SequenceContext;
@@ -20,8 +26,8 @@ import dev.engine_room.flywheel.api.model.Model;
 import dev.engine_room.flywheel.lib.model.Models;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SuperByteBuffer;
-import net.createmod.catnip.utility.VecHelper;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.math.VecHelper;
+import net.createmod.ponder.render.VirtualRenderHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -150,12 +156,6 @@ public class ValveHandleBlockEntity extends HandCrankBlockEntity {
 
 	@Override
 	@Environment(EnvType.CLIENT)
-	public Model getRenderedHandleInstance() {
-		return Models.block(getBlockState());
-	}
-
-	@Override
-	@Environment(EnvType.CLIENT)
 	public boolean shouldRenderShaft() {
 		return false;
 	}
@@ -170,9 +170,9 @@ public class ValveHandleBlockEntity extends HandCrankBlockEntity {
 
 		@Override
 		public ValueSettingsBoard createBoard(Player player, BlockHitResult hitResult) {
-			ImmutableList<Component> rows = ImmutableList.of(Components.literal("\u27f3")
+            ImmutableList<Component> rows = ImmutableList.of(Component.literal("\u27f3")
 				.withStyle(ChatFormatting.BOLD),
-				Components.literal("\u27f2")
+				Component.literal("\u27f2")
 					.withStyle(ChatFormatting.BOLD));
 			return new ValueSettingsBoard(label, 180, 45, rows, new ValueSettingsFormatter(this::formatValue));
 		}

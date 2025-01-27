@@ -7,6 +7,8 @@ import com.simibubi.create.AllFluids;
 import com.simibubi.create.content.fluids.VirtualFluid;
 
 import net.createmod.catnip.platform.CatnipServices;
+import net.createmod.catnip.nbt.NBTHelper;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;

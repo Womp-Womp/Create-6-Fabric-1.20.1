@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
@@ -40,4 +41,12 @@ public class DepotBlockEntity extends SmartBlockEntity implements SidedStorageBl
 	public ItemStack getHeldItem() {
 		return depotBehaviour.getHeldItemStack();
 	}
+
+	public void setHeldItem(ItemStack item) {
+		TransportedItemStack newStack = new TransportedItemStack(item);
+		if (depotBehaviour.heldItem != null)
+			newStack.angle = depotBehaviour.heldItem.angle;
+		depotBehaviour.setHeldItem(newStack);
+	}
+
 }

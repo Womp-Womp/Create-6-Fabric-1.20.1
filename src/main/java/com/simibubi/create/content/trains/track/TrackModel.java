@@ -5,7 +5,7 @@ import java.util.function.UnaryOperator;
 
 import com.simibubi.create.foundation.model.BakedQuadHelper;
 
-import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction.Axis;

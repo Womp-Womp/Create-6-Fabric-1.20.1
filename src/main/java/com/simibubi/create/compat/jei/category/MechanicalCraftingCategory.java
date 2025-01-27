@@ -18,7 +18,6 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.ingredients.IIngredientRenderer;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
-import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -188,7 +187,7 @@ public class MechanicalCraftingCategory extends CreateRecipeCategory<CraftingRec
 				return ingredient.getTooltipLines(player, tooltipFlag);
 			} catch (RuntimeException | LinkageError e) {
 				List<Component> list = new ArrayList<>();
-				MutableComponent crash = Components.translatable("jei.tooltip.error.crash");
+                MutableComponent crash = Component.translatable("jei.tooltip.error.crash");
 				list.add(crash.withStyle(ChatFormatting.RED));
 				return list;
 			}

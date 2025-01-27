@@ -5,6 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.Create;
+import com.simibubi.create.CreateBuildInfo;
 import com.simibubi.create.compat.Mods;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.utility.CreateLang;
@@ -12,15 +13,15 @@ import com.terraformersmc.modmenu.gui.ModsScreen;
 
 import dev.engine_room.flywheel.lib.transform.TransformStack;
 import net.createmod.catnip.config.ui.BaseConfigScreen;
+import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.gui.AbstractSimiScreen;
 import net.createmod.catnip.gui.ScreenOpener;
 import net.createmod.catnip.gui.element.BoxElement;
 import net.createmod.catnip.gui.element.GuiGameElement;
-import net.createmod.catnip.utility.FontHelper;
-import net.createmod.catnip.utility.FontHelper.Palette;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.lang.Components;
-import net.createmod.catnip.utility.theme.Color;
+import net.createmod.catnip.lang.FontHelper;
+import net.createmod.catnip.lang.FontHelper.Palette;
+import net.createmod.catnip.lang.Lang;
+import net.createmod.catnip.theme.Color;
 import net.createmod.ponder.foundation.ui.PonderTagIndexScreen;
 import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
@@ -47,10 +48,19 @@ public class CreateMainMenuScreen extends AbstractSimiScreen {
 		new ResourceLocation("textures/gui/title/background/panorama_overlay.png");
 	public static final PanoramaRenderer PANORAMA = new PanoramaRenderer(PANORAMA_RESOURCES);
 
-	private static final Component CURSEFORGE_TOOLTIP = Components.literal("CurseForge").withStyle(s -> s.withColor(0xFC785C).withBold(true));
-	private static final Component MODRINTH_TOOLTIP = Components.literal("Modrinth").withStyle(s -> s.withColor(0x3FD32B).withBold(true));
+	private static final Component CURSEFORGE_TOOLTIP;
 
-	public static final String CURSEFORGE_LINK = "https://www.curseforge.com/minecraft/mc-mods/create-fabric";
+    static {
+        CURSEFORGE_TOOLTIP = Component.literal("CurseForge").withStyle(s -> s.withColor(0xFC785C).withBold(true));
+    }
+
+    private static final Component MODRINTH_TOOLTIP;
+
+    static {
+        MODRINTH_TOOLTIP = Component.literal("Modrinth").withStyle(s -> s.withColor(0x3FD32B).withBold(true));
+    }
+
+    public static final String CURSEFORGE_LINK = "https://www.curseforge.com/minecraft/mc-mods/create-fabric";
 	public static final String MODRINTH_LINK = "https://modrinth.com/mod/create-fabric";
 	public static final String ISSUE_TRACKER_LINK = "https://github.com/Fabricators-of-Create/Create/issues";
 	public static final String SUPPORT_LINK = "https://github.com/Creators-of-Create/Create/wiki/Supporting-the-Project";
@@ -137,9 +147,9 @@ public class CreateMainMenuScreen extends AbstractSimiScreen {
 
 		ms.pushPose();
 		ms.translate(0, 0, 200);
-		graphics.drawCenteredString(font, Components.literal(Create.NAME).withStyle(ChatFormatting.BOLD)
+        graphics.drawCenteredString(font, Component.literal(Create.NAME).withStyle(ChatFormatting.BOLD)
 			.append(
-				Components.literal(" v" + Create.VERSION).withStyle(ChatFormatting.BOLD, ChatFormatting.WHITE)),
+				Component.literal(" v" + CreateBuildInfo.VERSION).withStyle(ChatFormatting.BOLD, ChatFormatting.WHITE)),
 			width / 2, 89, 0xFF_E4BB67);
 		ms.popPose();
 
@@ -230,7 +240,7 @@ public class CreateMainMenuScreen extends AbstractSimiScreen {
 		protected final float scale;
 
 		public PlatformIconButton(int pX, int pY, int pWidth, int pHeight, AllGuiTextures icon, float scale, OnPress pOnPress, Tooltip tooltip) {
-			super(pX, pY, pWidth, pHeight, Components.immutableEmpty(), pOnPress, DEFAULT_NARRATION);
+			super(pX, pY, pWidth, pHeight, Lang.IMMUTABLE_EMPTY, pOnPress, DEFAULT_NARRATION);
 			this.icon = icon;
 			this.scale = scale;
 			setTooltip(tooltip);

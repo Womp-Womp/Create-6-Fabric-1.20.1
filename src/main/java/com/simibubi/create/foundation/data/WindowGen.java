@@ -69,8 +69,8 @@ public class WindowGen {
 	}
 
 	public static BlockBuilder<WindowBlock, CreateRegistrate> randomisedWindowBlock(String name,
-		Supplier<? extends ItemLike> ingredient, Supplier<Supplier<RenderType>> renderType, boolean translucent,
-		Supplier<MapColor> color) {
+																					Supplier<? extends ItemLike> ingredient, Supplier<Supplier<RenderType>> renderType, boolean translucent,
+																					Supplier<MapColor> color) {
 		ResourceLocation end_texture = Create.asResource(palettesDir() + name + "_end");
 		ResourceLocation side_texture = Create.asResource(palettesDir() + name);
 		Function<Integer, ResourceLocation> ends = i -> Create.asResource(palettesDir() + name + "_" + i + "_end");
@@ -254,9 +254,7 @@ public class WindowGen {
 			.loot((t, g) -> t.dropWhenSilkTouch(g))
 			.item()
 			.tag(Tags.Items.GLASS_PANES)
-			.model((c, p) -> p.withExistingParent(c.getName(), Create.asResource("item/pane"))
-				.texture("pane", sideTexture)
-				.texture("edge", topTexture))
+			.model((c, p) -> p.generated(c, sideTexture))
 			.build();
 	}
 

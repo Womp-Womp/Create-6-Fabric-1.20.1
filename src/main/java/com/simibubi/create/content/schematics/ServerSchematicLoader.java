@@ -24,10 +24,10 @@ import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.config.CSchematics;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.level.Level;
@@ -164,10 +164,10 @@ public class ServerSchematicLoader {
 	protected boolean validateSchematicSizeOnServer(ServerPlayer player, long size) {
 		Integer maxFileSize = getConfig().maxTotalSchematicSize.get();
 		if (size > maxFileSize * 1000) {
-			player.sendSystemMessage(CreateLang.translateDirect("schematics.uploadTooLarge")
-				.append(Components.literal(" (" + size / 1000 + " KB).")));
-			player.sendSystemMessage(CreateLang.translateDirect("schematics.maxAllowedSize")
-				.append(Components.literal(" " + maxFileSize + " KB")));
+            player.sendSystemMessage(CreateLang.translateDirect("schematics.uploadTooLarge")
+				.append(Component.literal(" (" + size / 1000 + " KB).")));
+            player.sendSystemMessage(CreateLang.translateDirect("schematics.maxAllowedSize")
+				.append(Component.literal(" " + maxFileSize + " KB")));
 			return false;
 		}
 		return true;
@@ -270,7 +270,7 @@ public class ServerSchematicLoader {
 				if (table == null)
 					return;
 				table.finishUpload();
-				table.inventory.setStackInSlot(1, SchematicItem.create(world.holderLookup(Registries.BLOCK), schematic, player.getGameProfile()
+				table.inventory.setStackInSlot(1, SchematicItem.create(world, schematic, player.getGameProfile()
 					.getName()));
 
 			} catch (IOException e) {
@@ -319,7 +319,7 @@ public class ServerSchematicLoader {
 		);
 		if (result != null)
 			player.setItemInHand(InteractionHand.MAIN_HAND,
-				SchematicItem.create(world.holderLookup(Registries.BLOCK), schematic, playerName));
+				SchematicItem.create(world, schematic, playerName));
 		else
 			CreateLang.translate("schematicAndQuill.instant_failed")
 				.style(ChatFormatting.RED)

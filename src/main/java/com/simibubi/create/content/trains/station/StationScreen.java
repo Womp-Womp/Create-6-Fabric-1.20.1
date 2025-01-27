@@ -24,10 +24,10 @@ import com.simibubi.create.foundation.utility.CreateLang;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import net.createmod.catnip.gui.UIRenderHelper;
-import net.createmod.catnip.utility.AnimationTickHolder;
-import net.createmod.catnip.utility.Pair;
-import net.createmod.catnip.utility.animation.LerpedFloat;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.animation.AnimationTickHolder;
+import net.createmod.catnip.data.Pair;
+import net.createmod.catnip.animation.LerpedFloat;
+import net.createmod.catnip.lang.Lang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -46,7 +46,7 @@ public class StationScreen extends AbstractStationScreen {
 	private int leavingAnimation;
 	private LerpedFloat trainPosition;
 	private DoorControl doorControl;
-	
+
 	private ScrollInput colorTypeScroll;
 	private int messedWithColors;
 
@@ -72,7 +72,7 @@ public class StationScreen extends AbstractStationScreen {
 
 		onTextChanged = s -> nameBox.setX(nameBoxX(s, nameBox));
 		nameBox = new EditBox(new NoShadowFontWrapper(font), x + 23, y + 4, background.getWidth() - 20, 10,
-			Components.literal(station.name));
+			Component.literal(station.name));
 		nameBox.setBordered(false);
 		nameBox.setMaxLength(25);
 		nameBox.setTextColor(0x592424);
@@ -104,7 +104,7 @@ public class StationScreen extends AbstractStationScreen {
 		dropScheduleButton.withCallback(() -> AllPackets.getChannel()
 			.sendToServer(StationEditPacket.dropSchedule(blockEntity.getBlockPos())));
 		addRenderableWidget(dropScheduleButton);
-		
+
 		colorTypeScroll = new ScrollInput(x + 166, y + 17, 22, 14).titled(CreateLang.translateDirect("station.train_map_color"));
 		colorTypeScroll.withRange(0, 16);
 		colorTypeScroll.withStepFunction(ctx -> colorTypeScroll.standardStep()
@@ -113,14 +113,14 @@ public class StationScreen extends AbstractStationScreen {
 			Train train = displayedTrain.get();
 			if (train != null) {
 				train.mapColorIndex = s;
-				messedWithColors = 10;				
+				messedWithColors = 10;
 			}
 		});
 		colorTypeScroll.active = colorTypeScroll.visible = false;
 		addRenderableWidget(colorTypeScroll);
 
 		onTextChanged = s -> trainNameBox.setX(nameBoxX(s, trainNameBox));
-		trainNameBox = new EditBox(font, x + 23, y + 47, background.getWidth() - 75, 10, Components.immutableEmpty());
+		trainNameBox = new EditBox(font, x + 23, y + 47, background.getWidth() - 75, 10, Lang.IMMUTABLE_EMPTY);
 		trainNameBox.setBordered(false);
 		trainNameBox.setMaxLength(35);
 		trainNameBox.setTextColor(0xC6C6C6);
@@ -150,7 +150,7 @@ public class StationScreen extends AbstractStationScreen {
 				.length());
 			trainNameBox.setHighlightPos(trainNameBox.getCursorPosition());
 		}
-		
+
 		if (messedWithColors > 0) {
 			messedWithColors--;
 			if (messedWithColors == 0)
@@ -334,10 +334,10 @@ public class StationScreen extends AbstractStationScreen {
 			if (font.width(text) > trainNameBox.getWidth())
 				graphics.drawString(font, "...", guiLeft + 26, guiTop + 47, 0xa6a6a6);
 		}
-		
+
 		if (!mapModsPresent())
 			return;
-		
+
 		AllGuiTextures sprite = AllGuiTextures.TRAINMAP_SPRITES;
 		sprite.bind();
 		int trainColorIndex = colorTypeScroll.getState();

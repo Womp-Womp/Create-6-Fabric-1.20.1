@@ -9,12 +9,12 @@ import com.simibubi.create.content.contraptions.AssemblyException;
 import com.simibubi.create.content.contraptions.IDisplayAssemblyExceptions;
 import com.simibubi.create.foundation.utility.fabric.ReachUtil;
 
-import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -58,7 +58,9 @@ public class HighlightCommand {
 
 	private static void sendMissMessage(CommandSourceStack source) {
 		source.sendSuccess(() ->
-			Components.literal("Try looking at a Block that has failed to assemble a Contraption and try again."),
+                {
+                    return Component.literal("Try looking at a Block that has failed to assemble a Contraption and try again.");
+                },
 			true);
 	}
 
@@ -91,7 +93,9 @@ public class HighlightCommand {
 		}
 
 		if (!exception.hasPosition()) {
-			source.sendSuccess(() -> Components.literal("Can't highlight a specific position for this issue"), true);
+			source.sendSuccess(() -> {
+                return Component.literal("Can't highlight a specific position for this issue");
+            }, true);
 			return Command.SINGLE_SUCCESS;
 		}
 

@@ -16,7 +16,7 @@ import com.simibubi.create.compat.framedblocks.FramedBlocksInSchematics;
 import com.simibubi.create.foundation.data.recipe.Mods;
 import com.simibubi.create.impl.schematic.requirement.SchematicRequirementsRegistryImpl;
 
-import net.createmod.catnip.utility.NBTProcessors;
+import net.createmod.catnip.nbt.NBTProcessors;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.decoration.ArmorStand;

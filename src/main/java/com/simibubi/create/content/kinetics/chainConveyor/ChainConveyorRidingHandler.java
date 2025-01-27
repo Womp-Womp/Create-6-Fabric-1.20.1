@@ -1,11 +1,12 @@
 package com.simibubi.create.content.kinetics.chainConveyor;
 
 import com.simibubi.create.AllPackets;
+import com.simibubi.create.AllTags.AllItemTags;
 import com.simibubi.create.content.kinetics.chainConveyor.ChainConveyorBlockEntity.ConnectionStats;
 import com.simibubi.create.foundation.utility.ServerSpeedProvider;
 
-import net.createmod.catnip.utility.AnimationTickHolder;
-import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.animation.AnimationTickHolder;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.BlockPos;
@@ -45,6 +46,10 @@ public class ChainConveyorRidingHandler {
 		Minecraft mc = Minecraft.getInstance();
 		if (mc.isPaused())
 			return;
+		if (!AllItemTags.CHAIN_RIDEABLE.matches(mc.player.getMainHandItem())) {
+			stopRiding();
+			return;
+		}
 		BlockEntity blockEntity = mc.level.getBlockEntity(ridingChainConveyor);
 		if (mc.player.isShiftKeyDown() || !(blockEntity instanceof ChainConveyorBlockEntity clbe)) {
 			stopRiding();

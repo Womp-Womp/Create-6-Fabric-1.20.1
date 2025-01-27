@@ -1,26 +1,30 @@
 package com.simibubi.create.content.kinetics.drill;
 
-import org.joml.Quaternionf;
-
 import com.simibubi.create.AllPartialModels;
-import com.simibubi.create.content.contraptions.actors.ActorInstance;
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import com.simibubi.create.content.contraptions.render.ActorVisual;
+import com.simibubi.create.content.kinetics.base.RotatingInstance;
 import com.simibubi.create.foundation.render.AllInstanceTypes;
 import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
+import dev.engine_room.flywheel.lib.instance.InstanceTypes;
+import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
-import net.createmod.catnip.utility.VecHelper;
-import net.createmod.catnip.utility.math.AngleHelper;
+import net.createmod.catnip.animation.AnimationTickHolder;
+import net.createmod.catnip.math.VecHelper;
+import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.block.state.BlockState;
 
 public class DrillActorVisual extends ActorVisual {
 
-    ActorInstance drillHead;
+    TransformedInstance drillHead;
     private final Direction facing;
+
+	private double rotation;
+	private double previousRotation;
 
     public DrillActorVisual(VisualizationContext visualizationContext, VirtualRenderWorld contraption, MovementContext context) {
         super(visualizationContext, contraption, context);
@@ -29,38 +33,39 @@ public class DrillActorVisual extends ActorVisual {
 
         facing = state.getValue(DrillBlock.FACING);
 
-        Direction.Axis axis = facing.getAxis();
-        float eulerX = AngleHelper.verticalAngle(facing);
-
-        float eulerY;
-        if (axis == Direction.Axis.Y)
-            eulerY = 0;
-        else
-            eulerY = facing.toYRot() + ((axis == Direction.Axis.X) ? 180 : 0);
-
-		drillHead = instancerProvider.instancer(AllInstanceTypes.ACTOR, Models.partial(AllPartialModels.DRILL_HEAD))
+		drillHead = instancerProvider.instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.DRILL_HEAD))
 				.createInstance();
-
-        drillHead.setPosition(context.localPos)
-                 .setBlockLight(localBlockLight())
-                 .setRotationOffset(0)
-                 .setRotationAxis(0, 0, 1)
-                 .setLocalRotation(new Quaternionf().rotationXYZ(eulerX * Mth.DEG_TO_RAD, eulerY * Mth.DEG_TO_RAD, 0))
-                 .setSpeed(getSpeed(facing))
-                 .setChanged();
     }
 
-    @Override
+	@Override
+	public void tick() {
+		previousRotation = rotation;
+
+		if (context.contraption.stalled || context.disabled
+			|| VecHelper.isVecPointingTowards(context.relativeMotion, facing.getOpposite()))
+			return;
+
+		float deg = context.getAnimationSpeed();
+
+		rotation += deg / 20;
+
+		rotation %= 360;
+	}
+
+	@Override
     public void beginFrame() {
-        drillHead.setSpeed(getSpeed(facing))
-        		.setChanged();
+		drillHead.setIdentityTransform()
+			.translate(context.localPos)
+			.center()
+			.rotateToFace(facing.getOpposite())
+			.rotateZDegrees((float) getRotation())
+			.uncenter()
+			.setChanged();
     }
 
-    protected float getSpeed(Direction facing) {
-        if (context.contraption.stalled || !VecHelper.isVecPointingTowards(context.relativeMotion, facing.getOpposite()))
-            return context.getAnimationSpeed();
-        return 0;
-    }
+	protected double getRotation() {
+		return AngleHelper.angleLerp(AnimationTickHolder.getPartialTicks(), previousRotation, rotation);
+	}
 
 	@Override
 	protected void _delete() {

@@ -11,6 +11,7 @@ import com.simibubi.create.content.redstone.displayLink.target.DisplayTarget;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -18,6 +19,7 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public class DisplayLinkBlockEntity extends LinkWithBulbBlockEntity {
 
@@ -187,6 +189,13 @@ public class DisplayLinkBlockEntity extends LinkWithBulbBlockEntity {
 
 	public BlockPos getTargetPosition() {
 		return worldPosition.offset(targetOffset);
+	}
+
+	private static final Vec3 bulbOffset = VecHelper.voxelSpace(11, 7, 5);
+
+	@Override
+	public Vec3 getBulbOffset(BlockState state) {
+		return bulbOffset;
 	}
 
 }

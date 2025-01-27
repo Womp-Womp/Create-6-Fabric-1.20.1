@@ -10,67 +10,51 @@ import javax.annotation.Nullable;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
+
 import com.simibubi.create.Create;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
 
-import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.fabricmc.fabric.api.resource.SimpleSynchronousResourceReloadListener;
-
 /**
- * Utility for searching through a world's recipe collection. Non-dynamic
- * conditions can be split off into an initial search for caching intermediate
- * results.
+ * Utility for searching through a level's recipe collection.
+ * Non-dynamic conditions can be split off into an initial search for caching intermediate results.
  *
  * @author simibubi
- *
  */
 public class RecipeFinder {
 
-	private static Cache<Object, List<Recipe<?>>> cachedSearches = CacheBuilder.newBuilder().build();
+	private static final Cache<Object, List<Recipe<?>>> CACHED_SEARCHES = CacheBuilder.newBuilder().build();
+
+	public static final ResourceManagerReloadListener LISTENER = resourceManager -> CACHED_SEARCHES.invalidateAll();
 
 	/**
-	 * Find all IRecipes matching the condition predicate. If this search is made
-	 * more than once, using the same object instance as the cacheKey will retrieve
-	 * the cached result from the first time.
+	 * Find all recipes matching the condition predicate.
+	 * If this search is made more than once,
+	 * using the same object instance as the cacheKey will retrieve the cached result from the first search.
 	 *
-	 * @param cacheKey   (can be null to prevent the caching)
-	 * @param world
-	 * @param conditions
+	 * @param cacheKey (can be null to prevent the caching)
 	 * @return A started search to continue with more specific conditions.
 	 */
-	public static List<Recipe<?>> get(@Nullable Object cacheKey, Level world, Predicate<Recipe<?>> conditions) {
+	public static List<Recipe<?>> get(@Nullable Object cacheKey, Level level, Predicate<Recipe<?>> conditions) {
 		if (cacheKey == null)
-			return startSearch(world, conditions);
+			return startSearch(level, conditions);
 
 		try {
-			return cachedSearches.get(cacheKey, () -> startSearch(world, conditions));
+			return CACHED_SEARCHES.get(cacheKey, () -> startSearch(level, conditions));
 		} catch (ExecutionException e) {
-			e.printStackTrace();
+			Create.LOGGER.error("Encountered a exception while searching for recipes", e);
 		}
 
 		return Collections.emptyList();
 	}
 
-	private static List<Recipe<?>> startSearch(Level world, Predicate<? super Recipe<?>> conditions) {
-		List<Recipe<?>> list = world.getRecipeManager().getRecipes().stream().filter(conditions)
-				.collect(Collectors.toList());
-		return list;
+	private static List<Recipe<?>> startSearch(Level level, Predicate<? super Recipe<?>> conditions) {
+		return level.getRecipeManager()
+			.getRecipes()
+			.stream()
+			.filter(conditions)
+			.toList();
 	}
-
-	public static final IdentifiableResourceReloadListener LISTENER = new SimpleSynchronousResourceReloadListener() {
-		@Override
-		public ResourceLocation getFabricId() {
-			return Create.asResource("recipe_finder");
-		}
-
-		@Override
-		public void onResourceManagerReload(ResourceManager resourceManager) {
-			cachedSearches.invalidateAll();
-		}
-	};
-
 }

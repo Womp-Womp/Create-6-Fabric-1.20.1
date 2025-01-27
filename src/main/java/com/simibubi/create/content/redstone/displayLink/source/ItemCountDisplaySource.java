@@ -6,7 +6,7 @@ import com.simibubi.create.content.redstone.smartObserver.SmartObserverBlockEnti
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
 import com.simibubi.create.foundation.blockEntity.behaviour.inventory.InvManipulationBehaviour;
 
-import net.createmod.catnip.utility.lang.Components;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -42,7 +42,7 @@ public class ItemCountDisplaySource extends NumericSingleLineDisplaySource {
 			}
 		}
 
-		return Components.literal(String.valueOf(collected));
+		return Component.literal(String.valueOf(collected));
 	}
 
 	@Override

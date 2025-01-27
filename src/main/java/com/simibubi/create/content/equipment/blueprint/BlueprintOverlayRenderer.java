@@ -25,13 +25,11 @@ import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
 import com.simibubi.create.content.trains.track.TrackPlacement.PlacementInfo;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 
+import net.createmod.catnip.animation.AnimationTickHolder;
+import net.createmod.catnip.data.Couple;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.data.Pair;
 import net.createmod.catnip.gui.element.GuiGameElement;
-import net.createmod.catnip.utility.AnimationTickHolder;
-import net.createmod.catnip.utility.Couple;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.Pair;
-import net.createmod.catnip.utility.lang.Components;
-import net.createmod.ponder.utility.LevelTickHolder;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -352,7 +350,7 @@ public class BlueprintOverlayRenderer {
 			AllGuiTextures.TRADE_OVERLAY.render(graphics, window.getGuiScaledWidth() / 2 - 48, y - 19);
 			if (shopContext.purchases() > 0) {
 				graphics.renderItem(AllItems.SHOPPING_LIST.asStack(), window.getGuiScaledWidth() / 2 + 20, y - 20);
-				graphics.drawString(mc.font, Components.literal("x" + shopContext.purchases()), window.getGuiScaledWidth() / 2 + 20 + 16,
+                graphics.drawString(mc.font, Component.literal("x" + shopContext.purchases()), window.getGuiScaledWidth() / 2 + 20 + 16,
 					y - 20 + 4, 0xff_eeeeee, true);
 			}
 		}
@@ -424,7 +422,7 @@ public class BlueprintOverlayRenderer {
 	public static void drawItemStack(GuiGraphics graphics, Minecraft mc, int x, int y, ItemStack itemStack,
 		String count) {
 		if (itemStack.getItem() instanceof FilterItem) {
-			int step = LevelTickHolder.getTicks(mc.level) / 10;
+			int step = AnimationTickHolder.getTicks(mc.level) / 10;
 			ItemStack[] itemsMatchingFilter = getItemsMatchingFilter(itemStack);
 			if (itemsMatchingFilter.length > 0)
 				itemStack = itemsMatchingFilter[step % itemsMatchingFilter.length];

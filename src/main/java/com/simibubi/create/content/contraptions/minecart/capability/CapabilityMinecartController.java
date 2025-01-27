@@ -16,8 +16,8 @@ import com.simibubi.create.content.contraptions.minecart.CouplingHandler;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectLists;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.WorldAttached;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.data.WorldAttached;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;

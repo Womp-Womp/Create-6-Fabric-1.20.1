@@ -235,41 +235,26 @@
     ],
     "subtitle": "create.subtitle.desk_bell"
   },
-  "frogport_catch_1": {
+  "frogport_catch": {
     "sounds": [
+      {
+        "type": "file",
+        "name": "create:frogport_catch"
+      },
       {
         "type": "file",
         "name": "create:frogport_catch_1"
-      }
-    ],
-    "subtitle": "create.subtitle.frogport_catch_1"
-  },
-  "frogport_catch_2": {
-    "sounds": [
+      },
       {
         "type": "file",
         "name": "create:frogport_catch_2"
-      }
-    ],
-    "subtitle": "create.subtitle.frogport_catch_2"
-  },
-  "frogport_catch_3": {
-    "sounds": [
+      },
       {
         "type": "file",
         "name": "create:frogport_catch_3"
       }
     ],
-    "subtitle": "create.subtitle.frogport_catch_3"
-  },
-  "frogport_catch_4": {
-    "sounds": [
-      {
-        "type": "file",
-        "name": "create:frogport_catch_4"
-      }
-    ],
-    "subtitle": "create.subtitle.frogport_catch_4"
+    "subtitle": "create.subtitle.frogport_catch"
   },
   "frogport_close": {
     "sounds": [
@@ -292,8 +277,8 @@
   "frogport_open": {
     "sounds": [
       {
-        "type": "file",
-        "name": "create:frogport_open"
+        "type": "event",
+        "name": "minecraft:entity.warden.tendril_clicks"
       }
     ],
     "subtitle": "create.subtitle.frogport_open"
@@ -414,7 +399,7 @@
     "sounds": [
       {
         "type": "event",
-        "name": "minecraft:entity.armor_stand.break"
+        "name": "minecraft:block.chiseled_bookshelf.break"
       }
     ],
     "subtitle": "create.subtitle.package_pop"
@@ -426,6 +411,15 @@
         "name": "minecraft:block.wool.break"
       }
     ]
+  },
+  "packager": {
+    "sounds": [
+      {
+        "type": "event",
+        "name": "minecraft:entity.shulker.open"
+      }
+    ],
+    "subtitle": "create.subtitle.packager"
   },
   "peculiar_bell_use": {
     "sounds": [
@@ -559,6 +553,15 @@
       }
     ],
     "subtitle": "create.subtitle.steam"
+  },
+  "stock_link": {
+    "sounds": [
+      {
+        "type": "file",
+        "name": "create:stock_link"
+      }
+    ],
+    "subtitle": "create.subtitle.stock_link"
   },
   "stock_ticker_request": {
     "sounds": [

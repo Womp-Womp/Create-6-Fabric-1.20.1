@@ -13,8 +13,8 @@ import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.fluid.FluidHelper;
 
-import net.createmod.catnip.utility.BBHelper;
-import net.createmod.catnip.utility.Iterate;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.BBHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;

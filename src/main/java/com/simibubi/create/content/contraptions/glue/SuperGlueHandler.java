@@ -6,12 +6,10 @@ import java.util.Set;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.content.contraptions.BlockMovementChecks;
-import com.simibubi.create.foundation.utility.AdventureUtil;
-import com.simibubi.create.foundation.utility.fabric.ReachUtil;
 
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.levelWrappers.RayTraceLevel;
-import net.createmod.catnip.utility.placement.IPlacementHelper;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.levelWrappers.RayTraceLevel;
+import net.createmod.catnip.placement.IPlacementHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;

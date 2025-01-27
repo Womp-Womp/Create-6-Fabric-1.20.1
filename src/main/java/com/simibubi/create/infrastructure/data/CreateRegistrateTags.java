@@ -110,6 +110,18 @@ public class CreateRegistrateTags {
 			.addTag(BlockTags.PRESSURE_PLATES)
 			.addTag(BlockTags.RAILS);
 
+		// tags aren't used here because the implementations of modded entries are unknown
+		prov.tag(AllBlockTags.CHEST_MOUNTED_STORAGE.tag).add(
+			Blocks.CHEST, Blocks.TRAPPED_CHEST
+		);
+		prov.tag(AllBlockTags.SIMPLE_MOUNTED_STORAGE.tag).add(
+			Blocks.BARREL, Blocks.SHULKER_BOX,
+			Blocks.WHITE_SHULKER_BOX, Blocks.ORANGE_SHULKER_BOX, Blocks.MAGENTA_SHULKER_BOX, Blocks.LIGHT_BLUE_SHULKER_BOX,
+			Blocks.YELLOW_SHULKER_BOX, Blocks.LIME_SHULKER_BOX, Blocks.PINK_SHULKER_BOX, Blocks.GRAY_SHULKER_BOX,
+			Blocks.LIGHT_GRAY_SHULKER_BOX, Blocks.CYAN_SHULKER_BOX, Blocks.PURPLE_SHULKER_BOX, Blocks.BLUE_SHULKER_BOX,
+			Blocks.BROWN_SHULKER_BOX, Blocks.GREEN_SHULKER_BOX, Blocks.RED_SHULKER_BOX, Blocks.BLACK_SHULKER_BOX
+		);
+
 		prov.tag(AllBlockTags.ROOTS.tag)
 				.add(Blocks.MANGROVE_ROOTS);
 
@@ -148,6 +160,9 @@ public class CreateRegistrateTags {
 
 	private static void genItemTags(RegistrateTagsProvider<Item> provIn) {
 		CreateTagsProvider<Item> prov = new CreateTagsProvider<>(provIn, Item::builtInRegistryHolder);
+
+		prov.tag(AllItemTags.CHAIN_RIDEABLE.tag)
+			.addTag(AllItemTags.WRENCH.tag);
 
 		prov.tag(AllItemTags.PULPIFIABLE.tag)
 			.add(Items.BAMBOO, Items.SUGAR_CANE)
@@ -196,7 +211,8 @@ public class CreateRegistrateTags {
 		genStrippedWoodItemTags(prov);
 
 		// fabric: Trinkets compat is used instead
-		//prov.tag(AllItemTags.CURIOS_HEAD.tag).add(AllItems.GOGGLES.get());
+		//prov.tag(AllItemTags.CURIOS_HEAD.tag)
+			.add(AllItems.GOGGLES.get());
 		prov.tag(AllItemTags.TRINKETS_FACE.tag).add(AllItems.GOGGLES.get());
 
 		TagGen.addOptional(prov.tag(AllItemTags.ALLURITE.tag), Mods.GS, gsPalette("allurite"));

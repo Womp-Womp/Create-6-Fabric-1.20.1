@@ -24,7 +24,7 @@ import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBeha
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import com.simibubi.create.foundation.utility.TickBasedCache;
 
-import net.createmod.catnip.utility.Pair;
+import net.createmod.catnip.data.Pair;
 import net.minecraft.world.item.ItemStack;
 
 public class LogisticsManager {
@@ -65,7 +65,7 @@ public class LogisticsManager {
 		IItemHandler ignoredHandler, String address) {
 		if (order.isEmpty())
 			return false;
-		
+
 		Multimap<PackagerBlockEntity, PackagingRequest> requests =
 			findPackagersForRequest(freqId, order, null, ignoredHandler, address);
 
@@ -82,7 +82,11 @@ public class LogisticsManager {
 	public static Multimap<PackagerBlockEntity, PackagingRequest> findPackagersForRequest(UUID freqId,
 		PackageOrder order, @Nullable PackageOrder customContext, @Nullable IItemHandler ignoredHandler,
 		String address) {
-		List<BigItemStack> stacks = order.stacks();
+		List<BigItemStack> stacks = new ArrayList<>();
+		for (BigItemStack stack : order.stacks())
+			if (!stack.stack.isEmpty() && stack.count > 0)
+				stacks.add(stack);
+		
 		Multimap<PackagerBlockEntity, PackagingRequest> requests = HashMultimap.create();
 
 		// Packages need to track their index and successors for successful defrag
@@ -143,6 +147,8 @@ public class LogisticsManager {
 			ArrayList<PackagingRequest> queuedRequests = new ArrayList<>(entry.getValue());
 			PackagerBlockEntity packager = entry.getKey();
 
+			if (!queuedRequests.isEmpty())
+				packager.flashLink();
 			for (int i = 0; i < 100; i++) {
 				if (queuedRequests.isEmpty())
 					break;

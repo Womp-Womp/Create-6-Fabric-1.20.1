@@ -30,9 +30,9 @@ import com.simibubi.create.foundation.virtualWorld.VirtualRenderWorld;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
-import net.createmod.catnip.utility.NBTHelper;
-import net.createmod.catnip.utility.VecHelper;
-import net.createmod.catnip.utility.levelWrappers.SchematicLevel;
+import net.createmod.catnip.levelWrappers.SchematicLevel;
+import net.createmod.catnip.math.VecHelper;
+import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction.Axis;
@@ -147,7 +147,7 @@ public class DeployerMovementBehaviour implements MovementBehaviour {
 		ItemStack contextStack = requiredItems.isEmpty() ? ItemStack.EMPTY : requiredItems.get(0).stack;
 
 		if (!context.contraption.hasUniversalCreativeCrate) {
-			Storage<ItemVariant> itemHandler = context.contraption.getSharedInventory();
+			Storage<ItemVariant> itemHandler = context.contraption.getStorage().getAllItems();
 			try (Transaction t = TransferUtil.getTransaction()) {
 				for (ItemRequirement.StackRequirement required : requiredItems) {
 					int count = required.stack.getCount();
@@ -236,7 +236,7 @@ public class DeployerMovementBehaviour implements MovementBehaviour {
 			FilterItemStack filter = context.getFilterFromBE();
 			if (AllItems.SCHEMATIC.isIn(filter.item()))
 				return;
-			ItemStack held = ItemHelper.extract(context.contraption.getSharedInventory(),
+			ItemStack held = ItemHelper.extract(context.contraption.getStorage().getAllItems(),
 				stack -> filter.test(context.world, stack), 1, false);
 			player.setItemInHand(InteractionHand.MAIN_HAND, held);
 		}

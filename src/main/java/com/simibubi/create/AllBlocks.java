@@ -3,6 +3,8 @@ package com.simibubi.create;
 import static com.simibubi.create.AllInteractionBehaviours.interactionBehaviour;
 import static com.simibubi.create.AllMovementBehaviours.movementBehaviour;
 import static com.simibubi.create.Create.REGISTRATE;
+import static com.simibubi.create.api.contraption.storage.MountedStorageTypeRegistry.mountedFluidStorage;
+import static com.simibubi.create.api.contraption.storage.MountedStorageTypeRegistry.mountedItemStorage;
 import static com.simibubi.create.content.redstone.displayLink.AllDisplayBehaviours.assignDataBehaviour;
 import static com.simibubi.create.foundation.data.BlockStateGen.axisBlock;
 import static com.simibubi.create.foundation.data.BlockStateGen.simpleCubeAll;
@@ -105,6 +107,7 @@ import com.simibubi.create.content.fluids.tank.FluidTankBlock;
 import com.simibubi.create.content.fluids.tank.FluidTankGenerator;
 import com.simibubi.create.content.fluids.tank.FluidTankItem;
 import com.simibubi.create.content.fluids.tank.FluidTankModel;
+import com.simibubi.create.content.fluids.tank.FluidTankMovementBehavior;
 import com.simibubi.create.content.kinetics.BlockStressDefaults;
 import com.simibubi.create.content.kinetics.belt.BeltBlock;
 import com.simibubi.create.content.kinetics.belt.BeltGenerator;
@@ -169,6 +172,7 @@ import com.simibubi.create.content.logistics.crate.CreativeCrateBlock;
 import com.simibubi.create.content.logistics.depot.DepotBlock;
 import com.simibubi.create.content.logistics.depot.EjectorBlock;
 import com.simibubi.create.content.logistics.depot.EjectorItem;
+import com.simibubi.create.content.logistics.depot.MountedDepotInteractionBehaviour;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlock;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlockItem;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelModel;
@@ -187,6 +191,7 @@ import com.simibubi.create.content.logistics.packager.PackagerBlock;
 import com.simibubi.create.content.logistics.packager.repackager.RepackagerBlock;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
 import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlock;
+import com.simibubi.create.content.logistics.packagerLink.PackagerLinkGenerator;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlock;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterBlockItem;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlock;
@@ -289,7 +294,7 @@ import com.tterrag.registrate.providers.loot.RegistrateBlockLootTables;
 import com.tterrag.registrate.util.DataIngredient;
 import com.tterrag.registrate.util.entry.BlockEntry;
 
-import net.createmod.catnip.utility.Couple;
+import net.createmod.catnip.data.Couple;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Direction.AxisDirection;
@@ -797,6 +802,8 @@ public class AllBlocks {
 		.transform(axeOrPickaxe())
 		.blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.partialBaseModel(c, p)))
 		.onRegister(assignDataBehaviour(new ItemNameDisplaySource(), "combine_item_names"))
+		.onRegister(interactionBehaviour(new MountedDepotInteractionBehaviour()))
+		.transform(mountedItemStorage(AllMountedStorageTypes.DEPOT))
 		.item()
 		.transform(customItemModel("_", "block"))
 		.register();
@@ -869,6 +876,7 @@ public class AllBlocks {
 		.properties(p -> p.sound(SoundType.SCAFFOLDING))
 		.transform(axeOrPickaxe())
 		.item(BracketBlockItem::new)
+		.tag(AllItemTags.INVALID_FOR_TRACK_PAVING.tag)
 		.transform(BracketGenerator.itemModel("wooden"))
 		.register();
 
@@ -877,6 +885,7 @@ public class AllBlocks {
 		.properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
 		.transform(pickaxeOnly())
 		.item(BracketBlockItem::new)
+		.tag(AllItemTags.INVALID_FOR_TRACK_PAVING.tag)
 		.transform(BracketGenerator.itemModel("metal"))
 		.register();
 
@@ -993,6 +1002,8 @@ public class AllBlocks {
 		.blockstate(new FluidTankGenerator()::generate)
 		.onRegister(CreateRegistrate.blockModel(() -> FluidTankModel::standard))
 		.onRegister(assignDataBehaviour(new BoilerDisplaySource(), "boiler_status"))
+		.transform(mountedFluidStorage(AllMountedStorageTypes.FLUID_TANK))
+		.onRegister(movementBehaviour(new FluidTankMovementBehavior()))
 		.addLayer(() -> RenderType::cutoutMipped)
 		.item(FluidTankItem::new)
 		.model(AssetLookup.customBlockItemModel("_", "block_single_window"))
@@ -1008,6 +1019,7 @@ public class AllBlocks {
 			.tag(AllBlockTags.SAFE_NBT.tag)
 			.blockstate(new FluidTankGenerator("creative_")::generate)
 			.onRegister(CreateRegistrate.blockModel(() -> FluidTankModel::creative))
+			.transform(mountedFluidStorage(AllMountedStorageTypes.CREATIVE_FLUID_TANK))
 			.addLayer(() -> RenderType::cutoutMipped)
 			.item(FluidTankItem::new)
 			.properties(p -> p.rarity(Rarity.EPIC))
@@ -1823,6 +1835,7 @@ public class AllBlocks {
 		REGISTRATE.block("creative_crate", CreativeCrateBlock::new)
 			.transform(BuilderTransformers.crate("creative"))
 			.properties(p -> p.mapColor(MapColor.COLOR_PURPLE))
+			.transform(mountedItemStorage(AllMountedStorageTypes.CREATIVE_CRATE))
 			.register();
 
 	public static final BlockEntry<ItemVaultBlock> ITEM_VAULT = REGISTRATE.block("item_vault", ItemVaultBlock::new)
@@ -1837,6 +1850,7 @@ public class AllBlocks {
 				.rotationY(s.getValue(ItemVaultBlock.HORIZONTAL_AXIS) == Axis.X ? 90 : 0)
 				.build()))
 		.onRegister(connectedTextures(ItemVaultCTBehaviour::new))
+		.transform(mountedItemStorage(AllMountedStorageTypes.VAULT))
 		.item(ItemVaultItem::new)
 		.build()
 		.register();
@@ -1925,9 +1939,9 @@ public class AllBlocks {
 			.properties(p -> p.mapColor(MapColor.TERRACOTTA_BLUE)
 				.sound(SoundType.NETHERITE_BLOCK))
 			.transform(pickaxeOnly())
-			.blockstate((c, p) -> p.horizontalFaceBlock(c.get(), AssetLookup.forPowered(c, p)))
+			.blockstate(new PackagerLinkGenerator()::generate)
 			.item(LogisticallyLinkedBlockItem::new)
-			.transform(customItemModel("_", "block"))
+			.transform(customItemModel("_", "block_vertical"))
 			.register();
 
 	public static final BlockEntry<StockTickerBlock> STOCK_TICKER =
@@ -1944,9 +1958,9 @@ public class AllBlocks {
 	public static final BlockEntry<RedstoneRequesterBlock> REDSTONE_REQUESTER =
 		REGISTRATE.block("redstone_requester", RedstoneRequesterBlock::new)
 			.initialProperties(SharedProperties::stone)
-			.properties(p -> p.sound(SoundType.WOOD))
+			.properties(p -> p.sound(SoundType.NETHERITE_BLOCK))
 			.properties(p -> p.noOcclusion())
-			.transform(axeOrPickaxe())
+			.transform(pickaxeOnly())
 			.blockstate((c, p) -> BlockStateGen.horizontalAxisBlock(c, p, AssetLookup.forPowered(c, p)))
 			.item(RedstoneRequesterBlockItem::new)
 			.transform(customItemModel("_", "block"))
@@ -1995,6 +2009,7 @@ public class AllBlocks {
 			.recipe((c, p) -> p.stonecutting(DataIngredient.items(AllItems.ANDESITE_ALLOY.get()),
 				RecipeCategory.DECORATIONS, c::get, 2))
 			.transform(pickaxeOnly())
+			.lang("Andesite Table Cover")
 			.register();
 
 	public static final BlockEntry<TableClothBlock> BRASS_TABLE_CLOTH =
@@ -2005,6 +2020,7 @@ public class AllBlocks {
 			.recipe((c, p) -> p.stonecutting(DataIngredient.tag(AllTags.forgeItemTag("ingots/brass")),
 				RecipeCategory.DECORATIONS, c::get, 2))
 			.transform(pickaxeOnly())
+			.lang("Brass Table Cover")
 			.register();
 
 	public static final BlockEntry<TableClothBlock> COPPER_TABLE_CLOTH =
@@ -2014,6 +2030,7 @@ public class AllBlocks {
 			.recipe((c, p) -> p.stonecutting(DataIngredient.tag(AllTags.forgeItemTag("ingots/copper")),
 				RecipeCategory.DECORATIONS, c::get, 2))
 			.transform(pickaxeOnly())
+			.lang("Copper Table Cover")
 			.register();
 
 	public static final BlockEntry<DisplayLinkBlock> DISPLAY_LINK =
@@ -2240,6 +2257,7 @@ public class AllBlocks {
 					.texture("0", p.modLoc("block/toolbox/" + colourName)));
 			})
 			.onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "block.create.toolbox"))
+			.transform(mountedItemStorage(AllMountedStorageTypes.TOOLBOX))
 			.tag(AllBlockTags.TOOLBOXES.tag)
 			.item(UncontainableBlockItem::new)
 			.model((c, p) -> p.withExistingParent(colourName + "_toolbox", p.modLoc("block/toolbox/item"))

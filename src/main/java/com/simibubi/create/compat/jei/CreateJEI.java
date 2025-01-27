@@ -56,7 +56,6 @@ import com.simibubi.create.content.kinetics.fan.processing.SplashingRecipe;
 import com.simibubi.create.content.kinetics.press.MechanicalPressBlockEntity;
 import com.simibubi.create.content.kinetics.press.PressingRecipe;
 import com.simibubi.create.content.kinetics.saw.CuttingRecipe;
-import com.simibubi.create.content.kinetics.saw.SawBlockEntity;
 import com.simibubi.create.content.logistics.filter.AbstractFilterScreen;
 import com.simibubi.create.content.logistics.redstoneRequester.RedstoneRequesterScreen;
 import com.simibubi.create.content.processing.basin.BasinRecipe;
@@ -100,8 +99,6 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
-
-import net.fabricmc.loader.api.FabricLoader;
 
 import io.github.fabricators_of_create.porting_lib.mixin.accessors.common.accessor.RecipeManagerAccessor;
 
@@ -238,15 +235,6 @@ public class CreateJEI implements IModPlugin {
 				.doubleItemIcon(AllBlocks.MECHANICAL_SAW.get(), Items.STONE_BRICK_STAIRS)
 				.emptyBackground(177, 70)
 				.build("block_cutting", BlockCuttingCategory::new),
-
-		woodCutting = builder(CondensedBlockCuttingRecipe.class)
-				.enableIf(c -> c.allowWoodcuttingOnSaw.get() && FabricLoader.getInstance()
-						.isModLoaded("druidcraft"))
-				.addRecipes(() -> BlockCuttingCategory.condenseRecipes(getTypedRecipesExcluding(SawBlockEntity.woodcuttingRecipeType.get(), AllRecipeTypes::shouldIgnoreInAutomation)))
-				.catalyst(AllBlocks.MECHANICAL_SAW::get)
-				.doubleItemIcon(AllBlocks.MECHANICAL_SAW.get(), Items.OAK_STAIRS)
-				.emptyBackground(177, 70)
-				.build("wood_cutting", BlockCuttingCategory::new),
 
 		polishing = builder(SandPaperPolishingRecipe.class)
 				.addTypedRecipes(AllRecipeTypes.SANDPAPER_POLISHING)

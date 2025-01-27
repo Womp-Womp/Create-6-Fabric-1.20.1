@@ -6,7 +6,7 @@ import static com.simibubi.create.AllTags.NameSpace.QUARK;
 import static com.simibubi.create.AllTags.NameSpace.TIC;
 import static com.simibubi.create.AllTags.NameSpace.TRINKETS;
 
-import net.createmod.catnip.utility.lang.Lang;
+import net.createmod.catnip.lang.Lang;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -78,7 +78,6 @@ public class AllTags {
 
 		BRITTLE,
 		CASING,
-		CONTRAPTION_INVENTORY_DENY,
 		COPYCAT_ALLOW,
 		COPYCAT_DENY,
 		FAN_PROCESSING_CATALYSTS_BLASTING(MOD, "fan_processing_catalysts/blasting"),
@@ -101,6 +100,9 @@ public class AllTags {
 		VALVE_HANDLES,
 		WINDMILL_SAILS,
 		WRENCH_PICKUP,
+		CHEST_MOUNTED_STORAGE,
+		SIMPLE_MOUNTED_STORAGE,
+		FALLBACK_MOUNTED_STORAGE_BLACKLIST,
 		ROOTS,
 
 		CORALS,
@@ -164,6 +166,7 @@ public class AllTags {
 		CONTRAPTION_CONTROLLED,
 		CREATE_INGOTS,
 		CRUSHED_RAW_MATERIALS,
+		INVALID_FOR_TRACK_PAVING,
 		DEPLOYABLE_DRINK,
 		MODDED_STRIPPED_LOGS,
 		MODDED_STRIPPED_WOOD,
@@ -177,6 +180,7 @@ public class AllTags {
 		SLEEPERS,
 		TOOLBOXES,
 		PACKAGES,
+		CHAIN_RIDEABLE,
 		TRACKS,
 		UPRIGHT_ON_BELT,
 		VALVE_HANDLES,

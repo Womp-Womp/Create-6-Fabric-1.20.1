@@ -11,8 +11,7 @@ import com.simibubi.create.foundation.fluid.CombinedTankWrapper;
 import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
 import com.simibubi.create.foundation.utility.CreateLang;
 
-import net.createmod.catnip.utility.lang.Components;
-import net.createmod.catnip.utility.lang.Lang;
+import net.createmod.catnip.lang.Lang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
@@ -38,7 +37,7 @@ public class FluidThresholdCondition extends CargoThresholdCondition {
 
 	@Override
 	protected Component getUnit() {
-		return Components.literal("b");
+		return Component.literal("b");
 	}
 
 	@Override
@@ -134,7 +133,7 @@ public class FluidThresholdCondition extends CargoThresholdCondition {
 	public MutableComponent getWaitingStatus(Level level, Train train, CompoundTag tag) {
 		long lastDisplaySnapshot = getLastDisplaySnapshot(tag);
 		if (lastDisplaySnapshot == -1)
-			return Components.empty();
+            return Component.empty();
 		int offset = getOperator() == Ops.LESS ? -1 : getOperator() == Ops.GREATER ? 1 : 0;
 		return CreateLang.translateDirect("schedule.condition.threshold.status", lastDisplaySnapshot,
 			Math.max(0, getThreshold() + offset), CreateLang.translateDirect("schedule.condition.threshold.buckets"));

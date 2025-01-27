@@ -13,6 +13,7 @@ import dev.engine_room.flywheel.lib.instance.InstanceTypes;
 import dev.engine_room.flywheel.lib.instance.TransformedInstance;
 import dev.engine_room.flywheel.lib.model.Models;
 import net.createmod.catnip.render.SpriteShiftEntry;
+import net.createmod.ponder.render.VirtualRenderHelper;
 
 public class RopePulleyVisual extends AbstractPulleyVisual<PulleyBlockEntity> {
 	public RopePulleyVisual(VisualizationContext context, PulleyBlockEntity blockEntity, float partialTick) {
@@ -21,12 +22,12 @@ public class RopePulleyVisual extends AbstractPulleyVisual<PulleyBlockEntity> {
 
 	@Override
 	protected Instancer<TransformedInstance> getRopeModel() {
-		return instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.block(AllBlocks.ROPE.getDefaultState()));
+		return instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.ROPE));
 	}
 
 	@Override
 	protected Instancer<TransformedInstance> getMagnetModel() {
-		return instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.block(AllBlocks.PULLEY_MAGNET.getDefaultState()));
+		return instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(AllPartialModels.PULLEY_MAGNET));
 	}
 
 	@Override

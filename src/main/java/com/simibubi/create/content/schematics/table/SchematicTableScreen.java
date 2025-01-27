@@ -21,11 +21,12 @@ import com.simibubi.create.foundation.gui.widget.SelectionScrollInput;
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.createmod.catnip.gui.element.GuiGameElement;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.lang.Lang;
 import net.minecraft.Util;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
@@ -71,10 +72,10 @@ public class SchematicTableScreen extends AbstractSimiContainerScreen<SchematicT
 		List<Component> availableSchematics = CreateClient.SCHEMATIC_SENDER.getAvailableSchematics();
 
 		int x = leftPos;
-		int y = topPos;
+		int y = topPos + 2;
 
-		schematicsLabel = new Label(x + 49, y + 26, Components.immutableEmpty()).withShadow();
-		schematicsLabel.text = Components.immutableEmpty();
+		schematicsLabel = new Label(x + 51, y + 26, Lang.IMMUTABLE_EMPTY).withShadow();
+		schematicsLabel.text = Lang.IMMUTABLE_EMPTY;
 		if (!availableSchematics.isEmpty()) {
 			schematicsArea =
 				new SelectionScrollInput(x + 45, y + 21, 139, 18).forOptions(availableSchematics)
@@ -95,14 +96,14 @@ public class SchematicTableScreen extends AbstractSimiContainerScreen<SchematicT
 			}
 		});
 
-		folderButton = new IconButton(x + 21, y + 21, AllIcons.I_OPEN_FOLDER);
+		folderButton = new IconButton(x + 20, y + 21, AllIcons.I_OPEN_FOLDER);
 		folderButton.withCallback(() -> {
 			Util.getPlatform()
 				.openFile(Paths.get("schematics/")
 					.toFile());
 		});
 		folderButton.setToolTip(folder);
-		refreshButton = new IconButton(x + 207, y + 21, AllIcons.I_REFRESH);
+		refreshButton = new IconButton(x + 206, y + 21, AllIcons.I_REFRESH);
 		refreshButton.withCallback(() -> {
 			ClientSchematicLoader schematicSender = CreateClient.SCHEMATIC_SENDER;
 			schematicSender.refresh();
@@ -118,7 +119,7 @@ public class SchematicTableScreen extends AbstractSimiContainerScreen<SchematicT
 				addRenderableWidget(schematicsArea);
 			} else {
 				schematicsArea = null;
-				schematicsLabel.text = Components.immutableEmpty();
+				schematicsLabel.text = Lang.IMMUTABLE_EMPTY;
 			}
 		});
 		refreshButton.setToolTip(refresh);
@@ -152,7 +153,8 @@ public class SchematicTableScreen extends AbstractSimiContainerScreen<SchematicT
 			titleText = finished;
 		else
 			titleText = title;
-		graphics.drawCenteredString(font, titleText, x + (background.getWidth() - 8) / 2, y + 3, 0xFFFFFF);
+
+		graphics.drawString(font, titleText, x + (background.getWidth() - 8 - font.width(titleText)) / 2, y + 4, 0x505050, false);
 
 		if (schematicsArea == null)
 			graphics.drawString(font, noSchematics, x + 54, y + 26, 0xD3D3D3);
@@ -165,7 +167,7 @@ public class SchematicTableScreen extends AbstractSimiContainerScreen<SchematicT
 		int width = (int) (SCHEMATIC_TABLE_PROGRESS.getWidth()
 			* Mth.lerp(partialTicks, lastChasingProgress, chasingProgress));
 		int height = SCHEMATIC_TABLE_PROGRESS.getHeight();
-		graphics.blit(SCHEMATIC_TABLE_PROGRESS.location, x + 70, y + 57, SCHEMATIC_TABLE_PROGRESS.getStartX(),
+		graphics.blit(SCHEMATIC_TABLE_PROGRESS.location, x + 70, y + 59, SCHEMATIC_TABLE_PROGRESS.getStartX(),
 			SCHEMATIC_TABLE_PROGRESS.getStartY(), width, height);
 	}
 
@@ -189,7 +191,11 @@ public class SchematicTableScreen extends AbstractSimiContainerScreen<SchematicT
 			if (schematicsLabel != null) {
 				schematicsLabel.colored(0xCCDDFF);
 				String uploadingSchematic = menu.contentHolder.uploadingSchematic;
-				schematicsLabel.text = uploadingSchematic == null ? null : Components.literal(uploadingSchematic);
+                if (uploadingSchematic == null) {
+                    schematicsLabel.text = null;
+                } else {
+                    schematicsLabel.text = Component.literal(uploadingSchematic);
+                }
 			}
 			if (schematicsArea != null)
 				schematicsArea.visible = false;

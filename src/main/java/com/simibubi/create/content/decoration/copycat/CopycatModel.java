@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import com.simibubi.create.AllBlocks;
 
-import net.createmod.catnip.utility.Iterate;
+import net.createmod.catnip.data.Iterate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
@@ -73,7 +73,7 @@ public abstract class CopycatModel extends ForwardingBakedModel implements Custo
 
 		CullFaceRemovalData cullFaceRemovalData = new CullFaceRemovalData();
 		if (state.getBlock() instanceof CopycatBlock copycatBlock) {
-			for (Direction cullFace : Iterate.directions) {
+			for (Direction cullFace : net.createmod.catnip.utility.Iterate.directions) {
 				if (copycatBlock.shouldFaceAlwaysRender(state, cullFace)) {
 					cullFaceRemovalData.remove(cullFace);
 				}

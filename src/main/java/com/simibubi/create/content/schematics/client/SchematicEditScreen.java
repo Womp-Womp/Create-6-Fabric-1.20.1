@@ -14,7 +14,7 @@ import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.createmod.catnip.gui.AbstractSimiScreen;
 import net.createmod.catnip.gui.element.GuiGameElement;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.lang.Lang;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.core.BlockPos;
@@ -57,11 +57,11 @@ public class SchematicEditScreen extends AbstractSimiScreen {
 		super.init();
 
 		int x = guiLeft;
-		int y = guiTop;
+		int y = guiTop + 2;
 
-		xInput = new EditBox(font, x + 50, y + 26, 34, 10, Components.immutableEmpty());
-		yInput = new EditBox(font, x + 90, y + 26, 34, 10, Components.immutableEmpty());
-		zInput = new EditBox(font, x + 130, y + 26, 34, 10, Components.immutableEmpty());
+		xInput = new EditBox(font, x + 50, y + 26, 34, 10, Lang.IMMUTABLE_EMPTY);
+		yInput = new EditBox(font, x + 90, y + 26, 34, 10, Lang.IMMUTABLE_EMPTY);
+		zInput = new EditBox(font, x + 130, y + 26, 34, 10, Lang.IMMUTABLE_EMPTY);
 
 		BlockPos anchor = handler.getTransformation()
 				.getAnchor();
@@ -96,14 +96,14 @@ public class SchematicEditScreen extends AbstractSimiScreen {
 
 		StructurePlaceSettings settings = handler.getTransformation()
 			.toSettings();
-		Label labelR = new Label(x + 50, y + 48, Components.immutableEmpty()).withShadow();
+		Label labelR = new Label(x + 50, y + 48, Lang.IMMUTABLE_EMPTY).withShadow();
 		rotationArea = new SelectionScrollInput(x + 45, y + 43, 118, 18).forOptions(rotationOptions)
 			.titled(rotationLabel.plainCopy())
 			.setState(settings.getRotation()
 				.ordinal())
 			.writingTo(labelR);
 
-		Label labelM = new Label(x + 50, y + 70, Components.immutableEmpty()).withShadow();
+		Label labelM = new Label(x + 50, y + 70, Lang.IMMUTABLE_EMPTY).withShadow();
 		mirrorArea = new SelectionScrollInput(x + 45, y + 65, 118, 18).forOptions(mirrorOptions)
 			.titled(mirrorLabel.plainCopy())
 			.setState(settings.getMirror()
@@ -114,7 +114,7 @@ public class SchematicEditScreen extends AbstractSimiScreen {
 		addRenderableWidgets(labelR, labelM, rotationArea, mirrorArea);
 
 		confirmButton =
-			new IconButton(x + background.getWidth() - 33, y + background.getHeight() - 24, AllIcons.I_CONFIRM);
+			new IconButton(x + background.getWidth() - 33, y + background.getHeight() - 26, AllIcons.I_CONFIRM);
 		confirmButton.withCallback(() -> {
 			onClose();
 		});
@@ -157,7 +157,7 @@ public class SchematicEditScreen extends AbstractSimiScreen {
 
 		background.render(graphics, x, y);
 		String title = handler.getCurrentSchematicName();
-		graphics.drawCenteredString(font, title, x + (background.getWidth() - 8) / 2, y + 3, 0xFFFFFF);
+		graphics.drawString(font, title, x + (background.getWidth() - 8 - font.width(title)) / 2, y + 4, 0x505050, false);
 
 		GuiGameElement.of(AllItems.SCHEMATIC.asStack())
 				.<GuiGameElement.GuiRenderBuilder>at(x + background.getWidth() + 6, y + background.getHeight() - 40, -200)

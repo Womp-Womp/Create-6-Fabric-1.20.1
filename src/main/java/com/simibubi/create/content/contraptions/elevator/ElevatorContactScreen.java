@@ -14,10 +14,10 @@ import com.simibubi.create.foundation.gui.widget.ScrollInput;
 import com.simibubi.create.foundation.gui.widget.TooltipArea;
 import com.simibubi.create.foundation.utility.CreateLang;
 
+import net.createmod.catnip.data.Pair;
 import net.createmod.catnip.gui.AbstractSimiScreen;
 import net.createmod.catnip.gui.element.GuiGameElement;
-import net.createmod.catnip.utility.Pair;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.lang.Lang;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -107,7 +107,7 @@ public class ElevatorContactScreen extends AbstractSimiScreen {
 	}
 
 	private EditBox editBox(int x, int width, int chars) {
-		EditBox editBox = new EditBox(font, guiLeft + x, guiTop + 30, width, 10, Components.immutableEmpty());
+		EditBox editBox = new EditBox(font, guiLeft + x, guiTop + 30, width, 10, Lang.IMMUTABLE_EMPTY);
 		editBox.setTextColor(-1);
 		editBox.setTextColorUneditable(-1);
 		editBox.setBordered(false);

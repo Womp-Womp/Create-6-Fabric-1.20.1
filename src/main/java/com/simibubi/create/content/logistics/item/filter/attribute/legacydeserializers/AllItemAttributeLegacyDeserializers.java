@@ -1,21 +1,26 @@
 package com.simibubi.create.content.logistics.item.filter.attribute.legacydeserializers;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.ApiStatus;
 
 import com.simibubi.create.content.logistics.item.filter.attribute.AllItemAttributeTypes;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttributeType;
+import com.simibubi.create.content.logistics.item.filter.attribute.attributes.AddedByAttribute;
+import com.simibubi.create.content.logistics.item.filter.attribute.attributes.ColorAttribute;
 import com.simibubi.create.content.logistics.item.filter.attribute.attributes.EnchantAttribute;
+import com.simibubi.create.content.logistics.item.filter.attribute.attributes.FluidContentsAttribute;
 import com.simibubi.create.content.logistics.item.filter.attribute.attributes.InTagAttribute;
+import com.simibubi.create.content.logistics.item.filter.attribute.attributes.ShulkerFillLevelAttribute;
+import com.simibubi.create.content.logistics.item.filter.attribute.attributes.ShulkerFillLevelAttribute.ShulkerLevels;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
+import net.minecraft.world.item.DyeColor;
 
 @SuppressWarnings("deprecation")
 public class AllItemAttributeLegacyDeserializers {
@@ -29,12 +34,16 @@ public class AllItemAttributeLegacyDeserializers {
 			)))
 		);
 		createLegacyDeserializer("in_item_group", AllItemAttributeTypes.IN_ITEM_GROUP);
-		createLegacyDeserializer("added_by", AllItemAttributeTypes.ADDED_BY);
+		createLegacyDeserializer("added_by", tag ->
+			new AddedByAttribute(tag.getString("id")));
 		createLegacyDeserializer("has_enchant", tag ->
 			new EnchantAttribute(BuiltInRegistries.ENCHANTMENT.get(ResourceLocation.tryParse(tag.getString("id")))));
-		createLegacyDeserializer("shulker_fill_level", AllItemAttributeTypes.SHULKER_FILL_LEVEL);
-		createLegacyDeserializer("has_color", AllItemAttributeTypes.HAS_COLOR);
-		createLegacyDeserializer("has_fluid", AllItemAttributeTypes.HAS_FLUID);
+		createLegacyDeserializer("shulker_fill_level", tag ->
+			new ShulkerFillLevelAttribute(ShulkerLevels.fromKey(tag.getString("id"))));
+		createLegacyDeserializer("has_color", tag ->
+			new ColorAttribute(DyeColor.byId(tag.getInt("id"))));
+		createLegacyDeserializer("has_fluid", tag ->
+			new FluidContentsAttribute(BuiltInRegistries.FLUID.get(ResourceLocation.tryParse(tag.getString("id")))));
 		createLegacyDeserializer("has_name", AllItemAttributeTypes.HAS_NAME);
 		createLegacyDeserializer("book_author", AllItemAttributeTypes.BOOK_AUTHOR);
 		createLegacyDeserializer("book_copy", AllItemAttributeTypes.BOOK_COPY);
@@ -44,9 +53,9 @@ public class AllItemAttributeLegacyDeserializers {
 		createLegacyDeserializer("astralsorcery_perk_gem", AllItemAttributeTypes.ASTRAL_PERK_GEM);
 	}
 
-	private static void createLegacyDeserializer(String nbtKey, Supplier<ItemAttributeType> type) {
+	private static void createLegacyDeserializer(String nbtKey, ItemAttributeType type) {
 		createLegacyDeserializer(nbtKey, tag -> {
-			ItemAttribute attribute = type.get().createAttribute();
+			ItemAttribute attribute = type.createAttribute();
 			attribute.load(tag);
 			return attribute;
 		});

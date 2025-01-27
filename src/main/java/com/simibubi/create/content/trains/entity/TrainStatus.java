@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 import com.google.common.collect.Streams;
 import com.simibubi.create.foundation.utility.CreateLang;
 
-import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -42,6 +41,13 @@ public class TrainStatus {
 		if (navigation)
 			return;
 		displayInformation("no_match", false, filter);
+		navigation = true;
+	}
+
+	public void failedPackageNoTarget(String address) {
+		if (navigation)
+			return;
+		displayInformation("no_package_target", false, address);
 		navigation = true;
 	}
 
@@ -107,20 +113,22 @@ public class TrainStatus {
 
 	public void crash() {
 		Component component =
-			Components.literal(" - ").withStyle(ChatFormatting.GRAY)
+			Component.literal(" - ").withStyle(ChatFormatting.GRAY)
 			.append(
 				CreateLang.translateDirect("train.status.collision").withStyle(st -> st.withColor(0xFFD3B4))
 			);
 		List<ResourceKey<Level>> presentDimensions = train.getPresentDimensions();
 		Stream<Component> locationComponents = presentDimensions.stream().map(key ->
-			Components.literal(" - ").withStyle(ChatFormatting.GRAY)
-				.append(
-					CreateLang.translateDirect(
-						"train.status.collision.where",
-							key.location(),
-							train.getPositionInDimension(key).get().toShortString()
-						).withStyle(style -> style.withColor(0xFFD3B4))
-				)
+                {
+                    return Component.literal(" - ").withStyle(ChatFormatting.GRAY)
+                        .append(
+                            CreateLang.translateDirect(
+                                "train.status.collision.where",
+                                    key.location(),
+                                    train.getPositionInDimension(key).get().toShortString()
+                                ).withStyle(style -> style.withColor(0xFFD3B4))
+                        );
+                }
 		);
 		addMessage(new StatusMessage(Streams.concat(Stream.of(component), locationComponents).toArray(Component[]::new)));
 
@@ -152,7 +160,7 @@ public class TrainStatus {
 	}
 
 	public void displayInformation(String key, boolean itsAGoodThing, Object... args) {
-		MutableComponent component = Components.literal(" - ").withStyle(ChatFormatting.GRAY)
+        MutableComponent component = Component.literal(" - ").withStyle(ChatFormatting.GRAY)
 			.append(CreateLang.translateDirect("train.status." + key, args)
 				.withStyle(st -> st.withColor(itsAGoodThing ? 0xD5ECC2 : 0xFFD3B4)));
 		addMessage(new StatusMessage(component));

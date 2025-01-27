@@ -3,8 +3,8 @@ package com.simibubi.create.content.redstone.displayLink.source;
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkContext;
 import com.simibubi.create.content.redstone.displayLink.target.DisplayTargetStats;
 
-import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
@@ -47,7 +47,7 @@ public class EnchantPowerDisplaySource extends NumericSingleLineDisplaySource {
 
 		int cost = EnchantmentHelper.getEnchantmentCost(random, 2, (int) enchantPower, stack);
 
-		return Components.literal(String.valueOf(cost));
+		return Component.literal(String.valueOf(cost));
 	}
 
 	@Override

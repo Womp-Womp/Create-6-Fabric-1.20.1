@@ -21,13 +21,13 @@ import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.VecHelper;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -273,8 +273,8 @@ public class FilteringBehaviour extends BlockEntityBehaviour implements ValueSet
 		if (value.row() == 0 && value.value() == filter.item()
 			.getMaxStackSize())
 			return CreateLang.translateDirect("logistics.filter.any_amount_short");
-		return Components.literal(((value.row() == 0) ? "\u2264" : "=") + Math.max(1, value.value()));
-	}
+        return Component.literal(((value.row() == 0) ? "\u2264" : "=") + Math.max(1, value.value()));
+    }
 
 	@Override
 	public void onShortInteract(Player player, InteractionHand hand, Direction side, BlockHitResult hitResult) {
@@ -283,9 +283,7 @@ public class FilteringBehaviour extends BlockEntityBehaviour implements ValueSet
 		ItemStack itemInHand = player.getItemInHand(hand);
 		ItemStack toApply = itemInHand.copy();
 
-		if (AllItems.WRENCH.isIn(toApply))
-			return;
-		if (AllBlocks.MECHANICAL_ARM.isIn(toApply))
+		if (!canShortInteract(toApply))
 			return;
 		if (level.isClientSide())
 			return;
@@ -320,6 +318,14 @@ public class FilteringBehaviour extends BlockEntityBehaviour implements ValueSet
 		level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, .25f, .1f);
 	}
 
+	public boolean canShortInteract(ItemStack toApply) {
+		if (AllItems.WRENCH.isIn(toApply))
+			return false;
+		if (AllBlocks.MECHANICAL_ARM.isIn(toApply))
+			return false;
+		return true;
+	}
+
 	public MutableComponent getLabel() {
 		if (customLabel != null)
 			return customLabel;
@@ -337,9 +343,9 @@ public class FilteringBehaviour extends BlockEntityBehaviour implements ValueSet
 	}
 
 	public MutableComponent getCountLabelForValueBox() {
-		return Components.literal(isCountVisible() ? upTo && filter.item()
-			.getMaxStackSize() == count ? "*" : String.valueOf(count) : "");
-	}
+        return Component.literal(isCountVisible() ? upTo && filter.item()
+            .getMaxStackSize() == count ? "*" : String.valueOf(count) : "");
+    }
 
 	@Override
 	public String getClipboardKey() {

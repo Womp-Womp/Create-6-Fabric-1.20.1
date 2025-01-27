@@ -33,7 +33,7 @@ public class PortableItemInterfaceBlockEntity extends PortableStorageInterfaceBl
 
 	@Override
 	public void startTransferringTo(Contraption contraption, float distance) {
-		capability.setWrapped(contraption.getSharedInventory());
+		capability.setWrapped(contraption.getStorage().getAllItems());
 		super.startTransferringTo(contraption, distance);
 	}
 

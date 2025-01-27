@@ -56,14 +56,8 @@ public interface MovementBehaviour {
 
 	default void dropItem(MovementContext context, ItemStack stack) {
 		ItemStack remainder;
-		if (AllConfigs.server().kinetics.moveItemsToStorage.get()) {
-			try (Transaction t = TransferUtil.getTransaction()) {
-				long inserted = context.contraption.getSharedInventory().insert(ItemVariant.of(stack), stack.getCount(), t);
-				remainder = stack.copy();
-				remainder.shrink((int) inserted);
-				t.commit();
-			}
-		}
+		if (AllConfigs.server().kinetics.moveItemsToStorage.get())
+			remainder = ItemHandlerHelper.insertItem(context.contraption.getStorage().getAllItems(), stack, false);
 		else
 			remainder = stack;
 		if (remainder.isEmpty())

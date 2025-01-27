@@ -10,7 +10,7 @@ import com.simibubi.create.foundation.render.fabric.LayerFilteringBakedModel;
 import net.createmod.catnip.render.ShadedBlockSbbBuilder;
 import net.createmod.catnip.render.SuperByteBuffer;
 import net.createmod.catnip.render.SuperRenderTypeBuffer;
-import net.createmod.catnip.utility.levelWrappers.SchematicLevel;
+import net.createmod.catnip.levelWrappers.SchematicLevel;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;

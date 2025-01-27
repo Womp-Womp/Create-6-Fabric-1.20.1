@@ -13,8 +13,7 @@ import com.simibubi.create.content.trains.display.FlapDisplayBlockEntity;
 import com.simibubi.create.content.trains.display.FlapDisplayLayout;
 import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
 
-import net.createmod.catnip.utility.NBTProcessors;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.nbt.NBTProcessors;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 
@@ -23,9 +22,13 @@ import net.fabricmc.api.Environment;
 
 public abstract class DisplaySource extends DisplayBehaviour {
 
-	public static final List<MutableComponent> EMPTY = ImmutableList.of(Components.empty());
-	public static final MutableComponent EMPTY_LINE = Components.empty();
-	public static final MutableComponent WHITESPACE = Components.literal(" ");
+	public static final List<MutableComponent> EMPTY = ImmutableList.of(Component.empty());
+    public static final MutableComponent EMPTY_LINE = Component.empty();
+    public static final MutableComponent WHITESPACE;
+
+	static {
+		WHITESPACE = Component.literal(" ");
+	}
 
 	public abstract List<MutableComponent> provideText(DisplayLinkContext context, DisplayTargetStats stats);
 
@@ -66,7 +69,7 @@ public abstract class DisplaySource extends DisplayBehaviour {
 	}
 
 	public Component getName() {
-		return Components.translatable(id.getNamespace() + ".display_source." + getTranslationKey());
+		return Component.translatable(id.getNamespace() + ".display_source." + getTranslationKey());
 	}
 
 	public void loadFlapDisplayLayout(DisplayLinkContext context, FlapDisplayBlockEntity flapDisplay, FlapDisplayLayout layout, int lineIndex) {

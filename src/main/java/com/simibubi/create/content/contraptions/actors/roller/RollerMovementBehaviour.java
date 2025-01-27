@@ -35,10 +35,10 @@ import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import dev.engine_room.flywheel.api.visualization.VisualizationContext;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
-import net.createmod.catnip.utility.Couple;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.Pair;
-import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.data.Couple;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.data.Pair;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -198,7 +198,7 @@ public class RollerMovementBehaviour extends BlockBreakingMovementBehaviour {
 		if (!getStateToPaveWith(context).isAir()) {
 			FilterItemStack filter = context.getFilterFromBE();
 			if (!ItemHelper
-				.extract(context.contraption.getSharedInventory(),
+				.extract(context.contraption.getStorage().getAllItems(),
 					stack -> filter.test(context.world, stack), 1, true)
 				.isEmpty())
 				startingY = 0;
@@ -478,7 +478,7 @@ public class RollerMovementBehaviour extends BlockBreakingMovementBehaviour {
 			return PaveResult.FAIL;
 
 		FilterItemStack filter = context.getFilterFromBE();
-		ItemStack held = ItemHelper.extract(context.contraption.getSharedInventory(),
+		ItemStack held = ItemHelper.extract(context.contraption.getStorage().getAllItems(),
 			stack -> filter.test(context.world, stack), 1, false);
 		if (held.isEmpty())
 			return PaveResult.FAIL;

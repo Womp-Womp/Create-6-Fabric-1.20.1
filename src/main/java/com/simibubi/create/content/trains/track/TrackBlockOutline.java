@@ -14,11 +14,11 @@ import com.simibubi.create.foundation.utility.RaycastHelper;
 import com.simibubi.create.foundation.utility.fabric.ReachUtil;
 
 import dev.engine_room.flywheel.lib.transform.TransformStack;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.VecHelper;
-import net.createmod.catnip.utility.WorldAttached;
-import net.createmod.catnip.utility.math.AngleHelper;
-import net.createmod.ponder.utility.LevelTickHolder;
+import net.createmod.catnip.animation.AnimationTickHolder;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.VecHelper;
+import net.createmod.catnip.data.WorldAttached;
+import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -53,7 +53,7 @@ public class TrackBlockOutline {
 		if (mc.level == null)
 			return;
 
-		Vec3 origin = player.getEyePosition(LevelTickHolder.getPartialTicks(mc.level));
+		Vec3 origin = player.getEyePosition(AnimationTickHolder.getPartialTicks(mc.level));
 
 		double maxRange = mc.hitResult == null ? Double.MAX_VALUE
 			: mc.hitResult.getLocation()

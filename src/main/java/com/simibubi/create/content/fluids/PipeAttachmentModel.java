@@ -10,6 +10,7 @@ import com.simibubi.create.content.fluids.FluidTransportBehaviour.AttachmentType
 import com.simibubi.create.content.fluids.pipes.FluidPipeBlock;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
+import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.utility.Iterate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
@@ -55,7 +56,7 @@ public class PipeAttachmentModel extends ForwardingBakedModel {
 		Object attachment = attachmentView.getBlockEntityRenderAttachment(pos);
 		if (attachment instanceof AttachmentTypes[] attachments) {
 			for (int i = 0; i < attachments.length; i++) {
-				data.putAttachment(Iterate.directions[i], attachments[i]);
+				data.putAttachment(net.createmod.catnip.utility.Iterate.directions[i], attachments[i]);
 			}
 		}
 
@@ -86,7 +87,7 @@ public class PipeAttachmentModel extends ForwardingBakedModel {
 		BakedModel bracket = pipeData.getBracket();
 		if (bracket != null)
 			((FabricBakedModel) bracket).emitBlockQuads(world, state, pos, randomSupplier, context);
-		for (Direction d : Iterate.directions) {
+		for (Direction d : net.createmod.catnip.utility.Iterate.directions) {
 			AttachmentTypes type = pipeData.getAttachment(d);
 			for (ComponentPartials partial : type.partials) {
 				((FabricBakedModel) AllPartialModels.PIPE_ATTACHMENTS.get(partial)

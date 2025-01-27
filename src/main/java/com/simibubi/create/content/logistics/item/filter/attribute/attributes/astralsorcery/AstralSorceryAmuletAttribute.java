@@ -9,11 +9,11 @@ import com.simibubi.create.content.logistics.item.filter.attribute.AllItemAttrib
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttributeType;
 
-import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -53,7 +53,7 @@ public class AstralSorceryAmuletAttribute implements ItemAttribute {
 
 		Enchantment enchant = BuiltInRegistries.ENCHANTMENT.get(ResourceLocation.tryParse(enchName));
 		if (enchant != null) {
-			something = Components.translatable(enchant.getDescriptionId()).getString();
+            something = Component.translatable(enchant.getDescriptionId()).getString();
 		}
 
 		if (enchType == 1) something = "existing " + something;
@@ -63,7 +63,7 @@ public class AstralSorceryAmuletAttribute implements ItemAttribute {
 
 	@Override
 	public ItemAttributeType getType() {
-		return AllItemAttributeTypes.ASTRAL_AMULET.get();
+		return AllItemAttributeTypes.ASTRAL_AMULET;
 	}
 
 	@Override

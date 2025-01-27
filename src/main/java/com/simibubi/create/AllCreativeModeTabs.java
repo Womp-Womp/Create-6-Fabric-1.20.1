@@ -30,13 +30,13 @@ import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
 import it.unimi.dsi.fastutil.objects.ReferenceLinkedOpenHashSet;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.BlockItem;
@@ -61,14 +61,14 @@ public class AllCreativeModeTabs {
 
 	public static final TabInfo BASE_CREATIVE_TAB = register("base",
 		() -> FabricItemGroup.builder()
-			.title(Components.translatable("itemGroup.create.base"))
+			.title(Component.translatable("itemGroup.create.base"))
 			.icon(() -> AllBlocks.COGWHEEL.asStack())
 			.displayItems(new RegistrateDisplayItemsGenerator(true, () -> AllCreativeModeTabs.BASE_CREATIVE_TAB))
 			.build());
 
 	public static final TabInfo PALETTES_CREATIVE_TAB = register("palettes",
 		() -> FabricItemGroup.builder()
-			.title(Components.translatable("itemGroup.create.palettes"))
+			.title(Component.translatable("itemGroup.create.palettes"))
 			.icon(() -> AllPaletteBlocks.ORNATE_IRON_WINDOW.asStack())
 			.displayItems(new RegistrateDisplayItemsGenerator(false, () -> AllCreativeModeTabs.PALETTES_CREATIVE_TAB))
 			.build());

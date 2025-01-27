@@ -9,7 +9,7 @@ import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.foundation.utility.FluidFormatter;
 
-import net.createmod.catnip.utility.lang.Components;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
@@ -49,7 +49,7 @@ public class FluidAmountDisplaySource extends SingleLineDisplaySource {
 			}
 		}
 
-		return Components.literal(FluidFormatter.asString(collected, false, getUnit(context)));
+		return Component.literal(FluidFormatter.asString(collected, false, getUnit(context)));
 	}
 
 	@Override

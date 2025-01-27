@@ -2,7 +2,6 @@ package com.simibubi.create.foundation.blockEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -17,6 +16,7 @@ import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.utility.IInteractionChecker;
 
+import it.unimi.dsi.fastutil.objects.Reference2ObjectArrayMap;
 import net.createmod.ponder.api.VirtualBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -30,7 +30,7 @@ import io.github.fabricators_of_create.porting_lib.block.ChunkUnloadListeningBlo
 public abstract class SmartBlockEntity extends CachedRenderBBBlockEntity
 	implements IPartialSafeNBT, IInteractionChecker, ChunkUnloadListeningBlockEntity, ISpecialBlockEntityItemRequirement, VirtualBlockEntity {
 
-	private final Map<BehaviourType<?>, BlockEntityBehaviour> behaviours = new HashMap<>();
+	private final Map<BehaviourType<?>, BlockEntityBehaviour> behaviours = new Reference2ObjectArrayMap<>();
 	private boolean initialized = false;
 	private boolean firstNbtRead = true;
 	protected int lazyTickRate;
@@ -183,8 +183,9 @@ public abstract class SmartBlockEntity extends CachedRenderBBBlockEntity
 		return behaviours.values();
 	}
 
-	protected void attachBehaviourLate(BlockEntityBehaviour behaviour) {
+	public void attachBehaviourLate(BlockEntityBehaviour behaviour) {
 		behaviours.put(behaviour.getType(), behaviour);
+		behaviour.blockEntity = this;
 		behaviour.initialize();
 	}
 
@@ -193,7 +194,7 @@ public abstract class SmartBlockEntity extends CachedRenderBBBlockEntity
 			.reduce(ItemRequirement.NONE, (r, b) -> r.union(b.getRequiredItems()), (r, r1) -> r.union(r1));
 	}
 
-	protected void removeBehaviour(BehaviourType<?> type) {
+	public void removeBehaviour(BehaviourType<?> type) {
 		BlockEntityBehaviour remove = behaviours.remove(type);
 		if (remove != null) {
 			remove.unload();

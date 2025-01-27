@@ -1,5 +1,7 @@
 package com.simibubi.create.foundation.blockEntity.behaviour;
 
+import com.simibubi.create.foundation.utility.AdventureUtil;
+
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import com.simibubi.create.AllBlocks;
@@ -8,7 +10,6 @@ import com.simibubi.create.CreateClient;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.SidedFilteringBehaviour;
 import com.simibubi.create.foundation.utility.AdventureUtil;
-import com.simibubi.create.foundation.utility.RaycastHelper;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
@@ -50,7 +51,7 @@ public class ValueSettingsInputHandler {
 			if (!valueSettingsBehaviour.mayInteract(player))
 				continue;
 
-			BlockHitResult ray = RaycastHelper.rayTraceRange(world, player, 10);
+			BlockHitResult ray = event.getHitVec();
 			if (ray == null)
 				return InteractionResult.PASS;
 			if (behaviour instanceof SidedFilteringBehaviour) {

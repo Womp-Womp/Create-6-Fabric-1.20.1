@@ -8,19 +8,18 @@ import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllTags.AllItemTags;
 import com.simibubi.create.content.fluids.tank.FluidTankBlock;
-import com.simibubi.create.content.logistics.stockTicker.StockTickerBlock;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import com.simibubi.create.content.processing.basin.BasinBlock;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
-import dev.engine_room.flywheel.api.backend.BackendManager;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.VecHelper;
-import net.createmod.catnip.utility.animation.LerpedFloat;
-import net.createmod.catnip.utility.animation.LerpedFloat.Chaser;
-import net.createmod.catnip.utility.math.AngleHelper;
+import dev.engine_room.flywheel.api.visualization.VisualizationManager;
+import net.createmod.catnip.animation.LerpedFloat;
+import net.createmod.catnip.animation.LerpedFloat.Chaser;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.AngleHelper;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
@@ -131,8 +130,7 @@ public class BlazeBurnerBlockEntity extends SmartBlockEntity {
 			if (level instanceof Level l && !l.isLoaded(pos))
 				return null;
 			BlockState blockState = level.getBlockState(pos.relative(direction));
-			if (!AllBlocks.STOCK_TICKER.has(blockState)
-				|| blockState.getValue(StockTickerBlock.FACING) != direction.getOpposite())
+			if (!AllBlocks.STOCK_TICKER.has(blockState))
 				continue;
 			if (level.getBlockEntity(pos.relative(direction)) instanceof StockTickerBlockEntity stbe)
 				return stbe;
@@ -143,7 +141,7 @@ public class BlazeBurnerBlockEntity extends SmartBlockEntity {
 	@Environment(EnvType.CLIENT)
 	private boolean shouldTickAnimation() {
 		// Offload the animation tick to the visual when flywheel in enabled
-		return !BackendManager.isBackendOn();
+		return !VisualizationManager.supportsVisualization(level);
 	}
 
 	@Environment(EnvType.CLIENT)

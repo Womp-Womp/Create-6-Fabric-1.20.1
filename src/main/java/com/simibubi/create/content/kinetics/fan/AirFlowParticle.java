@@ -5,7 +5,7 @@ import javax.annotation.Nonnull;
 import com.simibubi.create.content.kinetics.fan.processing.AllFanProcessingTypes;
 import com.simibubi.create.content.kinetics.fan.processing.FanProcessingType;
 
-import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.ParticleProvider;
@@ -78,7 +78,7 @@ public class AirFlowParticle extends SimpleAnimatedParticle {
 			motion = motion.scale(airCurrent.maxDistance - (distance - 1f)).scale(.5f);
 
 			FanProcessingType type = getType(distance);
-			if (type == AllFanProcessingTypes.NONE.get()) {
+			if (type == AllFanProcessingTypes.NONE) {
 				setColor(0xEEEEEE);
 				setAlpha(.25f);
 				selectSprite((int) Mth.clamp((distance / airCurrent.maxDistance) * 8 + random.nextInt(4),
@@ -102,7 +102,7 @@ public class AirFlowParticle extends SimpleAnimatedParticle {
 
 	private FanProcessingType getType(double distance) {
 		if (source.getAirCurrent() == null)
-			return AllFanProcessingTypes.NONE.get();
+			return AllFanProcessingTypes.NONE;
 		return source.getAirCurrent().getTypeAt((float) distance);
 	}
 

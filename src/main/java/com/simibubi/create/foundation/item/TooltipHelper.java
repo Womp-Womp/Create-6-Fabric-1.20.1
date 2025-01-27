@@ -8,9 +8,8 @@ import java.util.List;
 import com.google.common.base.Strings;
 import com.simibubi.create.foundation.utility.CreateLang;
 
-import net.createmod.catnip.utility.Couple;
-import net.createmod.catnip.utility.FontHelper;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.data.Couple;
+import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -57,7 +56,7 @@ public class TooltipHelper {
 	}
 
 	public static List<Component> cutStringTextComponent(String s, FontHelper.Palette palette) {
-		return cutTextComponent(Components.literal(s), palette);
+		return cutTextComponent(Component.literal(s), palette);
 	}
 
 	public static List<Component> cutTextComponent(Component c, FontHelper.Palette palette) {
@@ -66,7 +65,7 @@ public class TooltipHelper {
 
 	public static List<Component> cutStringTextComponent(String s, Style primaryStyle,
 		Style highlightStyle) {
-		return cutTextComponent(Components.literal(s), primaryStyle, highlightStyle);
+		return cutTextComponent(Component.literal(s), primaryStyle, highlightStyle);
 	}
 
 	public static List<Component> cutTextComponent(Component c, Style primaryStyle,
@@ -76,7 +75,7 @@ public class TooltipHelper {
 
 	public static List<Component> cutStringTextComponent(String c, Style primaryStyle,
 		Style highlightStyle, int indent) {
-		return cutTextComponent(Components.literal(c), primaryStyle, highlightStyle, indent);
+		return cutTextComponent(Component.literal(c), primaryStyle, highlightStyle, indent);
 	}
 
 	public static List<Component> cutTextComponent(Component c, Style primaryStyle,
@@ -119,7 +118,7 @@ public class TooltipHelper {
 		}
 
 		// Format
-		MutableComponent lineStart = Components.literal(Strings.repeat(" ", indent));
+        MutableComponent lineStart = Component.literal(Strings.repeat(" ", indent));
 		lineStart.withStyle(primaryStyle);
 		List<Component> formattedLines = new ArrayList<>(lines.size());
 		Couple<Style> styles = Couple.create(highlightStyle, primaryStyle);
@@ -129,7 +128,7 @@ public class TooltipHelper {
 			MutableComponent currentComponent = lineStart.plainCopy();
 			String[] split = string.split("_");
 			for (String part : split) {
-				currentComponent.append(Components.literal(part).withStyle(styles.get(currentlyHighlighted)));
+                currentComponent.append(Component.literal(part).withStyle(styles.get(currentlyHighlighted)));
 				currentlyHighlighted = !currentlyHighlighted;
 			}
 

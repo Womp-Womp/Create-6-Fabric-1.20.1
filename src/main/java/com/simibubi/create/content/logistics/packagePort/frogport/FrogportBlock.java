@@ -3,12 +3,12 @@ package com.simibubi.create.content.logistics.packagePort.frogport;
 import org.jetbrains.annotations.Nullable;
 
 import com.simibubi.create.AllBlockEntityTypes;
-import com.simibubi.create.AllItems;
 import com.simibubi.create.AllShapes;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
+import com.simibubi.create.foundation.advancement.AdvancementBehaviour;
 import com.simibubi.create.foundation.block.IBE;
 
-import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -49,6 +49,7 @@ public class FrogportBlock extends Block implements IBE<FrogportBlockEntity>, IW
 		super.setPlacedBy(pLevel, pPos, pState, pPlacer, pStack);
 		if (pPlacer == null)
 			return;
+		AdvancementBehaviour.setPlacedBy(pLevel, pPos, pPlacer);
 		withBlockEntityDo(pLevel, pPos, be -> {
 			Vec3 diff = VecHelper.getCenterOf(pPos)
 				.subtract(pPlacer.position());
@@ -61,8 +62,6 @@ public class FrogportBlock extends Block implements IBE<FrogportBlockEntity>, IW
 	@Override
 	public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn,
 		BlockHitResult hit) {
-		if (player != null && AllItems.WRENCH.isIn(player.getItemInHand(handIn)))
-			return InteractionResult.PASS;
 		return onBlockEntityUse(worldIn, pos, be -> be.use(player));
 	}
 
@@ -80,12 +79,12 @@ public class FrogportBlock extends Block implements IBE<FrogportBlockEntity>, IW
 	public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pMovedByPiston) {
 		IBE.onRemove(pState, pLevel, pPos, pNewState);
 	}
-	
+
 	@Override
 	public boolean isPathfindable(BlockState state, BlockGetter reader, BlockPos pos, PathComputationType type) {
 		return false;
 	}
-	
+
 	@Override
 	public boolean hasAnalogOutputSignal(BlockState pState) {
 		return true;

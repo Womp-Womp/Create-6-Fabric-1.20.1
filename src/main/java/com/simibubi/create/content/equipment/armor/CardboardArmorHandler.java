@@ -3,6 +3,7 @@ package com.simibubi.create.content.equipment.armor;
 import java.util.UUID;
 
 import com.simibubi.create.AllItems;
+import com.simibubi.create.foundation.advancement.AllAdvancements;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -21,10 +22,18 @@ import io.github.fabricators_of_create.porting_lib.entity.events.LivingEntityEve
 public class CardboardArmorHandler {
 
 	public static void playerHitboxChangesWhenHidingAsBox(EntityEvents.Size event) {
-		if (testForStealth(event.getEntity())) {
-			event.setNewSize(EntityDimensions.fixed(0.8F, 0.8F));
-			event.setNewEyeHeight(0.6F);
-		}
+		Entity entity = event.getEntity();
+		if (!entity.isAddedToWorld())
+			return;
+		if (!testForStealth(entity))
+			return;
+
+		event.setNewSize(EntityDimensions.fixed(0.6F, 0.8F));
+		event.setNewEyeHeight(0.6F);
+
+		if (!entity.level()
+			.isClientSide() && entity instanceof Player p)
+			AllAdvancements.CARDBOARD_ARMOR.awardTo(p);
 	}
 
 	public static void playersStealthWhenWearingCardboard(LivingEntityEvents.LivingVisibilityEvent event) {

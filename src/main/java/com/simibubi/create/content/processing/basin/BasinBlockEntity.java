@@ -36,15 +36,14 @@ import com.simibubi.create.foundation.utility.LongAttached;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import it.unimi.dsi.fastutil.Pair;
-import net.createmod.catnip.utility.AnimationTickHolder;
-import net.createmod.catnip.utility.Couple;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.NBTHelper;
-import net.createmod.catnip.utility.VecHelper;
-import net.createmod.catnip.utility.animation.LerpedFloat;
-import net.createmod.catnip.utility.animation.LerpedFloat.Chaser;
-import net.createmod.catnip.utility.lang.Components;
-import net.createmod.catnip.utility.lang.LangBuilder;
+import net.createmod.catnip.animation.AnimationTickHolder;
+import net.createmod.catnip.animation.LerpedFloat;
+import net.createmod.catnip.animation.LerpedFloat.Chaser;
+import net.createmod.catnip.data.Couple;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.lang.LangBuilder;
+import net.createmod.catnip.math.VecHelper;
+import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -799,7 +798,7 @@ public class BasinBlockEntity extends SmartBlockEntity implements IHaveGoggleInf
 				if (stackInSlot.isEmpty())
 					continue;
 				CreateLang.text("")
-						.add(Components.translatable(stackInSlot.getDescriptionId())
+						.add(Component.translatable(stackInSlot.getDescriptionId())
 								.withStyle(ChatFormatting.GRAY))
 						.add(CreateLang.text(" x" + stackInSlot.getCount())
 								.style(ChatFormatting.GREEN))

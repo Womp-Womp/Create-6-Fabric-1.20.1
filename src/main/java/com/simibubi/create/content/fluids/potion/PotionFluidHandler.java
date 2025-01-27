@@ -9,9 +9,9 @@ import com.simibubi.create.content.fluids.potion.PotionFluid.BottleType;
 import com.simibubi.create.foundation.fluid.FluidHelper;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
 
-import net.createmod.catnip.utility.NBTHelper;
-import net.createmod.catnip.utility.Pair;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.lang.Lang;
+import net.createmod.catnip.nbt.NBTHelper;
+import net.createmod.catnip.data.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -123,10 +123,10 @@ public class PotionFluidHandler {
 		List<MobEffectInstance> list = PotionUtils.getAllEffects(fs.getNbt());
 		List<Tuple<String, AttributeModifier>> list1 = Lists.newArrayList();
 		if (list.isEmpty()) {
-			tooltip.add((Components.translatable("effect.none")).withStyle(ChatFormatting.GRAY));
+            tooltip.add((Component.translatable("effect.none")).withStyle(ChatFormatting.GRAY));
 		} else {
 			for (MobEffectInstance effectinstance : list) {
-				MutableComponent textcomponent = Components.translatable(effectinstance.getDescriptionId());
+                MutableComponent textcomponent = Component.translatable(effectinstance.getDescriptionId());
 				MobEffect effect = effectinstance.getEffect();
 				Map<Attribute, AttributeModifier> map = effect.getAttributeModifiers();
 				if (!map.isEmpty()) {
@@ -142,8 +142,8 @@ public class PotionFluidHandler {
 				}
 
 				if (effectinstance.getAmplifier() > 0) {
-					textcomponent.append(" ")
-						.append(Components.translatable("potion.potency." + effectinstance.getAmplifier()).getString());
+                    textcomponent.append(" ")
+						.append(Component.translatable("potion.potency." + effectinstance.getAmplifier()).getString());
 				}
 
 				if (effectinstance.getDuration() > 20) {
@@ -158,8 +158,8 @@ public class PotionFluidHandler {
 		}
 
 		if (!list1.isEmpty()) {
-			tooltip.add(Components.immutableEmpty());
-			tooltip.add((Components.translatable("potion.whenDrank")).withStyle(ChatFormatting.DARK_PURPLE));
+			tooltip.add(Lang.IMMUTABLE_EMPTY);
+            tooltip.add((Component.translatable("potion.whenDrank")).withStyle(ChatFormatting.DARK_PURPLE));
 
 			for (Tuple<String, AttributeModifier> tuple : list1) {
 				AttributeModifier attributemodifier2 = tuple.getB();
@@ -173,19 +173,15 @@ public class PotionFluidHandler {
 				}
 
 				if (d0 > 0.0D) {
-					tooltip.add((Components.translatable(
-						"attribute.modifier.plus." + attributemodifier2.getOperation()
-							.toValue(),
-						ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1),
-						Components.translatable(tuple.getA())))
+					Object[] args = new Object[]{ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(tuple.getA())};
+					tooltip.add((Component.translatable("attribute.modifier.plus." + attributemodifier2.getOperation()
+						.toValue(), args))
 							.withStyle(ChatFormatting.BLUE));
 				} else if (d0 < 0.0D) {
 					d1 = d1 * -1.0D;
-					tooltip.add((Components.translatable(
-						"attribute.modifier.take." + attributemodifier2.getOperation()
-							.toValue(),
-						ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1),
-						Components.translatable(tuple.getA())))
+					Object[] args = new Object[]{ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(d1), Component.translatable(tuple.getA())};
+					tooltip.add((Component.translatable("attribute.modifier.take." + attributemodifier2.getOperation()
+						.toValue(), args))
 							.withStyle(ChatFormatting.RED));
 				}
 			}

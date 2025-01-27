@@ -2,7 +2,6 @@ package com.simibubi.create.content.logistics.item.filter.attribute;
 
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import org.jetbrains.annotations.ApiStatus;
 
@@ -10,8 +9,6 @@ import com.simibubi.create.AllRecipeTypes;
 import com.simibubi.create.AllRegistries;
 import com.simibubi.create.Create;
 import com.simibubi.create.content.kinetics.fan.processing.AllFanProcessingTypes;
-import com.simibubi.create.content.kinetics.fan.processing.AllFanProcessingTypes.HauntingType;
-import com.simibubi.create.content.kinetics.fan.processing.AllFanProcessingTypes.SplashingType;
 import com.simibubi.create.content.logistics.item.filter.attribute.attributes.AddedByAttribute;
 import com.simibubi.create.content.logistics.item.filter.attribute.attributes.BookAuthorAttribute;
 import com.simibubi.create.content.logistics.item.filter.attribute.attributes.BookCopyAttribute;
@@ -50,7 +47,7 @@ import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandle
 public class AllItemAttributeTypes {
 	private static final ItemStackHandlerContainer RECIPE_WRAPPER = new ItemStackHandlerContainer();
 
-	public static final Supplier<ItemAttributeType>
+	public static final ItemAttributeType
 		PLACEABLE = singleton("placeable", s -> s.getItem() instanceof BlockItem),
 		CONSUMABLE = singleton("consumable", ItemStack::isEdible),
 		FLUID_CONTAINER = singleton("fluid_container", s -> ContainerItemContext.withConstant(s).find(FluidStorage.ITEM) != null),
@@ -63,14 +60,8 @@ public class AllItemAttributeTypes {
 		EQUIPABLE = singleton("equipable", s -> LivingEntity.getEquipmentSlotForItem(s)
 			.getType() != EquipmentSlot.Type.HAND),
 		FURNACE_FUEL = singleton("furnace_fuel", AbstractFurnaceBlockEntity::isFuel),
-		WASHABLE = singleton("washable", (s, l) -> {
-			SplashingType type = AllFanProcessingTypes.SPLASHING.get();
-			return type != null && type.canProcess(s, l);
-		}),
-		HAUNTABLE = singleton("hauntable", (s, l) -> {
-			HauntingType type = AllFanProcessingTypes.HAUNTING.get();
-			return type != null && type.canProcess(s, l);
-		}),
+		WASHABLE = singleton("washable", AllFanProcessingTypes.SPLASHING::canProcess),
+		HAUNTABLE = singleton("hauntable", AllFanProcessingTypes.HAUNTING::canProcess),
 		CRUSHABLE = singleton("crushable", (s, w) -> testRecipe(s, w, AllRecipeTypes.CRUSHING.getType())
 			|| testRecipe(s, w, AllRecipeTypes.MILLING.getType())),
 		SMELTABLE = singleton("smeltable", (s, w) -> testRecipe(s, w, RecipeType.SMELTING)),
@@ -110,17 +101,17 @@ public class AllItemAttributeTypes {
 				.getMaxLevel() <= e.getValue());
 	}
 
-	private static Supplier<ItemAttributeType> singleton(String id, Predicate<ItemStack> predicate) {
+	private static ItemAttributeType singleton(String id, Predicate<ItemStack> predicate) {
 		return register(id, new SingletonItemAttribute.Type(type -> new SingletonItemAttribute(type, (stack, level) -> predicate.test(stack), id)));
 	}
 
-	private static Supplier<ItemAttributeType> singleton(String id, BiPredicate<ItemStack, Level> predicate) {
+	private static ItemAttributeType singleton(String id, BiPredicate<ItemStack, Level> predicate) {
 		return register(id, new SingletonItemAttribute.Type(type -> new SingletonItemAttribute(type, predicate, id)));
 	}
 
-	private static Supplier<ItemAttributeType> register(String id, ItemAttributeType type) {
+	private static ItemAttributeType register(String id, ItemAttributeType type) {
 		Registry.register(AllRegistries.ITEM_ATTRIBUTE_TYPES, Create.asResource(id), type);
-		return () -> type;
+		return type;
 	}
 
 	@ApiStatus.Internal

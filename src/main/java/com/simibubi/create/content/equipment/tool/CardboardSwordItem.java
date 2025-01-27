@@ -55,12 +55,6 @@ public class CardboardSwordItem extends SwordItem implements CustomEnchantingBeh
 		return TooltipPart.MODIFIERS.getMask();
 	}
 
-	@Override
-	public boolean onLeftClickEntity(ItemStack stack, Player player, Entity entity) {
-		AllSoundEvents.CARDBOARD_SWORD.playFrom(entity, 0.75f, 1.85f);
-		return super.onLeftClickEntity(stack, player, entity);
-	}
-
 	@SubscribeEvent
 	public static void cardboardSwordsMakeNoiseOnClick(LeftClickBlock event) {
 		ItemStack itemStack = event.getItemStack();
@@ -84,6 +78,8 @@ public class CardboardSwordItem extends SwordItem implements CustomEnchantingBeh
 		if (!(attacker instanceof LivingEntity livingAttacker
 			&& AllItems.CARDBOARD_SWORD.isIn(livingAttacker.getItemInHand(InteractionHand.MAIN_HAND))))
 			return;
+
+		AllSoundEvents.CARDBOARD_SWORD.playFrom(attacker, 0.75f, 1.85f);
 
 		event.setCanceled(true);
 

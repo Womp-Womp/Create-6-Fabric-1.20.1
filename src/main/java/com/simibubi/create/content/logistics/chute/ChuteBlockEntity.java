@@ -28,10 +28,9 @@ import com.simibubi.create.foundation.utility.BlockHelper;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.VecHelper;
-import net.createmod.catnip.utility.animation.LerpedFloat;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.animation.LerpedFloat;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
@@ -764,10 +763,10 @@ public class ChuteBlockEntity extends SmartBlockEntity implements IHaveGoggleInf
 			.style(ChatFormatting.YELLOW)
 			.forGoggles(tooltip);
 		if (!item.isEmpty())
-			CreateLang.translate("tooltip.chute.contains", Components.translatable(item.getDescriptionId())
-				.getString(), item.getCount())
-				.style(ChatFormatting.GREEN)
-				.forGoggles(tooltip);
+            CreateLang.translate("tooltip.chute.contains", Component.translatable(item.getDescriptionId())
+                .getString(), item.getCount())
+                .style(ChatFormatting.GREEN)
+                .forGoggles(tooltip);
 
 		return true;
 	}

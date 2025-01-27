@@ -9,9 +9,9 @@ import com.simibubi.create.content.logistics.item.filter.attribute.AllItemAttrib
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttributeType;
 
-import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -49,13 +49,13 @@ public class AstralSorceryAttunementAttribute implements ItemAttribute {
 	@Override
 	public Object[] getTranslationParameters() {
 		ResourceLocation constResource = new ResourceLocation(constellationName);
-		String something = Components.translatable(String.format("%s.constellation.%s", constResource.getNamespace(), constResource.getPath())).getString();
+        String something = Component.translatable(String.format("%s.constellation.%s", constResource.getNamespace(), constResource.getPath())).getString();
 		return new Object[]{something};
 	}
 
 	@Override
 	public ItemAttributeType getType() {
-		return AllItemAttributeTypes.ASTRAL_ATTUNMENT.get();
+		return AllItemAttributeTypes.ASTRAL_ATTUNMENT;
 	}
 
 	@Override

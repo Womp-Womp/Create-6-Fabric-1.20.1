@@ -10,10 +10,10 @@ import com.simibubi.create.content.logistics.item.filter.attribute.AllItemAttrib
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttributeType;
 
-import net.createmod.catnip.utility.NBTHelper;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
@@ -41,13 +41,13 @@ public class EnchantAttribute implements ItemAttribute {
 	public Object[] getTranslationParameters() {
 		String parameter = "";
 		if (enchantment != null)
-			parameter = Components.translatable(enchantment.getDescriptionId()).getString();
+            parameter = Component.translatable(enchantment.getDescriptionId()).getString();
 		return new Object[]{parameter};
 	}
 
 	@Override
 	public ItemAttributeType getType() {
-		return AllItemAttributeTypes.HAS_ENCHANT.get();
+		return AllItemAttributeTypes.HAS_ENCHANT;
 	}
 
 	@Override

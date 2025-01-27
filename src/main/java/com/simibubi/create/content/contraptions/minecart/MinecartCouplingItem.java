@@ -1,5 +1,8 @@
 package com.simibubi.create.content.contraptions.minecart;
 
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.EntityHitResult;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.simibubi.create.AllItems;
@@ -7,8 +10,7 @@ import com.simibubi.create.content.contraptions.minecart.capability.MinecartCont
 import com.simibubi.create.foundation.utility.AdventureUtil;
 import com.tterrag.registrate.fabric.EnvExecutor;
 
-import net.createmod.catnip.utility.Iterate;
-import net.minecraft.world.InteractionHand;
+import net.createmod.catnip.data.Iterate;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;

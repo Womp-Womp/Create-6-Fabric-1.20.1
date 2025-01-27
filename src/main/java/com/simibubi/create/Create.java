@@ -44,8 +44,8 @@ import com.simibubi.create.infrastructure.worldgen.AllFeatures;
 import com.simibubi.create.infrastructure.worldgen.AllPlacementModifiers;
 
 import io.github.tropheusj.milk.Milk;
-import net.createmod.catnip.utility.FontHelper;
-import net.createmod.catnip.utility.lang.LangBuilder;
+import net.createmod.catnip.lang.FontHelper;
+import net.createmod.catnip.lang.LangBuilder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -55,10 +55,8 @@ import net.minecraft.world.level.Level;
 import net.fabricmc.api.ModInitializer;
 
 public class Create implements ModInitializer {
-
 	public static final String ID = "create";
 	public static final String NAME = "Create";
-	public static final String VERSION = "0.5.2-experimental";
 
 	public static final Logger LOGGER = LogUtils.getLogger();
 
@@ -93,6 +91,8 @@ public class Create implements ModInitializer {
 
 	@Override
 	public void onInitialize() { // onCtor
+		LOGGER.info("{} {} initializing! Commit hash: {}", NAME, CreateBuildInfo.VERSION, CreateBuildInfo.GIT_COMMIT);
+
 		AllSoundEvents.prepare();
 		AllTags.init();
 		AllCreativeModeTabs.register();
@@ -115,6 +115,7 @@ public class Create implements ModInitializer {
 		AllPackets.registerPackets();
 		AllFeatures.register();
 		AllPlacementModifiers.register();
+		AllMountedStorageTypes.register();
 
 		AllConfigs.register();
 		AllRegistries.register();
@@ -181,5 +182,4 @@ public class Create implements ModInitializer {
 	public static ResourceLocation asResource(String path) {
 		return new ResourceLocation(ID, path);
 	}
-
 }

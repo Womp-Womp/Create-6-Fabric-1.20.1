@@ -8,8 +8,10 @@ import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.foundation.utility.LongAttached;
 
+import net.createmod.catnip.data.IntAttached;
 import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
@@ -40,7 +42,7 @@ public class ScoreboardDisplaySource extends ValueListDisplaySource {
 		return sLevel.getScoreboard()
 			.getPlayerScores(objective)
 			.stream()
-			.map(score -> LongAttached.with(score.getScore(), Components.literal(score.getOwner())
+			.map(score -> LongAttached.with(score.getScore(), Component.literal(score.getOwner())
 				.copy()))
 			.sorted(LongAttached.comparator())
 			.limit(maxRows);

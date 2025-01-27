@@ -10,7 +10,6 @@ import java.util.Optional;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.simibubi.create.AllBlocks;
-import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import com.simibubi.create.content.contraptions.AssemblyException;
 import com.simibubi.create.content.contraptions.Contraption;
 import com.simibubi.create.content.contraptions.ContraptionType;
@@ -20,13 +19,12 @@ import com.simibubi.create.content.contraptions.minecart.TrainCargoManager;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock;
 import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.content.trains.bogey.AbstractBogeyBlock;
-import com.simibubi.create.foundation.fluid.CombinedTankWrapper;
 import com.simibubi.create.foundation.utility.CreateLang;
 
-import net.createmod.catnip.utility.Couple;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.NBTHelper;
-import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.data.Couple;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.VecHelper;
+import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -40,8 +38,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 import net.minecraft.world.phys.AABB;
-
-import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 public class CarriageContraption extends Contraption {
 
@@ -65,8 +61,12 @@ public class CarriageContraption extends Contraption {
 	public int portalCutoffMin;
 	public int portalCutoffMax;
 
-	static final ContraptionInvWrapper fallbackItems = new ContraptionInvWrapper();
-	static final CombinedTankWrapper fallbackFluids = new CombinedTankWrapper();
+	static final MountedStorageManager fallbackStorage;
+
+	static {
+		fallbackStorage = new MountedStorageManager();
+		fallbackStorage.initialize();
+	}
 
 	public CarriageContraption() {
 		conductorSeats = new HashMap<>();
@@ -121,7 +121,8 @@ public class CarriageContraption extends Contraption {
 		StructureBlockInfo info = blocks.get(controlsPos);
 		if (!AllBlocks.TRAIN_CONTROLS.has(info.state()))
 			return false;
-		return info.state().getValue(ControlsBlock.FACING) == direction.getOpposite();
+		return info.state()
+			.getValue(ControlsBlock.FACING) == direction.getOpposite();
 	}
 
 	public void swapStorageAfterAssembly(CarriageContraptionEntity cce) {
@@ -227,16 +228,11 @@ public class CarriageContraption extends Contraption {
 	}
 
 	@Override
-	protected MountedStorageManager getStorageForSpawnPacket() {
-		return storageProxy;
-	}
-
-	@Override
 	public ContraptionType getType() {
 		return ContraptionType.CARRIAGE;
 	}
 
-    public Direction getAssemblyDirection() {
+	public Direction getAssemblyDirection() {
 		return assemblyDirection;
 	}
 
@@ -319,25 +315,16 @@ public class CarriageContraption extends Contraption {
 	}
 
 	@Override
-	public ContraptionInvWrapper getSharedInventory() {
-		return storageProxy == null ? fallbackItems : storageProxy.getItems();
+	public MountedStorageManager getStorage() {
+		return storageProxy == null ? fallbackStorage : storageProxy;
 	}
 
 	@Override
-	public CombinedTankWrapper getSharedFluidTanks() {
-		return storageProxy == null ? fallbackFluids : storageProxy.getFluids();
-	}
-
-	public void handleContraptionFluidPacket(BlockPos localPos, FluidStack containedFluid) {
-		storage.updateContainedFluid(localPos, containedFluid);
-	}
-
-	@Override
-	public void tickStorage(AbstractContraptionEntity entity) {
-		if (entity.level().isClientSide)
-			storage.entityTick(entity);
-		else if (storageProxy != null)
-			storageProxy.entityTick(entity);
+	public void writeStorage(CompoundTag nbt, boolean spawnPacket) {
+		if (!spawnPacket)
+			return;
+		if (storageProxy != null)
+			storageProxy.write(nbt, spawnPacket);
 	}
 
 }

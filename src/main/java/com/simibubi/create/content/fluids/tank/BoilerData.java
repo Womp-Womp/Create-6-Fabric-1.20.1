@@ -6,6 +6,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.createmod.catnip.lang.Lang;
+
 import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.AllBlocks;
@@ -21,10 +23,9 @@ import com.simibubi.create.foundation.fluid.SmartFluidTank;
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import joptsimple.internal.Strings;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.animation.LerpedFloat;
-import net.createmod.catnip.utility.animation.LerpedFloat.Chaser;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.animation.LerpedFloat;
+import net.createmod.catnip.animation.LerpedFloat.Chaser;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -212,7 +213,7 @@ int boilerLevel = Math.min(activeHeat, Math.min(maxHeatForWater, maxHeatForSize)
 		double totalSU = getEngineEfficiency(boilerSize) * 16 * Math.max(boilerLevel, attachedEngines)
 			* BlockStressValues.getCapacity(AllBlocks.STEAM_ENGINE.get());
 
-		tooltip.add(Components.immutableEmpty());
+		tooltip.add(Lang.IMMUTABLE_EMPTY);
 
 		if (attachedEngines > 0 && maxHeatForSize > 0 && maxHeatForWater == 0 && (passiveHeat ? 1 : activeHeat) > 0) {
 			CreateLang.translate("boiler.water_input_rate")
@@ -293,12 +294,11 @@ int boilerLevel = Math.min(activeHeat, Math.min(maxHeatForWater, maxHeatForSize)
 	}
 
 	private MutableComponent blockComponent(int level) {
-		return Components.literal(
-			"" + "\u2588".repeat(minValue) + "\u2592".repeat(level - minValue) + "\u2591".repeat(maxValue - level));
+		return Component.literal("" + "\u2588".repeat(minValue) + "\u2592".repeat(level - minValue) + "\u2591".repeat(maxValue - level));
 	}
 
 	private MutableComponent barComponent(int level) {
-		return Components.empty()
+        return Component.empty()
 			.append(bars(Math.max(0, minValue - 1), ChatFormatting.DARK_GREEN))
 			.append(bars(minValue > 0 ? 1 : 0, ChatFormatting.GREEN))
 			.append(bars(Math.max(0, level - minValue), ChatFormatting.DARK_GREEN))
@@ -309,7 +309,7 @@ int boilerLevel = Math.min(activeHeat, Math.min(maxHeatForWater, maxHeatForSize)
 	}
 
 	private MutableComponent bars(int level, ChatFormatting format) {
-		return Components.literal(Strings.repeat('|', level))
+		return Component.literal(Strings.repeat('|', level))
 			.withStyle(format);
 	}
 

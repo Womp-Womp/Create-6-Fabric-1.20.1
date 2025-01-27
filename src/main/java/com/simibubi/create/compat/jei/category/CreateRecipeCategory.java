@@ -179,16 +179,15 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IReci
 			// fabric: don't need potion tooltip stuff, handled by attribute handler
 
 			long amountToUse = mbAmount == -1 ? fluidStack.getAmount() : mbAmount;
-			FluidUnit unit = AllConfigs.client().fluidUnitType.get();
+            FluidUnit unit = AllConfigs.client().fluidUnitType.get();
 			String amount = FluidTextUtil.getUnicodeMillibuckets(amountToUse, unit, AllConfigs.client().simplifyFluidUnit.get());
 			Component text = Component.literal(String.valueOf(amount)).append(CreateLang.translateDirect(unit.getTranslationKey())).withStyle(ChatFormatting.GOLD);
 			if (tooltip.isEmpty())
 				tooltip.add(0, text);
 			else {
-				// fabric: sibling strategy doesn't work some reason
-				Component name = tooltip.get(0);
-				Component nameWithAmount = name.copy().append(" ").append(text);
-				tooltip.set(0, nameWithAmount);
+				List<Component> siblings = tooltip.get(0).getSiblings();
+                siblings.add(Component.literal(" "));
+				siblings.add(text);
 			}
 		};
 	}

@@ -64,7 +64,7 @@ public class FluidContentsAttribute implements ItemAttribute {
 
 	@Override
 	public ItemAttributeType getType() {
-		return AllItemAttributeTypes.HAS_FLUID.get();
+		return AllItemAttributeTypes.HAS_FLUID;
 	}
 
 	@Override
@@ -74,13 +74,13 @@ public class FluidContentsAttribute implements ItemAttribute {
 		Optional<ResourceLocation> id = BuiltInRegistries.FLUID.getResourceKey(fluid).map(ResourceKey::location);
 		if (id.isEmpty())
 			return;
-		nbt.putString("id", id.get().toString());
+		nbt.putString("fluidId", id.toString());
 	}
 
 	@Override
 	public void load(CompoundTag nbt) {
-		if (nbt.contains("id")) {
-			fluid = BuiltInRegistries.FLUID.get(ResourceLocation.tryParse(nbt.getString("id")));
+		if (nbt.contains("fluidId")) {
+			fluid = BuiltInRegistries.FLUID.get(ResourceLocation.tryParse(nbt.getString("fluidId")));
 		}
 	}
 

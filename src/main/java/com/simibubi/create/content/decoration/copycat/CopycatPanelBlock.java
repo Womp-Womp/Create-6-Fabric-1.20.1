@@ -6,9 +6,9 @@ import java.util.function.Predicate;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllShapes;
 
-import net.createmod.catnip.utility.placement.IPlacementHelper;
-import net.createmod.catnip.utility.placement.PlacementHelpers;
-import net.createmod.catnip.utility.placement.PlacementOffset;
+import net.createmod.catnip.placement.IPlacementHelper;
+import net.createmod.catnip.placement.PlacementHelpers;
+import net.createmod.catnip.placement.PlacementOffset;
 import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

@@ -1,16 +1,18 @@
 package com.simibubi.create.content.logistics.box;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 import javax.annotation.Nullable;
 
 import com.simibubi.create.AllEntityTypes;
+import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
 import com.simibubi.create.content.logistics.box.PackageStyles.PackageStyle;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 
-import net.createmod.catnip.utility.VecHelper;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.data.Glob;
+import net.createmod.catnip.math.VecHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -163,8 +165,8 @@ public class PackageItem extends Item {
 			return boxAddress.isBlank();
 		if (address.equals("*") || boxAddress.equals("*"))
 			return true;
-		String matcher = "\\Q" + address.replace("*", "\\E.*\\Q") + "\\E";
-		String boxMatcher = "\\Q" + boxAddress.replace("*", "\\E.*\\Q") + "\\E";
+		String matcher = Glob.toRegexPattern(address, "");
+		String boxMatcher = Glob.toRegexPattern(boxAddress, "");
 		return address.matches(boxMatcher) || boxAddress.matches(matcher);
 	}
 
@@ -215,20 +217,21 @@ public class PackageItem extends Item {
 		CompoundTag compoundnbt = pStack.getOrCreateTag();
 
 		if (compoundnbt.contains("Address", Tag.TAG_STRING) && !compoundnbt.getString("Address")
-			.isBlank())
-			pTooltipComponents.add(Components.literal("-> " + compoundnbt.getString("Address"))
-				.withStyle(ChatFormatting.GOLD));
+			.isBlank()) {
+            pTooltipComponents.add(Component.literal("\u2192 " + compoundnbt.getString("Address"))
+                .withStyle(ChatFormatting.GOLD));
+        }
 
 		/*
 		 * Debug Fragmentation Data if (compoundnbt.contains("Fragment")) { CompoundTag
 		 * fragTag = compoundnbt.getCompound("Fragment");
-		 * pTooltipComponents.add(Components.literal("Order Information (Temporary)")
+		 * pTooltipComponents.add(Component.literal("Order Information (Temporary)")
 		 * .withStyle(ChatFormatting.GREEN)); pTooltipComponents.add(Components
 		 * .literal(" Link " + fragTag.getInt("LinkIndex") +
 		 * (fragTag.getBoolean("IsFinalLink") ? " Final" : "") + " | Fragment " +
 		 * fragTag.getInt("Index") + (fragTag.getBoolean("IsFinal") ? " Final" : ""))
 		 * .withStyle(ChatFormatting.DARK_GREEN)); if (fragTag.contains("OrderContext"))
-		 * pTooltipComponents.add(Components.literal("Has Context!")
+		 * pTooltipComponents.add(Component.literal("Has Context!")
 		 * .withStyle(ChatFormatting.DARK_GREEN)); }
 		 */
 
@@ -256,7 +259,7 @@ public class PackageItem extends Item {
 		}
 
 		if (skippedNames > 0)
-			pTooltipComponents.add(Components.translatable("container.shulkerBox.more", skippedNames)
+			pTooltipComponents.add(Component.translatable("container.shulkerBox.more", skippedNames)
 				.withStyle(ChatFormatting.ITALIC));
 	}
 
@@ -302,8 +305,7 @@ public class PackageItem extends Item {
 		}
 
 		Vec3 position = playerIn.position();
-		worldIn.playSound((Player) null, position.x, position.y, position.z, SoundEvents.CHISELED_BOOKSHELF_BREAK,
-			SoundSource.PLAYERS, 0.5F, 1.0F);
+		AllSoundEvents.PACKAGE_POP.playOnServer(worldIn, playerIn.blockPosition());
 
 		if (worldIn.isClientSide()) {
 			for (int i = 0; i < 10; i++) {
@@ -366,9 +368,8 @@ public class PackageItem extends Item {
 
 	@Override
 	public void releaseUsing(ItemStack stack, Level world, LivingEntity entity, int ticks) {
-		if (!(entity instanceof Player))
+		if (!(entity instanceof Player player))
 			return;
-		Player playerentity = (Player) entity;
 		int i = this.getUseDuration(stack) - ticks;
 		if (i < 0)
 			return;
@@ -379,15 +380,12 @@ public class PackageItem extends Item {
 		if (world.isClientSide)
 			return;
 
-		world.playSound(null, playerentity.getX(), playerentity.getY(), playerentity.getZ(), SoundEvents.SNOWBALL_THROW,
+		world.playSound(null, player.getX(), player.getY(), player.getZ(), SoundEvents.SNOWBALL_THROW,
 			SoundSource.NEUTRAL, 0.5F, 0.5F);
 
 		ItemStack copy = stack.copy();
-		stack.shrink(1);
-
-		if (stack.isEmpty())
-			playerentity.getInventory()
-				.removeItem(stack);
+		if (!player.getAbilities().instabuild)
+			stack.shrink(1);
 
 		Vec3 vec = new Vec3(entity.getX(), entity.getY() + entity.getBoundingBox()
 			.getYsize() / 2f, entity.getZ());
@@ -398,6 +396,7 @@ public class PackageItem extends Item {
 		PackageEntity packageEntity = new PackageEntity(world, vec.x, vec.y, vec.z);
 		packageEntity.setBox(copy);
 		packageEntity.setDeltaMovement(motion);
+		packageEntity.tossedBy = new WeakReference<Player>(player);
 		world.addFreshEntity(packageEntity);
 	}
 

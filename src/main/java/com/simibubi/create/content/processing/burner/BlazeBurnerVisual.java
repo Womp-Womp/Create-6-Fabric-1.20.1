@@ -2,6 +2,7 @@ package com.simibubi.create.content.processing.burner;
 
 import java.util.function.Consumer;
 
+import net.createmod.catnip.animation.AnimationTickHolder;
 import org.jetbrains.annotations.Nullable;
 
 import com.simibubi.create.AllPartialModels;
@@ -21,22 +22,23 @@ import dev.engine_room.flywheel.lib.visual.AbstractBlockEntityVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleDynamicVisual;
 import dev.engine_room.flywheel.lib.visual.SimpleTickableVisual;
 import net.createmod.catnip.render.SpriteShiftEntry;
-import net.createmod.catnip.utility.math.AngleHelper;
-import net.createmod.ponder.utility.LevelTickHolder;
+import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 
 public class BlazeBurnerVisual extends AbstractBlockEntityVisual<BlazeBurnerBlockEntity> implements SimpleDynamicVisual, SimpleTickableVisual {
 
-	private final BlazeBurnerBlock.HeatLevel heatLevel;
+	private BlazeBurnerBlock.HeatLevel heatLevel;
 
 	private final TransformedInstance head;
-	private final TransformedInstance smallRods;
-	private final TransformedInstance largeRods;
 
 	private final boolean isInert;
 
+	@Nullable
+	private TransformedInstance smallRods;
+	@Nullable
+	private TransformedInstance largeRods;
 	@Nullable
 	private ScrollInstance flame;
 	@Nullable
@@ -49,7 +51,7 @@ public class BlazeBurnerVisual extends AbstractBlockEntityVisual<BlazeBurnerBloc
 	public BlazeBurnerVisual(VisualizationContext ctx, BlazeBurnerBlockEntity blockEntity, float partialTick) {
 		super(ctx, blockEntity, partialTick);
 
-		heatLevel = blockEntity.getHeatLevelForRender();
+		heatLevel = HeatLevel.SMOULDERING;
 		validBlockAbove = blockEntity.isValidBlockAbove();
 
 		PartialModel blazeModel = BlazeBurnerRenderer.getBlazeModel(heatLevel, validBlockAbove);
@@ -59,24 +61,6 @@ public class BlazeBurnerVisual extends AbstractBlockEntityVisual<BlazeBurnerBloc
 				.createInstance();
 
 		head.light(LightTexture.FULL_BRIGHT);
-
-		if (heatLevel.isAtLeast(BlazeBurnerBlock.HeatLevel.FADING)) {
-			PartialModel rodsModel = heatLevel == BlazeBurnerBlock.HeatLevel.SEETHING ? AllPartialModels.BLAZE_BURNER_SUPER_RODS
-					: AllPartialModels.BLAZE_BURNER_RODS;
-			PartialModel rodsModel2 = heatLevel == BlazeBurnerBlock.HeatLevel.SEETHING ? AllPartialModels.BLAZE_BURNER_SUPER_RODS_2
-					: AllPartialModels.BLAZE_BURNER_RODS_2;
-
-			smallRods = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(rodsModel))
-					.createInstance();
-			largeRods = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(rodsModel2))
-					.createInstance();
-
-			smallRods.light(LightTexture.FULL_BRIGHT);
-			largeRods.light(LightTexture.FULL_BRIGHT);
-		} else {
-			smallRods = null;
-			largeRods = null;
-		}
 
 		animate(partialTick);
 	}
@@ -99,13 +83,42 @@ public class BlazeBurnerVisual extends AbstractBlockEntityVisual<BlazeBurnerBloc
 		float animation = blockEntity.headAnimation.getValue(partialTicks) * .175f;
 
 		boolean validBlockAbove = animation > 0.125f;
+		HeatLevel heatLevel = blockEntity.getHeatLevelForRender();
 
-		if (validBlockAbove != this.validBlockAbove) {
+		if (validBlockAbove != this.validBlockAbove || heatLevel != this.heatLevel) {
 			this.validBlockAbove = validBlockAbove;
 
 			PartialModel blazeModel = BlazeBurnerRenderer.getBlazeModel(heatLevel, validBlockAbove);
 			instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(blazeModel))
 					.stealInstance(head);
+			
+			boolean needsRods = heatLevel.isAtLeast(BlazeBurnerBlock.HeatLevel.FADING);
+			boolean hasRods = this.heatLevel.isAtLeast(HeatLevel.FADING);
+			
+			if (needsRods && !hasRods) {
+				PartialModel rodsModel = heatLevel == BlazeBurnerBlock.HeatLevel.SEETHING ? AllPartialModels.BLAZE_BURNER_SUPER_RODS
+						: AllPartialModels.BLAZE_BURNER_RODS;
+				PartialModel rodsModel2 = heatLevel == BlazeBurnerBlock.HeatLevel.SEETHING ? AllPartialModels.BLAZE_BURNER_SUPER_RODS_2
+						: AllPartialModels.BLAZE_BURNER_RODS_2;
+
+				smallRods = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(rodsModel))
+						.createInstance();
+				largeRods = instancerProvider().instancer(InstanceTypes.TRANSFORMED, Models.partial(rodsModel2))
+						.createInstance();
+
+				smallRods.light(LightTexture.FULL_BRIGHT);
+				largeRods.light(LightTexture.FULL_BRIGHT);
+				
+			} else if (!needsRods && hasRods) {
+				if (smallRods != null)
+					smallRods.delete();
+				if (largeRods != null)
+					largeRods.delete();
+				smallRods = null;
+				largeRods = null;
+			}
+			
+			this.heatLevel = heatLevel;
 		}
 
 		// Switch between showing/hiding the flame
@@ -139,7 +152,7 @@ public class BlazeBurnerVisual extends AbstractBlockEntityVisual<BlazeBurnerBloc
 		}
 
 		var hashCode = blockEntity.hashCode();
-		float time = LevelTickHolder.getRenderTime(level);
+		float time = AnimationTickHolder.getRenderTime(level);
 		float renderTick = time + (hashCode % 13) * 16f;
 		float offsetMult = heatLevel.isAtLeast(BlazeBurnerBlock.HeatLevel.FADING) ? 64 : 16;
 		float offset = Mth.sin((float) ((renderTick / 16f) % (2 * Math.PI))) / offsetMult;
@@ -168,15 +181,8 @@ public class BlazeBurnerVisual extends AbstractBlockEntityVisual<BlazeBurnerBloc
 		if (hat != null) {
 			hat.setIdentityTransform()
 					.translate(getVisualPosition())
-					.translateY(headY);
-			if (isInert) {
-				hat.translateY(0.5f)
-						.center()
-						.scale(0.75f)
-						.uncenter();
-			} else {
-				hat.translateY(0.75f);
-			}
+					.translateY(headY)
+					.translateY(0.75f);
 			hat.rotateCentered(horizontalAngle + Mth.PI, Direction.UP)
 					.translate(0.5f, 0, 0.5f)
 					.light(LightTexture.FULL_BRIGHT);

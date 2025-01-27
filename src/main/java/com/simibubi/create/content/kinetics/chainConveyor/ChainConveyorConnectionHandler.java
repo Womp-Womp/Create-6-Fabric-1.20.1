@@ -7,9 +7,9 @@ import com.simibubi.create.content.equipment.blueprint.BlueprintOverlayRenderer;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
-import net.createmod.catnip.CatnipClient;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.VecHelper;
+import net.createmod.catnip.outliner.Outliner;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -183,10 +183,10 @@ public class ChainConveyorConnectionHandler {
 			.normalize()
 			.scale(.875);
 
-		CatnipClient.OUTLINER.showLine("chain_connect_line", from.add(normal), to.add(normal))
+		Outliner.getInstance().showLine("chain_connect_line", from.add(normal), to.add(normal))
 			.lineWidth(1 / 16f)
 			.colored(color);
-		CatnipClient.OUTLINER.showLine("chain_connect_line_1", from.subtract(normal), to.subtract(normal))
+		Outliner.getInstance().showLine("chain_connect_line_1", from.subtract(normal), to.subtract(normal))
 			.lineWidth(1 / 16f)
 			.colored(color);
 
@@ -199,7 +199,7 @@ public class ChainConveyorConnectionHandler {
 			for (int i = 0; i < 8; i++) {
 				Vec3 v = VecHelper.rotate(new Vec3(0, .125 + y * .75, 1.25), 22.5 + i * 45, Axis.Y)
 					.add(Vec3.atBottomCenterOf(pos));
-				CatnipClient.OUTLINER.showLine(key + y + i, prevV, v)
+				Outliner.getInstance().showLine(key + y + i, prevV, v)
 					.lineWidth(1 / 16f)
 					.colored(color);
 				prevV = v;

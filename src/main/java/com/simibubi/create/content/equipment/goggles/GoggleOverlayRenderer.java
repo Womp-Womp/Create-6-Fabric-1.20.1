@@ -20,14 +20,14 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 import com.simibubi.create.infrastructure.config.CClient;
 
-import net.createmod.catnip.CatnipClient;
+import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.gui.element.BoxElement;
 import net.createmod.catnip.gui.element.GuiGameElement;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.lang.Components;
-import net.createmod.catnip.utility.outliner.Outline;
-import net.createmod.catnip.utility.outliner.Outliner.OutlineEntry;
-import net.createmod.catnip.utility.theme.Color;
+import net.createmod.catnip.lang.Lang;
+import net.createmod.catnip.outliner.Outline;
+import net.createmod.catnip.outliner.Outliner;
+import net.createmod.catnip.outliner.Outliner.OutlineEntry;
+import net.createmod.catnip.theme.Color;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
 import net.minecraft.client.gui.GuiGraphics;
@@ -47,7 +47,7 @@ import net.minecraft.world.phys.HitResult;
 
 public class GoggleOverlayRenderer {
 
-	private static final Map<Object, OutlineEntry> outlines = CatnipClient.OUTLINER.getOutlines();
+	private static final Map<Object, OutlineEntry> outlines = Outliner.getInstance().getOutlines();
 
 	public static int hoverTicks = 0;
 	public static BlockPos lastHovered = null;
@@ -107,7 +107,7 @@ public class GoggleOverlayRenderer {
 
 		if (hasHoveringInformation) {
 			if (!tooltip.isEmpty())
-				tooltip.add(Components.immutableEmpty());
+				tooltip.add(Lang.IMMUTABLE_EMPTY);
 			IHaveHoveringInformation hte = (IHaveHoveringInformation) be;
 			hoverAddedInformation = hte.addToTooltip(tooltip, isShifting);
 
@@ -154,7 +154,7 @@ public class GoggleOverlayRenderer {
 				return;
 			}
 			if (!tooltip.isEmpty())
-				tooltip.add(Components.immutableEmpty());
+				tooltip.add(Lang.IMMUTABLE_EMPTY);
 
 			CreateLang.translate("gui.goggles.pole_length")
 				.text(" " + poles)

@@ -15,8 +15,8 @@ import com.simibubi.create.foundation.gui.widget.ScrollInput;
 import com.simibubi.create.foundation.gui.widget.SelectionScrollInput;
 import com.simibubi.create.foundation.utility.CreateLang;
 
-import net.createmod.catnip.utility.NBTHelper;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.lang.Lang;
+import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -82,7 +82,7 @@ public class WorldshaperScreen extends ZapperScreen {
 		int x = guiLeft;
 		int y = guiTop;
 
-		brushLabel = new Label(x + 61, y + 25, Components.immutableEmpty()).withShadow();
+		brushLabel = new Label(x + 61, y + 25, Lang.IMMUTABLE_EMPTY).withShadow();
 		brushInput = new SelectionScrollInput(x + 56, y + 20, 77, 18).forOptions(brushOptions)
 			.titled(CreateLang.translateDirect("gui.terrainzapper.brush"))
 			.writingTo(brushLabel)
@@ -111,7 +111,7 @@ public class WorldshaperScreen extends ZapperScreen {
 		brushParams.clear();
 
 		for (int index = 0; index < 3; index++) {
-			Label label = new Label(x + 65 + 20 * index, y + 45, Components.immutableEmpty()).withShadow();
+			Label label = new Label(x + 65 + 20 * index, y + 45, Lang.IMMUTABLE_EMPTY).withShadow();
 
 			final int finalIndex = index;
 			ScrollInput input = new ScrollInput(x + 56 + 20 * index, y + 40, 18, 18)
@@ -155,10 +155,10 @@ public class WorldshaperScreen extends ZapperScreen {
 		if (currentBrush.hasConnectivityOptions()) {
 			int x1 = x + 7 + 4 * 18;
 			int y1 = y + 79;
-			followDiagonalsIndicator = new Indicator(x1, y1 - 6, Components.immutableEmpty());
+			followDiagonalsIndicator = new Indicator(x1, y1 - 6, Lang.IMMUTABLE_EMPTY);
 			followDiagonals = new IconButton(x1, y1, AllIcons.I_FOLLOW_DIAGONAL);
 			x1 += 18;
-			acrossMaterialsIndicator = new Indicator(x1, y1 - 6, Components.immutableEmpty());
+			acrossMaterialsIndicator = new Indicator(x1, y1 - 6, Lang.IMMUTABLE_EMPTY);
 			acrossMaterials = new IconButton(x1, y1, AllIcons.I_FOLLOW_MATERIAL);
 
 			followDiagonals.withCallback(() -> {
@@ -192,8 +192,8 @@ public class WorldshaperScreen extends ZapperScreen {
 			TerrainTools tool = toolValues[id];
 			IconButton toolButton = new IconButton(x + 7 + id * 18, y + 79, tool.icon);
 			toolButton.withCallback(() -> {
-				toolButtons.forEach(b -> b.active = true);
-				toolButton.active = false;
+				toolButtons.forEach(b -> b.green = false);
+				toolButton.green = true;
 				currentTool = tool;
 			});
 			toolButton.setToolTip(CreateLang.translateDirect("gui.terrainzapper.tool." + tool.translationKey));
@@ -208,7 +208,7 @@ public class WorldshaperScreen extends ZapperScreen {
 			currentTool = toolValues[0];
 			toolIndex = 0;
 		}
-		toolButtons.get(toolIndex).active = false;
+		toolButtons.get(toolIndex).green = true;
 
 		addRenderableWidgets(toolButtons);
 
@@ -224,15 +224,15 @@ public class WorldshaperScreen extends ZapperScreen {
 				PlacementOptions option = placementValues[id];
 				IconButton placementButton = new IconButton(x + 136 + id * 18, y + 79, option.icon);
 				placementButton.withCallback(() -> {
-					placementButtons.forEach(b -> b.active = true);
-					placementButton.active = false;
+					placementButtons.forEach(b -> b.green = false);
+					placementButton.green = true;
 					currentPlacement = option;
 				});
 				placementButton.setToolTip(CreateLang.translateDirect("gui.terrainzapper.placement." + option.translationKey));
 				placementButtons.add(placementButton);
 			}
 
-			placementButtons.get(currentPlacement.ordinal()).active = false;
+			placementButtons.get(currentPlacement.ordinal()).green = true;
 
 			addRenderableWidgets(placementButtons);
 		}

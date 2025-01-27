@@ -13,7 +13,8 @@ import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlock.Pane
 import com.simibubi.create.foundation.model.BakedQuadHelper;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
-import net.createmod.catnip.utility.VecHelper;
+import net.createmod.catnip.math.VecHelper;
+import net.createmod.ponder.api.level.PonderLevel;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
@@ -44,17 +45,18 @@ public class FactoryPanelModel extends ForwardingBakedModel {
 			data.states.put(slot, behaviour.count == 0 ? PanelState.PASSIVE : PanelState.ACTIVE);
 			data.type = behaviour.panelBE().restocker ? PanelType.PACKAGER : PanelType.NETWORK;
 		}
+		data.ponder = blockView instanceof PonderLevel;
 
 		super.emitBlockQuads(blockView, state, pos, randomSupplier, context);
 
 		List<BakedQuad> quads = new ArrayList<>(super.getQuads(state, null, randomSupplier.get()));
 		for (PanelSlot panelSlot : PanelSlot.values())
 			if (data.states.containsKey(panelSlot))
-				addPanel(quads, state, panelSlot, data.type, data.states.get(panelSlot), randomSupplier.get());
+				addPanel(quads, state, panelSlot, data.type, data.states.get(panelSlot), randomSupplier.get(), data.ponder);
 	}
 
 	public void addPanel(List<BakedQuad> quads, BlockState state, PanelSlot slot, PanelType type, PanelState panelState,
-		RandomSource rand) {
+		RandomSource rand, boolean ponder) {
 		PartialModel factoryPanel = panelState == PanelState.PASSIVE
 			? type == PanelType.NETWORK ? AllPartialModels.FACTORY_PANEL : AllPartialModels.FACTORY_PANEL_RESTOCKER
 			: type == PanelType.NETWORK ? AllPartialModels.FACTORY_PANEL_WITH_BULB
@@ -96,7 +98,7 @@ public class FactoryPanelModel extends ForwardingBakedModel {
 			Direction newNormal = Direction.fromDelta((int) Math.round(quadNormal.x), (int) Math.round(quadNormal.y),
 				(int) Math.round(quadNormal.z));
 			quads.add(new BakedQuad(transformedVertices, bakedQuad.getTintIndex(), newNormal, bakedQuad.getSprite(),
-				bakedQuad.isShade()));
+				!ponder && bakedQuad.isShade()));
 		}
 
 	}
@@ -104,6 +106,7 @@ public class FactoryPanelModel extends ForwardingBakedModel {
 	private static class FactoryPanelModelData {
 		public PanelType type;
 		public EnumMap<PanelSlot, PanelState> states = new EnumMap<>(PanelSlot.class);
+		private boolean ponder;
 	}
 
 }

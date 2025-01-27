@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import net.minecraft.network.chat.Component;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkContext;
@@ -18,8 +19,8 @@ import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.foundation.utility.LongAttached;
 
-import net.createmod.catnip.utility.Couple;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.data.Couple;
+import net.createmod.catnip.data.IntAttached;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
 
@@ -65,7 +66,7 @@ public abstract class ValueListDisplaySource extends DisplaySource {
 				current = atIndex;
 				continue;
 			}
-			current.append(Components.literal("\n"))
+			current.append(Component.literal("\n"))
 				.append(atIndex);
 			if ((i + 1) % ENTRIES_PER_PAGE == 0) {
 				condensed.add(current);
@@ -101,7 +102,7 @@ public abstract class ValueListDisplaySource extends DisplaySource {
 				: Arrays.asList(name, shortened.getFirst(), shortened.getSecond());
 		}
 
-		MutableComponent formattedNumber = Components.literal(String.valueOf(number)).append(WHITESPACE);
+		MutableComponent formattedNumber = Component.literal(String.valueOf(number)).append(WHITESPACE);
 		return valueFirst() ? Arrays.asList(formattedNumber, name) : Arrays.asList(name, formattedNumber);
 	}
 
@@ -138,15 +139,17 @@ public abstract class ValueListDisplaySource extends DisplaySource {
 	}
 
 	private Couple<MutableComponent> shorten(long number) {
-		if (number >= 1000000)
-			return Couple.create(Components.literal(String.valueOf(number / 1000000)),
-				CreateLang.translateDirect("display_source.value_list.million")
-					.append(WHITESPACE));
-		if (number >= 1000)
-			return Couple.create(Components.literal(String.valueOf(number / 1000)),
-				CreateLang.translateDirect("display_source.value_list.thousand")
-					.append(WHITESPACE));
-		return Couple.create(Components.literal(String.valueOf(number)), WHITESPACE);
+		if (number >= 1000000) {
+            return Couple.create(Component.literal(String.valueOf(number / 1000000)),
+                CreateLang.translateDirect("display_source.value_list.million")
+                    .append(WHITESPACE));
+        }
+		if (number >= 1000) {
+            return Couple.create(Component.literal(String.valueOf(number / 1000)),
+                CreateLang.translateDirect("display_source.value_list.thousand")
+                    .append(WHITESPACE));
+        }
+        return Couple.create(Component.literal(String.valueOf(number)), WHITESPACE);
 	}
 
 	protected boolean shortenNumbers(DisplayLinkContext context) {

@@ -9,10 +9,9 @@ import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.foundation.utility.CreateLang;
 
-import net.createmod.catnip.utility.Couple;
-import net.createmod.catnip.utility.IntAttached;
-import net.createmod.catnip.utility.NBTHelper;
-import net.createmod.catnip.utility.lang.Components;
+import net.createmod.catnip.data.Couple;
+import net.createmod.catnip.data.IntAttached;
+import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -127,7 +126,7 @@ public class ShoppingListItem extends Item {
 					boolean cost = items == lists.getSecond();
 
 					if (cost)
-						pTooltipComponents.add(Components.empty());
+                        pTooltipComponents.add(Component.empty());
 
 					if (entries.size() == 1) {
 						BigItemStack entry = entries.get(0);

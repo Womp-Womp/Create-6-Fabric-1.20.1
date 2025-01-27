@@ -11,7 +11,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.simibubi.create.content.logistics.box.PackageEntity;
 
-import net.createmod.catnip.utility.Pair;
+import net.createmod.catnip.data.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.util.Mth;
@@ -21,6 +21,7 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.items.IItemHandlerModifiable;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
@@ -301,14 +302,6 @@ public class ItemHelper {
 		}
 	}
 
-//	public static ItemStack findFirstMatch(Storage<ItemVariant> inv, Predicate<ItemStack> test) {
-//		int slot = findFirstMatchingSlotIndex(inv, test);
-//		if (slot == -1)
-//			return ItemStack.EMPTY;
-//		else
-//			return inv.getStackInSlot(slot);
-//	}
-
 	public static ItemStack fromItemEntity(Entity entityIn) {
 		if (!entityIn.isAlive())
 			return ItemStack.EMPTY;
@@ -330,4 +323,13 @@ public class ItemHelper {
 		return remainder;
 	}
 
+	public static void copyContents(IItemHandler from, IItemHandlerModifiable to) {
+		if (from.getSlots() != to.getSlots()) {
+			throw new IllegalArgumentException("Slot count mismatch");
+		}
+
+		for (int i = 0; i < from.getSlots(); i++) {
+			to.setStackInSlot(i, from.getStackInSlot(i).copy());
+		}
+	}
 }

@@ -1,6 +1,6 @@
 package com.simibubi.create.content.contraptions;
 
-import static net.createmod.catnip.utility.math.AngleHelper.angleLerp;
+import static net.createmod.catnip.math.AngleHelper.angleLerp;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllEntityTypes;
+import com.simibubi.create.api.contraption.storage.item.MountedItemStorageWrapper;
 import com.simibubi.create.content.contraptions.bearing.StabilizedContraption;
 import com.simibubi.create.content.contraptions.minecart.MinecartSim2020;
 import com.simibubi.create.content.contraptions.minecart.capability.CapabilityMinecartController;
@@ -18,10 +19,19 @@ import com.simibubi.create.content.contraptions.mounted.MountedContraption;
 import com.simibubi.create.foundation.item.ItemHelper;
 
 import dev.engine_room.flywheel.lib.transform.TransformStack;
-import net.createmod.catnip.utility.Couple;
-import net.createmod.catnip.utility.NBTHelper;
-import net.createmod.catnip.utility.VecHelper;
-import net.createmod.catnip.utility.math.AngleHelper;
+
+import io.github.fabricators_of_create.porting_lib.util.MinecartAndRailUtil;
+
+import io.github.fabricators_of_create.porting_lib.util.NBTSerializer;
+
+import net.createmod.catnip.data.Couple;
+import net.createmod.catnip.math.AngleHelper;
+import net.createmod.catnip.math.VecHelper;
+import net.createmod.catnip.nbt.NBTHelper;
+
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -444,9 +454,12 @@ public class OrientedContraptionEntity extends AbstractContraptionEntity {
 					.normalize()
 					.scale(1));
 		if (fuel < 5 && contraption != null) {
-			ItemStack coal = ItemHelper.extract(contraption.getSharedInventory(), FUEL_ITEMS, 1, false);
-			if (!coal.isEmpty())
-				fuel += 3600;
+			MountedItemStorageWrapper fuelItems = contraption.getStorage().getFuelItems();
+			if (fuelItems != null) {
+				ItemStack coal = ItemHelper.extract(fuelItems, FUEL_ITEMS, 1, false);
+				if (!coal.isEmpty())
+					fuel += 3600;
+			}
 		}
 
 		if (fuel != fuelBefore || pushX != 0 || pushZ != 0) {

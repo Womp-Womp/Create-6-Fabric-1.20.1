@@ -31,11 +31,10 @@ import com.simibubi.create.foundation.utility.BlockHelper;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
-import net.createmod.catnip.utility.Couple;
-import net.createmod.catnip.utility.Iterate;
-import net.createmod.catnip.utility.NBTHelper;
-import net.createmod.catnip.utility.lang.Components;
-import net.createmod.catnip.utility.lang.Lang;
+import net.createmod.catnip.data.Couple;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.lang.Lang;
+import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -80,6 +79,7 @@ public class BrassTunnelBlockEntity extends BeltTunnelBlockEntity implements IHa
 	// <filtered, non-filtered>
 	Couple<List<Pair<BlockPos, Direction>>> distributionTargets;
 
+	private boolean newItemArrived;
 	private boolean syncedOutputActive;
 	private Set<BrassTunnelBlockEntity> syncSet;
 
@@ -196,11 +196,16 @@ public class BrassTunnelBlockEntity extends BeltTunnelBlockEntity implements IHa
 					.isEmpty())
 				return;
 
-			if (selectionMode.get() != SelectionMode.SYNCHRONIZE || syncedOutputActive) {
-				distributionProgress = AllConfigs.server().logistics.brassTunnelTimer.get();
-				sendData();
+			if (newItemArrived) {
+				newItemArrived = false;
+				distributionProgress = 2;
+			} else {
+				if (selectionMode.get() != SelectionMode.SYNCHRONIZE || syncedOutputActive) {
+					distributionProgress = AllConfigs.server().logistics.brassTunnelTimer.get();
+					sendData();
+				}
+				return;
 			}
-			return;
 		}
 
 		if (distributionProgress != 0)
@@ -352,6 +357,10 @@ public class BrassTunnelBlockEntity extends BeltTunnelBlockEntity implements IHa
 		stackToDistribute = stack;
 		stackEnteredFrom = enteredFrom;
 		distributionProgress = -1;
+		if (!stack.isEmpty())
+			newItemArrived = true;
+		sendData();
+		setChanged();
 	}
 
 	public ItemStack getStackToDistribute() {
@@ -801,8 +810,8 @@ public class BrassTunnelBlockEntity extends BeltTunnelBlockEntity implements IHa
 
 		CreateLang.translate("tooltip.brass_tunnel.contains").style(ChatFormatting.WHITE).forGoggles(tooltip);
 		for (ItemStack item : allStacks) {
-			CreateLang.translate("tooltip.brass_tunnel.contains_entry",
-					Components.translatable(item.getDescriptionId()).getString(), item.getCount())
+            CreateLang.translate("tooltip.brass_tunnel.contains_entry",
+					Component.translatable(item.getDescriptionId()).getString(), item.getCount())
 					.style(ChatFormatting.GRAY).forGoggles(tooltip);
 		}
 		CreateLang.translate("tooltip.brass_tunnel.retrieve").style(ChatFormatting.DARK_GRAY).forGoggles(tooltip);

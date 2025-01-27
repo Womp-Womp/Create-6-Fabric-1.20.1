@@ -9,10 +9,10 @@ import com.simibubi.create.content.logistics.item.filter.attribute.AllItemAttrib
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttributeType;
 
-import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -45,13 +45,13 @@ public class AstralSorceryPerkGemAttribute implements ItemAttribute {
 	@Override
 	public Object[] getTranslationParameters() {
 		ResourceLocation traitResource = new ResourceLocation(traitName);
-		String something = Components.translatable(String.format("perk.attribute.%s.%s.name", traitResource.getNamespace(), traitResource.getPath())).getString();
+        String something = Component.translatable(String.format("perk.attribute.%s.%s.name", traitResource.getNamespace(), traitResource.getPath())).getString();
 		return new Object[]{something};
 	}
 
 	@Override
 	public ItemAttributeType getType() {
-		return AllItemAttributeTypes.ASTRAL_PERK_GEM.get();
+		return AllItemAttributeTypes.ASTRAL_PERK_GEM;
 	}
 
 	@Override

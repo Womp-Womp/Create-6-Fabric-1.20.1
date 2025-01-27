@@ -5,8 +5,8 @@ import java.util.Set;
 
 import com.simibubi.create.AllItems;
 
+import net.createmod.catnip.math.VecHelper;
 import net.createmod.catnip.platform.CatnipServices;
-import net.createmod.catnip.utility.VecHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;

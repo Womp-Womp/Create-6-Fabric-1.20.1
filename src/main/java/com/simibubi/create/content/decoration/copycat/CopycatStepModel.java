@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import com.simibubi.create.foundation.model.BakedModelHelper;
 
-import net.createmod.catnip.utility.Iterate;
+import net.createmod.catnip.data.Iterate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;

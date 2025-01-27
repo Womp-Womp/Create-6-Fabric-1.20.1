@@ -3,10 +3,15 @@ package com.simibubi.create.content.fluids.tank;
 import java.util.List;
 import java.util.function.Consumer;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.foundation.fluid.SmartFluidTank;
+
+import io.github.fabricators_of_create.porting_lib.transfer.fluid.FluidTank;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -32,6 +37,14 @@ public class CreativeFluidTankBlockEntity extends FluidTankBlockEntity {
 	}
 
 	public static class CreativeSmartFluidTank extends SmartFluidTank {
+		public static final Codec<CreativeSmartFluidTank> CODEC = RecordCodecBuilder.create(i -> i.group(
+			FluidStack.CODEC.fieldOf("fluid").forGetter(FluidTank::getFluid),
+			ExtraCodecs.NON_NEGATIVE_INT.fieldOf("capacity").forGetter(FluidTank::getCapacity)
+		).apply(i, (fluid, capacity) -> {
+			CreativeSmartFluidTank tank = new CreativeSmartFluidTank(capacity, $ -> {});
+			tank.setFluid(fluid);
+			return tank;
+		}));
 
 		public CreativeSmartFluidTank(long capacity, Consumer<FluidStack> updateCallback) {
 			super(capacity, updateCallback);

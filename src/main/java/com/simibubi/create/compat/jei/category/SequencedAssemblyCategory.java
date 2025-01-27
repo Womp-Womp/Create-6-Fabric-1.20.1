@@ -22,7 +22,6 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import net.createmod.catnip.platform.CatnipServices;
-import net.createmod.catnip.utility.lang.Components;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
@@ -102,7 +101,7 @@ public class SequencedAssemblyCategory extends CreateRecipeCategory<SequencedAss
 		AllGuiTextures.JEI_LONG_ARROW.render(graphics, 52 + xOffset, 79);
 		if (!singleOutput) {
 			AllGuiTextures.JEI_CHANCE_SLOT.render(graphics, 150 + xOffset, 75);
-			Component component = Components.literal("?").withStyle(ChatFormatting.BOLD);
+            Component component = Component.literal("?").withStyle(ChatFormatting.BOLD);
 			graphics.drawString(font, component, font.width(component) / -2 + 8 + 150 + xOffset, 2 + 78,
 				0xefefef);
 		}
@@ -111,7 +110,7 @@ public class SequencedAssemblyCategory extends CreateRecipeCategory<SequencedAss
 			matrixStack.pushPose();
 			matrixStack.translate(15, 9, 0);
 			AllIcons.I_SEQ_REPEAT.render(graphics, 50 + xOffset, 75);
-			Component repeat = Components.literal("x" + recipe.getLoops());
+            Component repeat = Component.literal("x" + recipe.getLoops());
 			graphics.drawString(font, repeat, 66 + xOffset, 80, 0x888888, false);
 			matrixStack.popPose();
 		}
@@ -131,7 +130,7 @@ public class SequencedAssemblyCategory extends CreateRecipeCategory<SequencedAss
 			SequencedRecipe<?> sequencedRecipe = sequence.get(i);
 			JeiSequencedAssemblySubCategory subCategory = getSubCategory(sequencedRecipe);
 			int subWidth = subCategory.getWidth();
-			MutableComponent component = Components.literal("" + romans[Math.min(i, 6)]);
+            MutableComponent component = Component.literal("" + romans[Math.min(i, 6)]);
 			graphics.drawString(font, component, font.width(component) / -2 + subWidth / 2, 2, 0x888888, false);
 			subCategory.draw(sequencedRecipe, graphics, mouseX, mouseY, i);
 			matrixStack.translate(subWidth + margin, 0, 0);
