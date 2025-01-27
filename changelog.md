@@ -92,7 +92,7 @@ Bug Fixes
 
 
 API Changes
-- Versioning change: `major.minor.patch`, starting with `6.0.0`
+- Versioning change: `major.minor.patch.fabric-patch`, starting with `6.0.0.0`
 - Ponder is now a separate library mod. It comes shipped with the create jar.
 - Added `#create:chain_rideable` to mark items as valid for riding a chain with
 - Added `#create:invalid_for_track_paving` for items

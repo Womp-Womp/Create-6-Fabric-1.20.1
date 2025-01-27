@@ -1,19 +1,25 @@
+import dev.ithundxr.silk.ChangelogText
+
 //file:noinspection GrMethodMayBeStatic
 plugins {
-    id "fabric-loom" version "1.8.+"
-
+    id "fabric-loom" version "1.9.+"
+    id "maven-publish"
     id "io.github.p03w.machete" version "1.1.4" // automatic jar compressing on build
-
-    id "com.modrinth.minotaur" version "2.+" // modrinth publishing
-    id "com.matthewprenger.cursegradle" version "1.+" // curseforge publishing
-    id "maven-publish" // maven publishing
+    id "me.modmuss50.mod-publish-plugin" version "0.8.3"
+    id "dev.ithundxr.silk" version "0.11.15"
+    id "net.kyori.blossom" version "2.1.0" // https://github.com/KyoriPowered/blossom
+    id "org.jetbrains.gradle.plugin.idea-ext" version "1.1.8" // https://github.com/JetBrains/gradle-idea-ext-plugin
 }
+
+apply from: "gradle/compat/compat.gradle"
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
 
 String runNumber = System.getenv("GITHUB_RUN_NUMBER")
 String build = runNumber != null ? "build.$runNumber" : "local"
+String gitHash = "\"${calculateGitHash() + (hasUnstaged() ? "-modified" : "")}\""
+
 version = "$mod_version-$build+mc$minecraft_version"
 
 group = project.maven_group
@@ -154,27 +160,18 @@ def recipeViewers(DependencyHandler deps) {
 }
 
 machete {
-    enabled = Boolean.getBoolean("PUBLISHING") // only optimize published releases
+    enabled = Boolean.getBoolean("RELEASE_BUILD") // only optimize published releases
 }
 
-tasks.register("buildOrPublish") {
-    group = "build"
-    String mavenUser = System.getenv("MAVEN_USER")
-    if (mavenUser != null && !mavenUser.isEmpty()) {
-        dependsOn(tasks.named("publish"))
-        println("prepared for publish")
-    } else {
-        dependsOn(tasks.named("build"))
-        println("prepared for build")
+sourceSets.main {
+    resources {
+        srcDir 'src/generated/resources'
+        exclude '.cache/'
     }
-}
 
-sourceSets {
-    main {
-        resources {
-            srcDir("src/generated/resources")
-            exclude(".cache")
-        }
+    blossom.javaSources {
+        property("version", build_info_mod_version)
+        property("gitCommit", gitHash.toString())
     }
 }
 
@@ -252,6 +249,16 @@ jar {
     from("LICENSE") {
         rename { "${it}_$archivesBaseName" }
     }
+
+    manifest.attributes([
+        "Git-Hash": gitHash
+    ])
+}
+
+tasks.named("sourcesJar") {
+    manifest.attributes([
+        "Git-Hash": gitHash
+    ])
 }
 
 tasks.named("compileJava", JavaCompile) {
@@ -259,6 +266,72 @@ tasks.named("compileJava", JavaCompile) {
     options.compilerArgs.add("10000")
 }
 
-// see gradle/publishing.gradle for publishing
-apply from: "gradle/publishing/publishing.gradle"
-apply from: "gradle/compat/compat.gradle"
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = archivesBaseName + "-${project.minecraft_version}"
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            url = "https://mvn.devos.one/${System.getenv("PUBLISH_SUFFIX")}/"
+            credentials {
+                username = System.getenv("MAVEN_USER")
+                password = System.getenv("MAVEN_PASS")
+            }
+            authentication { basic(BasicAuthentication) }
+        }
+    }
+}
+
+publishMods {
+    file = jar.archiveFile
+    changelog = ChangelogText.getChangelogText(project).toString()
+    type = BETA
+    displayName = "$mod_name $minecraft_version $mod_version"
+    modLoaders.add("fabric")
+    modLoaders.add("quilt")
+
+    curseforge {
+        accessToken = providers.environmentVariable("CURSEFORGE_TOKEN")
+        projectId = "624165"
+        minecraftVersions.add(minecraft_version)
+
+        requires("fabric-api")
+    }
+
+    modrinth {
+        accessToken = providers.environmentVariable("MODRINTH_TOKEN")
+        projectId = "Xbc0uyRg"
+        minecraftVersions.add(minecraft_version)
+
+        requires("fabric-api")
+    }
+}
+
+String calculateGitHash() {
+    try {
+        def output = providers.exec {
+            commandLine("git", "rev-parse", "HEAD")
+        }
+        return output.standardOutput.asText.get().trim()
+    } catch(Throwable ignored) {
+        return "unknown"
+    }
+}
+
+boolean hasUnstaged() {
+    try {
+        def output = providers.exec {
+            commandLine("git", "status", "--porcelain")
+        }
+        String result = output.standardOutput.asText.get().replace("/M gradlew(\\.bat)?/", "").trim()
+        if (!result.isEmpty())
+            println("Found stageable results:\n ${result}\n")
+        return !result.isEmpty()
+    }  catch(Throwable ignored) {
+        return false
+    }
+}
