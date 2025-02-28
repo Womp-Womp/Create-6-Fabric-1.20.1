@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
@@ -18,6 +20,7 @@ import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBehaviour;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlock;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlockEntity;
 import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity;
+import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlock;
 import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlockEntity;
@@ -35,6 +38,7 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.VersionedI
 import com.simibubi.create.foundation.item.ItemHelper;
 
 import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.BlockFace;
 import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -59,8 +63,6 @@ import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import io.github.fabricators_of_create.porting_lib.util.StorageProvider;
-
-import org.jetbrains.annotations.Nullable;
 
 public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorageBlockEntity {
 
@@ -656,27 +658,12 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 		return animationTicks >= CYCLE / 2 ? ItemStack.EMPTY : heldBox;
 	}
 
-	public boolean isTargetingSameInventory(IItemHandler inventory) {
-		IItemHandler myInventory = targetInventory.getInventory();
-		if (myInventory == null || inventory == null)
+	// fabric: forge's approach is not viable. Introduced InventoryIdentifier. Will upstream soon
+	public boolean isTargetingSameInventory(@Nullable InventoryIdentifier identifier) {
+		if (identifier == null || !this.targetInventory.hasInventory())
 			return false;
-
-		if (myInventory == inventory)
-			return true;
-
-		// If a contained ItemStack instance is the same, we can be pretty sure these
-		// inventories are the same (works for compound inventories)
-		for (int i = 0; i < inventory.getSlots(); i++) {
-			ItemStack stackInSlot = inventory.getStackInSlot(i);
-			if (stackInSlot.isEmpty())
-				continue;
-			for (int j = 0; j < myInventory.getSlots(); j++)
-				if (stackInSlot == myInventory.getStackInSlot(j))
-					return true;
-			break;
-		}
-
-		return false;
+		BlockFace target = this.targetInventory.getTarget();
+		return identifier.contains(target);
 	}
 
 }

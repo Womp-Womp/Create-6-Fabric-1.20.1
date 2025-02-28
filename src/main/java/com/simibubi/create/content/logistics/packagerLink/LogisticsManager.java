@@ -20,6 +20,7 @@ import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
+import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import com.simibubi.create.foundation.utility.TickBasedCache;
@@ -53,21 +54,21 @@ public class LogisticsManager {
 		return InventorySummary.EMPTY;
 	}
 
-	public static int getStockOf(UUID freqId, ItemStack stack, @Nullable IItemHandler ignoredHandler) {
+	public static int getStockOf(UUID freqId, ItemStack stack, @Nullable InventoryIdentifier identifier) {
 		int sum = 0;
 		for (LogisticallyLinkedBehaviour link : LogisticallyLinkedBehaviour.getAllPresent(freqId, false))
-			sum += link.getSummary(ignoredHandler)
+			sum += link.getSummary(identifier)
 				.getCountOf(stack);
 		return sum;
 	}
 
 	public static boolean broadcastPackageRequest(UUID freqId, RequestType type, PackageOrder order,
-		IItemHandler ignoredHandler, String address, @Nullable PackageOrder orderContext) {
+		InventoryIdentifier identifier, String address, @Nullable PackageOrder orderContext) {
 		if (order.isEmpty())
 			return false;
 
 		Multimap<PackagerBlockEntity, PackagingRequest> requests =
-			findPackagersForRequest(freqId, order, orderContext, ignoredHandler, address);
+			findPackagersForRequest(freqId, order, orderContext, identifier, address);
 
 		// Check if packagers have accumulated too many packages already
 		for (PackagerBlockEntity packager : requests.keySet())
@@ -80,13 +81,13 @@ public class LogisticsManager {
 	}
 
 	public static Multimap<PackagerBlockEntity, PackagingRequest> findPackagersForRequest(UUID freqId,
-		PackageOrder order, @Nullable PackageOrder customContext, @Nullable IItemHandler ignoredHandler,
+		PackageOrder order, @Nullable PackageOrder customContext, @Nullable InventoryIdentifier identifier,
 		String address) {
 		List<BigItemStack> stacks = new ArrayList<>();
 		for (BigItemStack stack : order.stacks())
 			if (!stack.stack.isEmpty() && stack.count > 0)
 				stacks.add(stack);
-		
+
 		Multimap<PackagerBlockEntity, PackagingRequest> requests = HashMultimap.create();
 
 		// Packages need to track their index and successors for successful defrag
@@ -116,7 +117,7 @@ public class LogisticsManager {
 					isFinalLink = finalLinkTracker;
 
 				Pair<PackagerBlockEntity, PackagingRequest> request = link.processRequest(requestedItem, remainingCount,
-					address, linkIndex, isFinalLink, orderId, contextToSend, ignoredHandler);
+					address, linkIndex, isFinalLink, orderId, contextToSend, identifier);
 				if (request == null)
 					continue;
 

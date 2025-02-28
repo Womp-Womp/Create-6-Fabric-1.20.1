@@ -5,6 +5,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.simibubi.create.content.logistics.packager.InventorySummary;
+import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.packagerLink.LogisticsManager;
@@ -37,14 +38,14 @@ public abstract class StockCheckingBlockEntity extends SmartBlockEntity {
 		return LogisticsManager.getSummaryOfNetwork(behaviour.freqId, true);
 	}
 
-	public boolean broadcastPackageRequest(RequestType type, PackageOrder order, IItemHandler ignoredHandler,
+	public boolean broadcastPackageRequest(RequestType type, PackageOrder order, InventoryIdentifier identifier,
 		String address) {
-		return broadcastPackageRequest(type, order, ignoredHandler, address, null);
+		return broadcastPackageRequest(type, order, identifier, address, null);
 	}
-	
-	public boolean broadcastPackageRequest(RequestType type, PackageOrder order, IItemHandler ignoredHandler,
+
+	public boolean broadcastPackageRequest(RequestType type, PackageOrder order, InventoryIdentifier identifier,
 		String address, @Nullable PackageOrder orderContext) {
-		return LogisticsManager.broadcastPackageRequest(behaviour.freqId, type, order, ignoredHandler, address, orderContext);
+		return LogisticsManager.broadcastPackageRequest(behaviour.freqId, type, order, identifier, address, orderContext);
 	}
 
 }

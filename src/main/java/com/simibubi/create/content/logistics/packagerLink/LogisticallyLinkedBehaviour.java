@@ -18,6 +18,7 @@ import com.simibubi.create.Create;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
+import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BehaviourType;
@@ -31,6 +32,8 @@ import net.minecraft.core.GlobalPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 
 public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 
@@ -170,18 +173,18 @@ public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 
 	public Pair<PackagerBlockEntity, PackagingRequest> processRequest(ItemStack stack, int amount, String address,
 		int linkIndex, MutableBoolean finalLink, int orderId, @Nullable PackageOrder orderContext,
-		@Nullable IItemHandler ignoredHandler) {
+		@Nullable InventoryIdentifier identifier) {
 
 		if (blockEntity instanceof PackagerLinkBlockEntity plbe)
 			return plbe.processRequest(stack, amount, address, linkIndex, finalLink, orderId, orderContext,
-				ignoredHandler);
+				identifier);
 
 		return null;
 	}
 
-	public InventorySummary getSummary(@Nullable IItemHandler ignoredHandler) {
+	public InventorySummary getSummary(@Nullable InventoryIdentifier identifier) {
 		if (blockEntity instanceof PackagerLinkBlockEntity plbe)
-			return plbe.fetchSummaryFromPackager(ignoredHandler);
+			return plbe.fetchSummaryFromPackager(identifier);
 		return InventorySummary.EMPTY;
 	}
 
@@ -189,7 +192,7 @@ public class LogisticallyLinkedBehaviour extends BlockEntityBehaviour {
 		InventorySummary summary = LogisticsManager.ACCURATE_SUMMARIES.getIfPresent(freqId);
 		if (summary == null)
 			return;
-		for (int i = 0; i < packageContents.getSlots(); i++) {
+		for (int i = 0; i < packageContents.getSlotCount(); i++) {
 			ItemStack orderedStack = packageContents.getStackInSlot(i);
 			if (orderedStack.isEmpty())
 				continue;
