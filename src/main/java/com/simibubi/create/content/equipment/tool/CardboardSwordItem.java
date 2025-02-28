@@ -1,7 +1,5 @@
 package com.simibubi.create.content.equipment.tool;
 
-import java.util.function.Consumer;
-
 import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.AllItems;
@@ -29,9 +27,6 @@ import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.Level;
-
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 
 import io.github.fabricators_of_create.porting_lib.enchant.CustomEnchantingBehaviorItem;
 import io.github.fabricators_of_create.porting_lib.entity.events.LivingAttackEvent;
@@ -116,11 +111,4 @@ public class CardboardSwordItem extends SwordItem implements CustomEnchantingBeh
 		target.stopRiding();
 		target.knockback(knockbackStrength * 0.5F, Mth.sin(yRot * Mth.DEG_TO_RAD), -Mth.cos(yRot * Mth.DEG_TO_RAD));
 	}
-
-	@Override
-	@Environment(EnvType.CLIENT)
-	public void initializeClient(Consumer<IClientItemExtensions> consumer) {
-		consumer.accept(SimpleCustomRenderer.create(this, new CardboardSwordItemRenderer()));
-	}
-
 }

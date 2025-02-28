@@ -71,6 +71,7 @@
     "fabric.GuiAccessor",
     "fabric.LivingEntityRendererAccessor",
     "fabric.infra.GuiGraphicsMixin",
+    "fabric.infra.GuiMixin",
     "fabric.infra.MultiPlayerGameModeMixin"
   ],
   "injectors": {

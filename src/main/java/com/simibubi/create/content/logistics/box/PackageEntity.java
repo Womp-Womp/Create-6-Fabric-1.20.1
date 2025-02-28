@@ -11,20 +11,15 @@ import com.simibubi.create.AllPackets;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.logistics.chute.ChuteBlock;
 
-import io.github.fabricators_of_create.porting_lib.entity.PortingLibEntity;
-import io.github.fabricators_of_create.porting_lib.entity.events.LivingAttackEvent;
-
 import net.createmod.catnip.math.AngleHelper;
 import net.createmod.catnip.math.VecHelper;
 import net.createmod.ponder.api.level.PonderLevel;
-
-import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
+import net.minecraft.network.protocol.game.ClientboundAddEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -54,7 +49,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-
 
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 
@@ -130,8 +124,7 @@ public class PackageEntity extends LivingEntity implements IEntityAdditionalSpaw
 	public static FabricEntityTypeBuilder<?> build(FabricEntityTypeBuilder<?> builder) {
 		//@SuppressWarnings("unchecked")
 		//EntityType.Builder<PackageEntity> boxBuilder = (EntityType.Builder<PackageEntity>) builder;
-		return builder.setCustomClientFactory(PackageEntity::spawn)
-			.sized(1, 1);
+		return builder.dimensions(EntityDimensions.scalable(1, 1));
 	}
 
 	@Override
@@ -212,12 +205,10 @@ public class PackageEntity extends LivingEntity implements IEntityAdditionalSpaw
 		return new EntityDimensions(PackageItem.getWidth(box), PackageItem.getHeight(box), true);
 	}
 
-	public static PackageEntity spawn(SpawnEntity spawnEntity, Level world) {
-		PackageEntity packageEntity =
-			new PackageEntity(world, spawnEntity.getPosX(), spawnEntity.getPosY(), spawnEntity.getPosZ());
-		packageEntity.setDeltaMovement(spawnEntity.getVelX(), spawnEntity.getVelY(), spawnEntity.getVelZ());
-		packageEntity.clientPosition = packageEntity.position();
-		return packageEntity;
+	@Override
+	public void recreateFromPacket(ClientboundAddEntityPacket packet) {
+		this.setDeltaMovement(packet.getXa(), packet.getYa(), packet.getZa());
+		this.clientPosition = this.position();
 	}
 
 	public ItemStack getBox() {
@@ -380,7 +371,7 @@ public class PackageEntity extends LivingEntity implements IEntityAdditionalSpaw
 	protected void dropAllDeathLoot(DamageSource pDamageSource) {
 		super.dropAllDeathLoot(pDamageSource);
 		ItemStackHandler contents = PackageItem.getContents(box);
-		for (int i = 0; i < contents.getSlots(); i++) {
+		for (int i = 0; i < contents.getSlotCount(); i++) {
 			ItemStack itemstack = contents.getStackInSlot(i);
 
 			if (itemstack.getItem() instanceof SpawnEggItem sei && level() instanceof ServerLevel sl) {

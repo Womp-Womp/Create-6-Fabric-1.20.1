@@ -26,6 +26,7 @@ import com.simibubi.create.content.equipment.armor.BacktankItem;
 import com.simibubi.create.content.equipment.armor.BacktankItem.BacktankBlockItem;
 import com.simibubi.create.content.equipment.armor.BaseArmorItem;
 import com.simibubi.create.content.equipment.armor.CardboardArmorItem;
+import com.simibubi.create.content.equipment.armor.CardboardArmorStealthOverlay;
 import com.simibubi.create.content.equipment.armor.CardboardHelmetItem;
 import com.simibubi.create.content.equipment.armor.DivingBootsItem;
 import com.simibubi.create.content.equipment.armor.DivingHelmetItem;
@@ -42,6 +43,7 @@ import com.simibubi.create.content.equipment.sandPaper.SandPaperItemRenderer;
 import com.simibubi.create.content.equipment.symmetryWand.SymmetryWandItem;
 import com.simibubi.create.content.equipment.symmetryWand.SymmetryWandItemRenderer;
 import com.simibubi.create.content.equipment.tool.CardboardSwordItem;
+import com.simibubi.create.content.equipment.tool.CardboardSwordItemRenderer;
 import com.simibubi.create.content.equipment.wrench.WrenchItem;
 import com.simibubi.create.content.equipment.wrench.WrenchItemRenderer;
 import com.simibubi.create.content.equipment.zapper.terrainzapper.WorldshaperItem;
@@ -72,6 +74,7 @@ import com.simibubi.create.foundation.data.recipe.CompatMetals;
 import com.simibubi.create.foundation.item.CombustibleItem;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.TagDependentIngredientItem;
+import com.simibubi.create.infrastructure.fabric.HelmetOverlay;
 import com.tterrag.registrate.builders.ItemBuilder;
 import com.tterrag.registrate.providers.ProviderType;
 import com.tterrag.registrate.util.entry.ItemEntry;
@@ -183,6 +186,7 @@ public class AllItems {
 		REGISTRATE.item("cardboard_sword", CardboardSwordItem::new)
 			.properties(p -> p.stacksTo(1))
 			.onRegister(i -> FuelRegistry.INSTANCE.add(i, 1000))
+			.transform(CreateRegistrate.customRenderedItem(() -> CardboardSwordItemRenderer::new))
 			.model(AssetLookup.itemModelWithPartials())
 			.register();
 
@@ -358,6 +362,7 @@ public class AllItems {
 		.onRegister(i -> FuelRegistry.INSTANCE.add(i, 1000))
 		.onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "item.create.cardboard_armor"))
 		.model(TrimmableArmorModelGenerator::generate)
+		.onRegister(item -> HelmetOverlay.REGISTRY.register(item, new CardboardArmorStealthOverlay()))
 		.register(),
 
 	CARDBOARD_CHESTPLATE =
