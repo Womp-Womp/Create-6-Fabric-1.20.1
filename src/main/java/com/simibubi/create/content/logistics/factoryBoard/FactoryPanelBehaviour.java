@@ -1044,7 +1044,7 @@ public class FactoryPanelBehaviour extends FilteringBehaviour implements MenuPro
 	}
 
 	private void tickOutline() {
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> LogisticallyLinkedClientHandler.tickPanel(this));
+		EnvExecutor.runWhenOn(EnvType.CLIENT, () -> () -> LogisticallyLinkedClientHandler.tickPanel(this));
 	}
 
 	@Override

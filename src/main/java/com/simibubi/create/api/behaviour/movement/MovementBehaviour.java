@@ -20,6 +20,10 @@ import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 
 /**
  * MovementBehaviors, also known as Actors, provide behavior to blocks mounted on contraptions.
@@ -67,8 +71,14 @@ public interface MovementBehaviour {
 
 	default void dropItem(MovementContext context, ItemStack stack) {
 		ItemStack remainder;
-		if (AllConfigs.server().kinetics.moveItemsToStorage.get())
-			remainder = ItemHandlerHelper.insertItem(context.contraption.getStorage().getAllItems(), stack, false);
+		if (AllConfigs.server().kinetics.moveItemsToStorage.get()) {
+			try (Transaction t = TransferUtil.getTransaction()) {
+				long inserted = context.contraption.getStorage().getAllItems().insert(ItemVariant.of(stack), stack.getCount(), t);
+				remainder = stack.copy();
+				remainder.shrink((int) inserted);
+				t.commit();
+			}
+		}
 		else
 			remainder = stack;
 		if (remainder.isEmpty())

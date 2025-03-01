@@ -25,6 +25,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
@@ -91,10 +92,7 @@ public class ItemHelper {
 //	}
 
 	public static <T extends IBE<? extends BlockEntity>> int calcRedstoneFromBlockEntity(T ibe, Level level, BlockPos pos) {
-		return ibe.getBlockEntityOptional(level, pos)
-			.map(be -> be.getCapability(ForgeCapabilities.ITEM_HANDLER))
-			.map(lo -> lo.map(ItemHelper::calcRedstoneFromInventory).orElse(0))
-			.orElse(0);
+		return calcRedstoneFromInventory(ItemStorage.SIDED.find(level, pos, null));
 	}
 
 	public static int calcRedstoneFromInventory(@Nullable Storage<ItemVariant> inv) {

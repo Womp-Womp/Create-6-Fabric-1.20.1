@@ -173,13 +173,13 @@ public class InventorySummary {
 				continue;
 
 			AllPackets.getChannel()
-				.send(target, new LogisticalStockResponsePacket(false, pos, currentList));
+				.sendToClient(new LogisticalStockResponsePacket(false, pos, currentList), player);
 			currentList = null;
 		}
 
 		if (currentList != null)
 			AllPackets.getChannel()
-				.send(target, new LogisticalStockResponsePacket(true, pos, currentList));
+				.sendToClient(new LogisticalStockResponsePacket(true, pos, currentList), player);
 	}
 
 	public CompoundTag write() {

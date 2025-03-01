@@ -52,7 +52,7 @@ public class PackagePortMenu extends MenuBase<PackagePortBlockEntity> {
 			return ItemStack.EMPTY;
 
 		ItemStack stack = clickedSlot.getItem();
-		int size = contentHolder.inventory.getSlots();
+		int size = contentHolder.inventory.getSlotCount();
 		boolean success = false;
 		if (index < size) {
 			success = !moveItemStackTo(stack, size, slots.size(), false);

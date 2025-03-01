@@ -22,7 +22,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 
-
 import net.fabricmc.api.EnvType;
 
 public class CreateBlockEntityBuilder<T extends BlockEntity, P> extends BlockEntityBuilder<T, P> {
@@ -102,7 +101,7 @@ public class CreateBlockEntityBuilder<T extends BlockEntity, P> extends BlockEnt
 	protected void registerVisualizer() {
 		var visualFactory = this.visualFactory;
 		if (visualFactory != null) {
-			NonNullPredicate<T> renderNormally = this.renderNormally;
+			Predicate<T> renderNormally = this.renderNormally;
 			SimpleBlockEntityVisualizer.builder(getEntry())
 					.factory(visualFactory.get())
 					.skipVanillaRender(be -> !renderNormally.test(be))

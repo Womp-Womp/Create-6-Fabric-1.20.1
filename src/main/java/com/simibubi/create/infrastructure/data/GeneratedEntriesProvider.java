@@ -7,11 +7,9 @@ import com.simibubi.create.AllDamageTypes;
 import com.simibubi.create.Create;
 import com.simibubi.create.api.registry.CreateRegistries;
 import com.simibubi.create.content.equipment.potatoCannon.AllPotatoProjectileTypes;
-import com.simibubi.create.infrastructure.worldgen.AllBiomeModifiers;
 import com.simibubi.create.infrastructure.worldgen.AllConfiguredFeatures;
 import com.simibubi.create.infrastructure.worldgen.AllPlacedFeatures;
 
-import net.minecraft.Util;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.Registries;
@@ -20,23 +18,19 @@ import net.minecraft.data.PackOutput;
 import io.github.fabricators_of_create.porting_lib.data.DatapackBuiltinEntriesProvider;
 
 public class GeneratedEntriesProvider extends DatapackBuiltinEntriesProvider {
-	private static final RegistrySetBuilder BUILDER = new RegistrySetBuilder()
-		.add(Registries.DAMAGE_TYPE, AllDamageTypes::bootstrap)
-		.add(Registries.CONFIGURED_FEATURE, AllConfiguredFeatures::bootstrap)
-		.add(Registries.PLACED_FEATURE, AllPlacedFeatures::bootstrap)
-		.add(ForgeRegistries.Keys.BIOME_MODIFIERS, AllBiomeModifiers::bootstrap)
-		.add(CreateRegistries.POTATO_PROJECTILE_TYPE, AllPotatoProjectileTypes::bootstrap);
+	private static final RegistrySetBuilder BUILDER = addBootstraps(new RegistrySetBuilder());
 
 	public GeneratedEntriesProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
 		super(output, registries, BUILDER, Set.of(Create.ID));
 	}
 
 	// fabric: this must be reused in the entrypoint, moved to a method
-	public static void addBootstraps(RegistrySetBuilder builder) {
-		builder.add(Registries.DAMAGE_TYPE, AllDamageTypes::bootstrap)
+	public static RegistrySetBuilder addBootstraps(RegistrySetBuilder builder) {
+		return builder.add(Registries.DAMAGE_TYPE, AllDamageTypes::bootstrap)
 				.add(Registries.CONFIGURED_FEATURE, AllConfiguredFeatures::bootstrap)
-				.add(Registries.PLACED_FEATURE, AllPlacedFeatures::bootstrap);
-		// fabric: biome modifiers not a registry, remove
+				.add(Registries.PLACED_FEATURE, AllPlacedFeatures::bootstrap)
+				.add(CreateRegistries.POTATO_PROJECTILE_TYPE, AllPotatoProjectileTypes::bootstrap);
+		// fabric: biome modifiers are not a registry, remove
 	}
 
 	@Override

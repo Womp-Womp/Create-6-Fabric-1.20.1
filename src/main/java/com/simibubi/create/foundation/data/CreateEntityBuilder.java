@@ -16,7 +16,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
 
-
 import net.fabricmc.api.EnvType;
 
 @ParametersAreNonnullByDefault
@@ -56,7 +55,7 @@ public class CreateEntityBuilder<T extends Entity, P> extends EntityBuilder<T, P
 	protected void registerVisualizer() {
 		var visualFactory = this.visualFactory;
 		if (visualFactory != null) {
-			NonNullPredicate<T> renderNormally = this.renderNormally;
+			Predicate<T> renderNormally = this.renderNormally;
 			SimpleEntityVisualizer.builder(getEntry())
 					.factory(visualFactory.get())
 					.skipVanillaRender(entity -> !renderNormally.test(entity))

@@ -35,7 +35,7 @@ public class MountedStorageMenus {
 			return null;
 
 		// make sure rows are full
-		if (handler.getSlots() % 9 != 0)
+		if (handler.getSlotCount() % 9 != 0)
 			return null;
 
 		MenuType<?> type = GENERIC_CHEST_MENUS.get(rows - 1);

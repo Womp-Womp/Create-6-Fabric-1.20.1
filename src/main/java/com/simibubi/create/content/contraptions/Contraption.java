@@ -1015,7 +1015,7 @@ public abstract class Contraption {
 		BlockEntity be = entityBlock.newBlockEntity(pos, state);
 		postprocessReadBlockEntity(level, be);
 		if (be != null && nbt != null) {
-			be.handleUpdateTag(nbt);
+			be.load(nbt);
 		}
 
 		return be;

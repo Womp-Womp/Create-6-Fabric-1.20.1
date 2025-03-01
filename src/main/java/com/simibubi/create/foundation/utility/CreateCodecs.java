@@ -115,7 +115,7 @@ public class CreateCodecs {
 		if (isMeat) builder.meat();
 		if (canAlwaysEat) builder.alwaysEat();
 		if (isFastFood) builder.fast();
-		for (FoodEffect effect : effects) builder.effect(effect.effectSupplier(), effect.probability());
+		for (FoodEffect effect : effects) builder.effect(effect.effect(), effect.probability());
 
 		return builder.build();
 	}));

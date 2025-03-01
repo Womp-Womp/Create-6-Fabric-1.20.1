@@ -30,7 +30,12 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 
 public class GlobalStation extends SingleBlockEntityEdgePoint {
@@ -181,7 +186,7 @@ public class GlobalStation extends SingleBlockEntityEdgePoint {
 						.getLevel(getBlockEntityDimension());
 			}
 
-			IItemHandlerModifiable carriageInventory = carriage.storage.getAllItems();
+			Storage<ItemVariant> carriageInventory = carriage.storage.getAllItems();
 			if (carriageInventory == null)
 				continue;
 
@@ -191,22 +196,22 @@ public class GlobalStation extends SingleBlockEntityEdgePoint {
 				BlockPos pos = entry.getKey();
 				PostboxBlockEntity box = null;
 
-				IItemHandlerModifiable postboxInventory = port.offlineBuffer;
+				ItemStackHandler postboxInventory = port.offlineBuffer;
 				if (level != null && level.isLoaded(pos)
 					&& level.getBlockEntity(pos) instanceof PostboxBlockEntity ppbe) {
 					postboxInventory = ppbe.inventory;
 					box = ppbe;
 				}
 
-				for (int slot = 0; slot < postboxInventory.getSlots(); slot++) {
+				for (int slot = 0; slot < postboxInventory.getSlotCount(); slot++) {
 					ItemStack stack = postboxInventory.getStackInSlot(slot);
 					if (!PackageItem.isPackage(stack))
 						continue;
 					if (PackageItem.matchAddress(stack, port.address))
 						continue;
 
-					ItemStack result = ItemHandlerHelper.insertItemStacked(carriageInventory, stack, false);
-					if (!result.isEmpty())
+					long inserted = TransferUtil.insertItem(carriageInventory, stack);
+					if (inserted == 0)
 						continue;
 
 					postboxInventory.setStackInSlot(slot, ItemStack.EMPTY);
@@ -217,39 +222,41 @@ public class GlobalStation extends SingleBlockEntityEdgePoint {
 			}
 
 			// Export to station
-			for (int slot = 0; slot < carriageInventory.getSlots(); slot++) {
-				ItemStack stack = carriageInventory.getStackInSlot(slot);
-				if (!PackageItem.isPackage(stack))
-					continue;
-
-				for (Entry<BlockPos, GlobalPackagePort> entry : connectedPorts.entrySet()) {
-					GlobalPackagePort port = entry.getValue();
-					BlockPos pos = entry.getKey();
-					PostboxBlockEntity box = null;
-
-					if (!PackageItem.matchAddress(stack, port.address))
+			try (Transaction t = Transaction.openOuter()) {
+				for (StorageView<ItemVariant> view : carriageInventory.nonEmptyViews()) {
+					ItemVariant resource = view.getResource();
+					if (!PackageItem.isPackage(resource))
 						continue;
 
-					IItemHandler postboxInventory = port.offlineBuffer;
-					if (level != null && level.isLoaded(pos)
-						&& level.getBlockEntity(pos) instanceof PostboxBlockEntity ppbe) {
-						postboxInventory = ppbe.inventory;
-						box = ppbe;
+					for (Entry<BlockPos, GlobalPackagePort> entry : connectedPorts.entrySet()) {
+						GlobalPackagePort port = entry.getValue();
+						BlockPos pos = entry.getKey();
+						PostboxBlockEntity box = null;
+
+						if (!PackageItem.matchAddress(resource, port.address))
+							continue;
+
+						ItemStackHandler postboxInventory = port.offlineBuffer;
+						if (level != null && level.isLoaded(pos)
+							&& level.getBlockEntity(pos) instanceof PostboxBlockEntity ppbe) {
+							postboxInventory = ppbe.inventory;
+							box = ppbe;
+						}
+
+						long inserted = postboxInventory.insert(resource, view.getAmount(), t);
+						if (inserted != 0)
+							continue;
+
+						Create.RAILWAYS.markTracksDirty();
+						view.extract(resource, view.getAmount(), t);
+						if (box != null)
+							box.spawnParticles();
+
+						break;
 					}
-
-					ItemStack result = ItemHandlerHelper.insertItemStacked(postboxInventory, stack, false);
-					if (!result.isEmpty())
-						continue;
-
-					Create.RAILWAYS.markTracksDirty();
-					carriageInventory.setStackInSlot(slot, ItemStack.EMPTY);
-					if (box != null)
-						box.spawnParticles();
-
-					break;
 				}
+				t.commit();
 			}
-
 		}
 	}
 
