@@ -15,10 +15,9 @@ import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.content.processing.burner.LitBlazeBurnerBlock;
 import com.simibubi.create.foundation.ponder.CreateSceneBuilder;
 import com.simibubi.create.foundation.ponder.element.BeltItemElement;
-import com.simibubi.create.foundation.utility.LongAttached;
 
-import net.createmod.catnip.data.IntAttached;
 import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.data.LongAttached;
 import net.createmod.catnip.nbt.NBTHelper;
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.ParticleEmitter;

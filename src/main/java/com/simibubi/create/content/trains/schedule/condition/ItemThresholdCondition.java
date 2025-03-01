@@ -11,6 +11,9 @@ import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.createmod.catnip.lang.Lang;
+
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -47,20 +50,18 @@ public class ItemThresholdCondition extends CargoThresholdCondition {
 		long target = getThreshold();
 		boolean stacks = inStacks();
 
-		int foundItems = 0;
+		long foundItems = 0;
 		for (Carriage carriage : train.carriages) {
-			ContraptionInvWrapper items = carriage.storage.getAllItems();
-			try (Transaction t = TransferUtil.getTransaction()) {
-				for (StorageView<ItemVariant> view : items.nonEmptyViews()) {
-					ItemVariant variant = view.getResource();
-					if (!stack.test(level, variant.toStack()))
-						continue;
+			Storage<ItemVariant> items = carriage.storage.getAllItems();
+			for (StorageView<ItemVariant> view : items.nonEmptyViews()) {
+				ItemVariant variant = view.getResource();
+				if (!stack.test(level, variant.toStack()))
+					continue;
 
-					if (stacks)
-						foundItems += view.getAmount() == variant.getItem().getMaxStackSize() ? 1 : 0;
-					else
-						foundItems += view.getAmount();
-				}
+				if (stacks)
+					foundItems += view.getAmount() == variant.getItem().getMaxStackSize() ? 1 : 0;
+				else
+					foundItems += view.getAmount();
 			}
 		}
 

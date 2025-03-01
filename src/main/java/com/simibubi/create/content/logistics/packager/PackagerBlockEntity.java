@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.simibubi.create.AllBlocks;
@@ -183,9 +186,12 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 			return availableItems;
 		}
 
-		for (int slot = 0; slot < targetInv.getSlots(); slot++) {
-			int slotLimit = targetInv.getSlotLimit(slot);
-			availableItems.add(scanInputSlots ? targetInv.getStackInSlot(slot) : targetInv.extractItem(slot, slotLimit, true));
+		try (Transaction t = Transaction.openOuter()) {
+			for (StorageView<ItemVariant> view : targetInv.nonEmptyViews()) {
+				ItemVariant resource = view.getResource();
+				long amount = scanInputSlots ? view.getAmount() : view.extract(resource, view.getAmount(), t);
+				availableItems.add(resource, amount);
+			}
 		}
 
 		invVersionTracker.awaitNewVersion(targetInventory.getInventory());
@@ -330,7 +336,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 
 		ItemStackHandler contents = PackageItem.getContents(box);
 		PackageOrder orderContext = PackageItem.getOrderContext(box);
-		IItemHandler targetInv = targetInventory.getInventory();
+		Storage<ItemVariant> targetInv = targetInventory.getInventory();
 		BlockEntity targetBE =
 			level.getBlockEntity(worldPosition.relative(getBlockState().getOptionalValue(PackagerBlock.FACING)
 				.orElse(Direction.UP)

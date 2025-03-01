@@ -25,7 +25,7 @@ public class PackageClientInteractionHandler {
 			return;
 		if (!(event.getTarget() instanceof PackageEntity))
 			return;
-		ObfuscationReflectionHelper.setPrivateValue(Minecraft.class, mc, 10, "f_91078_");
+		Minecraft.getInstance().missTime = 10;
 	}
 
 }

@@ -335,12 +335,12 @@ public class SawBlockEntity extends BlockBreakingKineticBlockEntity implements S
 		if (PackageItem.isPackage(input)) {
 			inventory.clear();
 			ItemStackHandler results = PackageItem.getContents(input);
-			for (int i = 0; i < results.getSlots(); i++) {
+			for (int i = 0; i < results.getSlotCount(); i++) {
 				ItemStack stack = results.getStackInSlot(i);
 				if (!stack.isEmpty())
 					ItemHelper.addToList(stack, list);
 			}
-			for (int slot = 0; slot < list.size() && slot + 1 < inventory.getSlots(); slot++)
+			for (int slot = 0; slot < list.size() && slot + 1 < inventory.getSlotCount(); slot++)
 				inventory.setStackInSlot(slot + 1, list.get(slot));
 			return;
 		}

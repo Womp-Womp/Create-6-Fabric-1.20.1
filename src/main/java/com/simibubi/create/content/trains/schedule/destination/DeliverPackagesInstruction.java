@@ -21,6 +21,12 @@ import com.simibubi.create.content.trains.station.GlobalStation.GlobalPackagePor
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.createmod.catnip.data.Pair;
+
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
@@ -78,20 +84,20 @@ public class DeliverPackagesInstruction extends ScheduleInstruction {
 		}
 
 		for (Carriage carriage : train.carriages) {
-			IItemHandlerModifiable carriageInventory = carriage.storage.getAllItems();
+			Storage<ItemVariant> carriageInventory = carriage.storage.getAllItems();
 			if (carriageInventory == null)
 				continue;
 
 			// Export to station
-			for (int slot = 0; slot < carriageInventory.getSlots(); slot++) {
-				ItemStack stack = carriageInventory.getStackInSlot(slot);
-				if (!PackageItem.isPackage(stack))
+			for (StorageView<ItemVariant> view : carriageInventory.nonEmptyViews()) {
+				ItemVariant resource = view.getResource();
+				if (!PackageItem.isPackage(resource))
 					continue;
 				if (firstPackage == null)
-					firstPackage = PackageItem.getAddress(stack);
+					firstPackage = PackageItem.getAddress(resource);
 				for (GlobalStation globalStation : train.graph.getPoints(EdgePointType.STATION)) {
 					for (Entry<BlockPos, GlobalPackagePort> port : globalStation.connectedPorts.entrySet()) {
-						if (!PackageItem.matchAddress(stack, port.getValue().address))
+						if (!PackageItem.matchAddress(resource, port.getValue().address))
 							continue;
 						anyMatch = true;
 						validStations.add(globalStation);

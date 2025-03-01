@@ -234,7 +234,7 @@ public class FilterItem extends Item implements MenuProvider, SupportsItemCopyin
 			return false;
 		if (!a.hasTag())
 			return true;
-		if (!a.areCapsCompatible(b))
+		if (!a.getTag().getAllKeys().equals(b.getTag().getAllKeys()))
 			return false;
 		for (String key : a.getTag()
 			.getAllKeys()) {

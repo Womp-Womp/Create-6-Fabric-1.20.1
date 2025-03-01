@@ -49,6 +49,8 @@ import net.minecraft.world.item.crafting.RecipeType;
 
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
 
+import net.minecraft.world.item.crafting.ShapedRecipe;
+
 public class FactoryPanelScreen extends AbstractSimiScreen {
 
 	private EditBox addressBox;
@@ -108,9 +110,9 @@ public class FactoryPanelScreen extends AbstractSimiScreen {
 		int width = Math.min(3, ingredients.size());
 		int height = Math.min(3, ingredients.size() / 3 + 1);
 
-		if (availableCraftingRecipe instanceof IShapedRecipe<?> shaped) {
-			width = shaped.getRecipeWidth();
-			height = shaped.getRecipeHeight();
+		if (availableCraftingRecipe instanceof ShapedRecipe shaped) {
+			width = shaped.getWidth();
+			height = shaped.getHeight();
 		}
 
 		if (height == 1)

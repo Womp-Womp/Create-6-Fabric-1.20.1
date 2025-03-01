@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.google.common.collect.ImmutableList;
 import com.simibubi.create.Create;
+import com.simibubi.create.api.contraption.storage.fluid.MountedFluidStorageWrapper;
 import com.simibubi.create.content.logistics.filter.FilterItemStack;
 import com.simibubi.create.content.trains.entity.Carriage;
 import com.simibubi.create.content.trains.entity.Train;
@@ -50,16 +51,14 @@ public class FluidThresholdCondition extends CargoThresholdCondition {
 		Ops operator = getOperator();
 		long target = getThreshold();
 
-		int foundFluid = 0;
+		long foundFluid = 0;
 		for (Carriage carriage : train.carriages) {
-			CombinedTankWrapper fluids = carriage.storage.getFluids();
-			try (Transaction t = TransferUtil.getTransaction()) {
-				for (StorageView<FluidVariant> view : fluids.nonEmptyViews()) {
-					FluidStack fluidInTank = new FluidStack(view);
-					if (!compareStack.test(level, fluidInTank))
-						continue;
-					foundFluid += fluidInTank.getAmount();
-				}
+			MountedFluidStorageWrapper fluids = carriage.storage.getFluids();
+			for (StorageView<FluidVariant> view : fluids.nonEmptyViews()) {
+				FluidStack fluidInTank = new FluidStack(view);
+				if (!compareStack.test(level, fluidInTank))
+					continue;
+				foundFluid += fluidInTank.getAmount();
 			}
 		}
 

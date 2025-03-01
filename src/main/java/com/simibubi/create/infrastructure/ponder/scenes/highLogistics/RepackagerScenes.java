@@ -6,11 +6,19 @@ import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.foundation.ponder.CreateSceneBuilder;
 
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+
 import net.createmod.catnip.math.Pointing;
 import net.createmod.ponder.api.PonderPalette;
 import net.createmod.ponder.api.scene.SceneBuilder;
 import net.createmod.ponder.api.scene.SceneBuildingUtil;
 import net.createmod.ponder.api.scene.Selection;
+
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
@@ -380,11 +388,10 @@ public class RepackagerScenes {
 		scene.world()
 			.modifyBlockEntity(util.grid()
 				.at(3, 2, 5), BlockEntity.class, be -> {
-					IItemHandler handler = be.getCapability(ForgeCapabilities.ITEM_HANDLER)
-						.orElse(null);
-					if (handler == null)
+					Storage<ItemVariant> storage = TransferUtil.getItemStorage(be);
+					if (storage == null)
 						return;
-					ItemHandlerHelper.insertItemStacked(handler, stack, false);
+					TransferUtil.insertItem(storage, stack);
 				});
 	}
 

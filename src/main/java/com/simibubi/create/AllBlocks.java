@@ -276,6 +276,10 @@ import com.tterrag.registrate.util.DataIngredient;
 import com.tterrag.registrate.util.entry.BlockEntry;
 
 import net.createmod.catnip.data.Couple;
+
+import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
+import net.fabricmc.fabric.api.registry.FuelRegistry;
+
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Direction.AxisDirection;
@@ -1867,6 +1871,7 @@ public class AllBlocks {
 			.properties(p -> p.noOcclusion())
 			.properties(p -> p.mapColor(MapColor.TERRACOTTA_BLUE)
 				.sound(SoundType.NETHERITE_BLOCK))
+			.properties(p -> p.pushReaction(PushReaction.NORMAL))
 			.transform(pickaxeOnly())
 			.addLayer(() -> RenderType::cutoutMipped)
 			.blockstate((c, p) -> p.simpleBlock(c.getEntry(), AssetLookup.partialBaseModel(c, p)))
@@ -2580,11 +2585,13 @@ public class AllBlocks {
 			.properties(p -> p.mapColor(MapColor.COLOR_BROWN)
 				.sound(SoundType.CHISELED_BOOKSHELF)
 				.ignitedByLava())
+			.onRegister(block -> FlammableBlockRegistry.getDefaultInstance().add(block, 20, 100))
 			.transform(axeOnly())
 			.blockstate(BlockStateGen.horizontalAxisBlockProvider(false))
 			.tag(Tags.Blocks.STORAGE_BLOCKS)
 			.tag(AllTags.forgeBlockTag("storage_blocks/cardboard"))
 			.item(CardboardBlockItem::new)
+			.onRegister(item -> FuelRegistry.INSTANCE.add(item, 4000))
 			.tag(AllTags.forgeItemTag("storage_blocks/cardboard"))
 			.tag(Tags.Items.STORAGE_BLOCKS)
 			.build()
@@ -2597,6 +2604,7 @@ public class AllBlocks {
 			.properties(p -> p.mapColor(MapColor.COLOR_BROWN)
 				.sound(SoundType.CHISELED_BOOKSHELF)
 				.ignitedByLava())
+			.onRegister(block -> FlammableBlockRegistry.getDefaultInstance().add(block, 20, 100))
 			.transform(axeOnly())
 			.blockstate(BlockStateGen.horizontalAxisBlockProvider(false))
 			.loot((r, b) -> r.add(b, LootTable.lootTable()
@@ -2607,6 +2615,7 @@ public class AllBlocks {
 					.setRolls(ConstantValue.exactly(1.0F))
 					.add(LootItem.lootTableItem(AllBlocks.CARDBOARD_BLOCK.asItem()))))))
 			.item(CardboardBlockItem::new)
+			.onRegister(item -> FuelRegistry.INSTANCE.add(item, 4000))
 			.build()
 			.lang("Bound Block of Cardboard")
 			.register();

@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.foundation.model.BakedModelHelper;
 
+import net.createmod.catnip.data.Iterate;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.resources.model.BakedModel;
@@ -91,7 +92,7 @@ public class CopycatPanelModel extends CopycatModel {
 			}
 
 			// 2 Pieces
-			for (boolean front : net.createmod.catnip.utility.Iterate.trueAndFalse) {
+			for (boolean front : Iterate.trueAndFalse) {
 				Vec3 normalScaledN13 = normal.scale(front ? 0 : -13 / 16f);
 				float contract = 16 - (front ? 1 : 2);
 				AABB bb = CUBE_AABB.contract(normal.x * contract / 16, normal.y * contract / 16, normal.z * contract / 16);

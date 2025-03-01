@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.regex.PatternSyntaxException;
 
+import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.google.common.collect.ImmutableList;
@@ -101,7 +103,7 @@ public class FetchPackagesInstruction extends TextScheduleInstruction {
 		MinecraftServer server = level.getServer();
 		if (server == null)
 			return null;
-		
+
 		String regex = getFilterForRegex();
 		boolean anyMatch = false;
 		ArrayList<GlobalStation> validStations = new ArrayList<>();
@@ -117,16 +119,16 @@ public class FetchPackagesInstruction extends TextScheduleInstruction {
 			ServerLevel dimLevel = server.getLevel(globalStation.blockEntityDimension);
 			if (dimLevel == null)
 				continue;
-			
+
 			for (Entry<BlockPos, GlobalPackagePort> entry : globalStation.connectedPorts.entrySet()) {
 				GlobalPackagePort port = entry.getValue();
 				BlockPos pos = entry.getKey();
 
-				IItemHandlerModifiable postboxInventory = port.offlineBuffer;
+				ItemStackHandler postboxInventory = port.offlineBuffer;
 				if (dimLevel.isLoaded(pos) && dimLevel.getBlockEntity(pos) instanceof PostboxBlockEntity ppbe)
 					postboxInventory = ppbe.inventory;
 
-				for (int slot = 0; slot < postboxInventory.getSlots(); slot++) {
+				for (int slot = 0; slot < postboxInventory.getSlotCount(); slot++) {
 					ItemStack stack = postboxInventory.getStackInSlot(slot);
 					if (!PackageItem.isPackage(stack))
 						continue;

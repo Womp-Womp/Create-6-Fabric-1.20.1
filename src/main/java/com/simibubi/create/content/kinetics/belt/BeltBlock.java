@@ -287,16 +287,12 @@ public class BeltBlock extends HorizontalKineticBlock
 			return InteractionResult.PASS;
 
 		if (PackageItem.isPackage(heldItem)) {
-			ItemStack toInsert = heldItem.copy();
-			IItemHandler handler = belt.getCapability(ForgeCapabilities.ITEM_HANDLER)
-				.orElse(null);
+			Storage<ItemVariant> handler = belt.getItemStorage(null);
 			if (handler == null)
 				return InteractionResult.PASS;
-			ItemStack remainder = handler.insertItem(0, toInsert, false);
-			if (remainder.isEmpty()) {
-				heldItem.shrink(1);
-				return InteractionResult.SUCCESS;
-			}
+			long inserted = TransferUtil.insertItem(handler, heldItem);
+			heldItem.shrink((int) inserted);
+			return InteractionResult.SUCCESS;
 		}
 
 		if (isHand) {

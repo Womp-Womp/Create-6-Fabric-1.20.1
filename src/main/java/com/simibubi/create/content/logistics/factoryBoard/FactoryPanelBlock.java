@@ -1,5 +1,6 @@
 package com.simibubi.create.content.logistics.factoryBoard;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import com.simibubi.create.AllBlockEntityTypes;
@@ -13,7 +14,12 @@ import com.simibubi.create.content.schematics.requirement.ItemRequirement;
 import com.simibubi.create.foundation.advancement.AdvancementBehaviour;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
+import com.simibubi.create.foundation.utility.BlockHelper;
 import com.simibubi.create.foundation.utility.CreateLang;
+
+import com.simibubi.create.foundation.utility.fabric.ReachUtil;
+
+import io.github.fabricators_of_create.porting_lib.block.PlayerDestroyBlock;
 
 import net.createmod.catnip.math.AngleHelper;
 import net.createmod.catnip.math.VecHelper;
@@ -53,7 +59,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class FactoryPanelBlock extends FaceAttachedHorizontalDirectionalBlock
-	implements ProperWaterloggedBlock, IBE<FactoryPanelBlockEntity>, IWrenchable, SpecialBlockItemRequirement {
+	implements ProperWaterloggedBlock, IBE<FactoryPanelBlockEntity>, IWrenchable, SpecialBlockItemRequirement, PlayerDestroyBlock {
 
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
@@ -142,7 +148,7 @@ public class FactoryPanelBlock extends FaceAttachedHorizontalDirectionalBlock
 	public InteractionResult onSneakWrenched(BlockState state, UseOnContext context) {
 		Level world = context.getLevel();
 		BlockPos pos = context.getClickedPos();
-		Player player = context.getPlayer();
+		Player player = Objects.requireNonNull(context.getPlayer());
 		PanelSlot slot = getTargetedSlot(pos, state, context.getClickLocation());
 
 		if (!(world instanceof ServerLevel))
@@ -153,21 +159,18 @@ public class FactoryPanelBlock extends FaceAttachedHorizontalDirectionalBlock
 			if (behaviour == null || !behaviour.isActive())
 				return InteractionResult.SUCCESS;
 
-			BlockEvent.BreakEvent event = new BlockEvent.BreakEvent(world, pos, world.getBlockState(pos), player);
-			MinecraftForge.EVENT_BUS.post(event);
-			if (event.isCanceled())
-				return InteractionResult.SUCCESS;
+			BlockHelper.runWithBreakEvents(world, pos, state, be, player, () -> {
+				if (!be.removePanel(slot))
+					return;
 
-			if (!be.removePanel(slot))
-				return InteractionResult.SUCCESS;
+				if (!player.isCreative())
+					player.getInventory()
+						.placeItemBackInInventory(AllBlocks.FACTORY_GAUGE.asStack());
 
-			if (!player.isCreative())
-				player.getInventory()
-					.placeItemBackInInventory(AllBlocks.FACTORY_GAUGE.asStack());
-
-			IWrenchable.playRemoveSound(world, pos);
-			if (be.activePanels() == 0)
-				world.destroyBlock(pos, false);
+				IWrenchable.playRemoveSound(world, pos);
+				if (be.activePanels() == 0)
+					world.destroyBlock(pos, false);
+			});
 
 			return InteractionResult.SUCCESS;
 		});
@@ -179,8 +182,7 @@ public class FactoryPanelBlock extends FaceAttachedHorizontalDirectionalBlock
 		if (pPlacer == null)
 			return;
 		AdvancementBehaviour.setPlacedBy(pLevel, pPos, pPlacer);
-		double range = pPlacer.getAttribute(ForgeMod.BLOCK_REACH.get())
-			.getValue() + 1;
+		double range = ReachUtil.reach(pPlacer);
 		HitResult hitResult = pPlacer.pick(range, 1, false);
 		Vec3 location = hitResult.getLocation();
 		if (location == null)
@@ -231,13 +233,12 @@ public class FactoryPanelBlock extends FaceAttachedHorizontalDirectionalBlock
 		FluidState fluid) {
 		if (tryDestroySubPanelFirst(state, level, pos, player))
 			return false;
-		boolean result = super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
+		boolean result = PlayerDestroyBlock.super.onDestroyedByPlayer(state, level, pos, player, willHarvest, fluid);
 		return result;
 	}
 
 	private boolean tryDestroySubPanelFirst(BlockState state, Level level, BlockPos pos, Player player) {
-		double range = player.getAttribute(ForgeMod.BLOCK_REACH.get())
-			.getValue() + 1;
+		double range = ReachUtil.reach(player);
 		HitResult hitResult = player.pick(range, 1, false);
 		Vec3 location = hitResult.getLocation();
 		PanelSlot destroyedSlot = getTargetedSlot(pos, state, location);

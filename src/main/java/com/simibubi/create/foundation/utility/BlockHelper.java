@@ -32,6 +32,7 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -417,4 +418,13 @@ safeNbtBE.writeSafe(data);
 		return true;
 	}
 
+	public static void runWithBreakEvents(Level level, BlockPos pos, BlockState state, @Nullable BlockEntity be, Player player, Runnable runnable) {
+		boolean shouldBreak = PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, player, pos, state, be);
+		if (shouldBreak) {
+			runnable.run();
+			PlayerBlockBreakEvents.AFTER.invoker().afterBlockBreak(level, player, pos, state, be);
+		} else {
+			PlayerBlockBreakEvents.CANCELED.invoker().onBlockBreakCanceled(level, player, pos, state, be);
+		}
+	}
 }

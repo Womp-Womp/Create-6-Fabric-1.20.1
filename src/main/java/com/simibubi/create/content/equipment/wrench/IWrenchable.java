@@ -9,6 +9,8 @@ import com.simibubi.create.content.kinetics.base.HorizontalKineticBlock;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.base.RotatedPillarKineticBlock;
 
+import com.simibubi.create.foundation.utility.BlockHelper;
+
 import net.createmod.catnip.math.VoxelShaper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,9 +21,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
+
+import java.util.Objects;
 
 public interface IWrenchable {
 
@@ -48,26 +53,27 @@ public interface IWrenchable {
 	default InteractionResult onSneakWrenched(BlockState state, UseOnContext context) {
 		Level world = context.getLevel();
 		BlockPos pos = context.getClickedPos();
-		Player player = context.getPlayer();
+		// note: this player is never null
+		Player player = Objects.requireNonNull(context.getPlayer());
 
 		if (!(world instanceof ServerLevel serverLevel))
 			return InteractionResult.SUCCESS;
 
-		boolean shouldBreak = PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(world, player, pos, world.getBlockState(pos), null);
-		if (!shouldBreak)
-			return InteractionResult.SUCCESS;
+		BlockEntity be = world.getBlockEntity(pos);
+		BlockHelper.runWithBreakEvents(world, pos, state, be, player, () -> {
+			if (!player.isCreative()) {
+				Block.getDrops(state, serverLevel, pos, be, player, context.getItemInHand())
+					.forEach(itemStack -> {
+						player.getInventory()
+							.placeItemBackInInventory(itemStack);
+					});
+			}
 
-		if (player != null && !player.isCreative()) {
-			Block.getDrops(state, serverLevel, pos, world.getBlockEntity(pos), player, context.getItemInHand())
-				.forEach(itemStack -> {
-					player.getInventory()
-						.placeItemBackInInventory(itemStack);
-				});
-		}
+			state.spawnAfterBreak(serverLevel, pos, ItemStack.EMPTY, true);
+			world.destroyBlock(pos, false);
+			playRemoveSound(world, pos);
+		});
 
-		state.spawnAfterBreak(serverLevel, pos, ItemStack.EMPTY, true);
-		world.destroyBlock(pos, false);
-		playRemoveSound(world, pos);
 		return InteractionResult.SUCCESS;
 	}
 

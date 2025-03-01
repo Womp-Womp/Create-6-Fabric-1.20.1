@@ -69,34 +69,29 @@ public class InputEvents {
 		if (mc.screen != null)
 			return InteractionResult.PASS;
 
-		if (CurvedTrackInteraction.onClickInput(event)) {
-			return InteractionResult.SUCCESS;
-		}
-
-		KeyMapping key = event.getKeyMapping();
-
-		if (key == mc.options.keyUse || key == mc.options.keyAttack) {
-			if (CreateClient.GLUE_HANDLER.onMouseInput(key == mc.options.keyAttack))
-				return InteractionResult.SUCCESS;
-		}
-
-		if (key == mc.options.keyUse
-			&& (FactoryPanelConnectionHandler.onRightClick() || ChainConveyorConnectionHandler.onRightClick())) {
-			return InteractionResult.SUCCESS;
-		}
-
 		if (CurvedTrackInteraction.onClickInput(true, false)) {
 			return InteractionResult.SUCCESS;
 		}
 
-		boolean glueCancelled = CreateClient.GLUE_HANDLER.onMouseInput(false);
-		LinkedControllerClientHandler.deactivateInLectern();
-		boolean relocatorCancelled = TrainRelocator.onClicked();
-		boolean factoryPanelCancelled = FactoryPanelConnectionHandler.onRightClick();
+		if (CreateClient.GLUE_HANDLER.onMouseInput(false))
+			return InteractionResult.SUCCESS;
 
-		return glueCancelled || relocatorCancelled || factoryPanelCancelled
-				? InteractionResult.SUCCESS
-				: InteractionResult.PASS;
+		if (FactoryPanelConnectionHandler.onRightClick() || ChainConveyorConnectionHandler.onRightClick()) {
+			return InteractionResult.SUCCESS;
+		}
+
+		LinkedControllerClientHandler.deactivateInLectern();
+		boolean cancel = TrainRelocator.onClicked();
+
+		if (ChainConveyorInteractionHandler.onUse() || PackagePortTargetSelectionHandler.onUse()) {
+			return InteractionResult.SUCCESS;
+		}
+
+		if (ChainPackageInteractionHandler.onUse()) {
+			return InteractionResult.SUCCESS;
+		}
+
+		return cancel ? InteractionResult.SUCCESS : InteractionResult.PASS;
 	}
 
 	public static InteractionResult onAttack(Minecraft mc, HitResult hit) {
@@ -126,19 +121,6 @@ public class InputEvents {
 		InteractEvents.USE.register(InputEvents::onUse);
 		InteractEvents.ATTACK.register(InputEvents::onAttack);
 		InteractEvents.PICK.register(InputEvents::onPick);
-
-		if (ChainConveyorInteractionHandler.onUse()) {
-			event.setCanceled(true);
-			return;
-		} else if (PackagePortTargetSelectionHandler.onUse()) {
-			event.setCanceled(true);
-			return;
-		}
-
-		DistExecutor.unsafeRunWhenOn(EnvType.CLIENT, () -> () -> {
-			if (ChainPackageInteractionHandler.onUse())
-				event.setCanceled(true);
-		});
 	}
 
 }

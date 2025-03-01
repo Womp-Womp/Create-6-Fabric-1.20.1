@@ -16,6 +16,13 @@ import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringB
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.fabric.SecondaryUseBypassingBlock;
 
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -97,12 +104,10 @@ public class ItemHatchBlock extends HorizontalDirectionalBlock
 		if (pPlayer instanceof FakePlayer)
 			return InteractionResult.SUCCESS;
 
-		BlockEntity blockEntity = pLevel.getBlockEntity(pPos.relative(pState.getValue(FACING)));
-		if (blockEntity == null)
-			return InteractionResult.FAIL;
-		LazyOptional<IItemHandler> optional = blockEntity.getCapability(ForgeCapabilities.ITEM_HANDLER);
-		IItemHandler targetInv = optional.orElse(null);
-		if (targetInv == null)
+		Direction facing = pState.getValue(FACING);
+		BlockPos targetPos = pPos.relative(facing);
+		Storage<ItemVariant> storage = ItemStorage.SIDED.find(pLevel, targetPos, facing.getOpposite());
+		if (storage == null)
 			return InteractionResult.FAIL;
 
 		FilteringBehaviour filter = BlockEntityBehaviour.get(pLevel, pPos, FilteringBehaviour.TYPE);
@@ -110,7 +115,6 @@ public class ItemHatchBlock extends HorizontalDirectionalBlock
 			return InteractionResult.FAIL;
 
 		Inventory inventory = pPlayer.getInventory();
-		List<ItemStack> failedInsertions = new ArrayList<>();
 		boolean anyInserted = false;
 		boolean depositItemInHand = !pPlayer.isShiftKeyDown();
 
@@ -132,20 +136,15 @@ public class ItemHatchBlock extends HorizontalDirectionalBlock
 				.isEmpty() && !filter.test(item))
 				continue;
 
-			ItemStack remainder = ItemHandlerHelper.insertItemStacked(targetInv, item, true);
-			if (remainder.getCount() == item.getCount())
+			long inserted = TransferUtil.insertItem(storage, item);
+			if (inserted <= 0)
 				continue;
 
-			ItemStack extracted = inventory.removeItem(i, item.getCount() - remainder.getCount());
-			remainder = ItemHandlerHelper.insertItemStacked(targetInv, extracted, false);
 			anyInserted = true;
-
-			// remainder might not be empty in itemhandler edge cases
-			if (!remainder.isEmpty())
-				failedInsertions.add(remainder);
+			int newSize = TransferUtil.truncateLong(item.getCount() - inserted);
+			ItemStack newStack = newSize <= 0 ? ItemStack.EMPTY : item.copyWithCount(newSize);
+			inventory.setItem(i, newStack);
 		}
-
-		failedInsertions.forEach(inventory::placeItemBackInInventory);
 
 		if (!anyInserted)
 			return InteractionResult.SUCCESS;

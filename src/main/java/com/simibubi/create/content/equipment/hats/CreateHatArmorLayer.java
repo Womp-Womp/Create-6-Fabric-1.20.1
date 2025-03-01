@@ -10,6 +10,9 @@ import com.simibubi.create.foundation.mixin.accessor.AgeableListModelAccessor;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
+
+import io.github.fabricators_of_create.porting_lib.mixin.accessors.client.accessor.ModelPartAccessor;
+
 import net.createmod.catnip.render.CachedBuffers;
 import net.minecraft.client.model.AgeableListModel;
 import net.minecraft.client.model.EntityModel;
@@ -50,11 +53,12 @@ public class CreateHatArmorLayer<T extends LivingEntity, M extends EntityModel<T
 
 				if (entityModel instanceof AgeableListModel<?> model) {
 					if (model.young) {
-						if (model.scaleHead) {
-							float f = 1.5F / model.babyHeadScale;
+						AgeableListModelAccessor accessor = (AgeableListModelAccessor) model;
+						if (accessor.getScaleHead()) {
+							float f = 1.5F / accessor.getBabyHeadScale();
 							ms.scale(f, f, f);
 						}
-						ms.translate(0.0D, model.babyYHeadOffset / 16.0F, model.babyZHeadOffset / 16.0F);
+						ms.translate(0.0D, accessor.getBabyYHeadOffset() / 16.0F, accessor.getBabyZHeadOffset() / 16.0F);
 					}
 
 					ModelPart head = getHeadPart(model);
@@ -70,7 +74,8 @@ public class CreateHatArmorLayer<T extends LivingEntity, M extends EntityModel<T
 
 					ModelPart lastChild = partsToHead.get(partsToHead.size() - 1);
 					if (!lastChild.isEmpty()) {
-						Cube cube = lastChild.cubes.get(Mth.clamp(info.cubeIndex(), 0, lastChild.cubes.size() - 1));
+						List<Cube> cubes = ((ModelPartAccessor) (Object) lastChild).porting_lib$cubes();
+						Cube cube = cubes.get(Mth.clamp(info.cubeIndex(), 0, cubes.size() - 1));
 						ms.translate(info.offset().x() / 16.0F, (cube.minY - cube.maxY + info.offset().y()) / 16.0F, info.offset().z() / 16.0F);
 						float max = Math.max(cube.maxX - cube.minX, cube.maxZ - cube.minZ) / 8.0F * info.scale();
 						ms.scale(max, max, max);

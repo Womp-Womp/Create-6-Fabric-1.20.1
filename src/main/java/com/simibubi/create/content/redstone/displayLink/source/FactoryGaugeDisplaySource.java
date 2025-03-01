@@ -11,6 +11,7 @@ import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelPosition;
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkContext;
 
 import net.createmod.catnip.data.IntAttached;
+import net.createmod.catnip.data.LongAttached;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -20,7 +21,7 @@ import net.minecraft.world.level.Level;
 public class FactoryGaugeDisplaySource extends ValueListDisplaySource {
 
 	@Override
-	protected Stream<IntAttached<MutableComponent>> provideEntries(DisplayLinkContext context, int maxRows) {
+	protected Stream<LongAttached<MutableComponent>> provideEntries(DisplayLinkContext context, int maxRows) {
 		List<FactoryPanelPosition> panels = context.blockEntity().factoryPanelSupport.getLinkedPanels();
 		if (panels.isEmpty())
 			return Stream.empty();
@@ -32,7 +33,7 @@ public class FactoryGaugeDisplaySource extends ValueListDisplaySource {
 	}
 
 	@Nullable
-	public IntAttached<MutableComponent> createEntry(Level level, FactoryPanelPosition pos) {
+	public LongAttached<MutableComponent> createEntry(Level level, FactoryPanelPosition pos) {
 		FactoryPanelBehaviour panel = FactoryPanelBehaviour.at(level, pos);
 		ItemStack filter = panel.getFilter();
 		if (filter == null)
@@ -51,7 +52,7 @@ public class FactoryGaugeDisplaySource extends ValueListDisplaySource {
 				s = "\u25aa";
 		}
 
-		return IntAttached.with(panel.getLevelInStorage(), Component.literal(s + " ")
+		return LongAttached.with(panel.getLevelInStorage(), Component.literal(s + " ")
 			.withStyle(style -> style.withColor(panel.getIngredientStatusColor()))
 			.append(filter.getHoverName()
 				.plainCopy()

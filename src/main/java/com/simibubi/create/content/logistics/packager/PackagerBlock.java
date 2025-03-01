@@ -11,6 +11,15 @@ import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.block.WrenchableDirectionalBlock;
 import com.simibubi.create.foundation.utility.CreateLang;
 
+import io.github.fabricators_of_create.porting_lib.block.WeakPowerCheckingBlock;
+
+import net.fabricmc.fabric.api.entity.FakePlayer;
+
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
@@ -35,7 +44,7 @@ import net.minecraft.world.phys.BlockHitResult;
 
 import io.github.fabricators_of_create.porting_lib.block.NeighborChangeListeningBlock;
 
-public class PackagerBlock extends WrenchableDirectionalBlock implements IBE<PackagerBlockEntity>, IWrenchable, NeighborChangeListeningBlock {
+public class PackagerBlock extends WrenchableDirectionalBlock implements IBE<PackagerBlockEntity>, IWrenchable, NeighborChangeListeningBlock, WeakPowerCheckingBlock {
 
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 	public static final BooleanProperty LINKED = BooleanProperty.create("linked");
@@ -56,16 +65,14 @@ public class PackagerBlock extends WrenchableDirectionalBlock implements IBE<Pac
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext context) {
-		Capability<IItemHandler> itemCap = ForgeCapabilities.ITEM_HANDLER;
 		Direction preferredFacing = null;
 		for (Direction face : context.getNearestLookingDirections()) {
-			BlockEntity be = context.getLevel()
-				.getBlockEntity(context.getClickedPos()
-					.relative(face));
+			BlockPos pos = context.getClickedPos().relative(face);
+			BlockEntity be = context.getLevel().getBlockEntity(pos);
 			if (be instanceof PackagerBlockEntity)
 				continue;
-			if (be != null && (be.getCapability(itemCap)
-				.isPresent())) {
+			Storage<ItemVariant> storage = ItemStorage.SIDED.find(context.getLevel(), pos, face.getOpposite());
+			if (storage != null) {
 				preferredFacing = face.getOpposite();
 				break;
 			}

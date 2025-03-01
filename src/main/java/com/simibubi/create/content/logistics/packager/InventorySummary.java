@@ -57,6 +57,10 @@ public class InventorySummary {
 		add(view.getResource().toStack(count), count);
 	}
 
+	public void add(ItemVariant variant, long amount) {
+		this.add(variant.toStack(TransferUtil.truncateLong(amount)));
+	}
+
 	public Map<Item, List<BigItemStack>> getItemMap() {
 		return items;
 	}

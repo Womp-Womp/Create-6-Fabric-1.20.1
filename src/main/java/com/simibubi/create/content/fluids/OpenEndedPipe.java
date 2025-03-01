@@ -256,15 +256,15 @@ public class OpenEndedPipe extends FlowSource {
 
 			long fill = super.insert(resource, maxAmount, transaction);
 
-			if (effectHandler != null && !resource.isEmpty()) {
+			if (effectHandler != null) {
 				// resource should be copied before giving it to the handler.
 				// if hasBlockState is false, it was already copied above.
-				FluidStack exposed = hasBlockState ? resource.copy() : resource;
+				FluidStack exposed = new FluidStack(resource, 81);
 				effectHandler.apply(world, aoe, exposed);
 			}
 
-			if (getFluidAmount() == 1000 || !hasBlockState)
-				if (provideFluidToSpace(containedFluidStack, false))
+			if (getFluidAmount() == FluidConstants.BUCKET || !hasBlockState)
+				if (provideFluidToSpace(containedFluidStack, transaction))
 					setFluid(FluidStack.EMPTY);
 			return fill;
 		}

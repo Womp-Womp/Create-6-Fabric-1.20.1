@@ -151,8 +151,6 @@ public class ClipboardValueSettingsHandler {
 			return InteractionResult.PASS;
 
 		if (smartBE instanceof ClipboardBlockEntity cbe) {
-			event.setCanceled(true);
-			event.setCancellationResult(InteractionResult.SUCCESS);
 
 			if (!world.isClientSide()) {
 				List<List<ClipboardEntry>> listTo = ClipboardEntry.readAll(itemStack);
@@ -195,7 +193,7 @@ public class ClipboardValueSettingsHandler {
 				.withStyle(ChatFormatting.WHITE))
 				.style(ChatFormatting.GREEN)
 				.component(), true);
-			return;
+			return InteractionResult.SUCCESS;
 		}
 		CompoundTag tag = itemStack.getTagElement("CopiedValues");
 		if (paste && tag == null)

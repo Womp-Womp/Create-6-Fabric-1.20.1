@@ -122,7 +122,7 @@ public class SawRenderer extends SafeBlockEntityRenderer<SawBlockEntity> {
 			offset = 1 - offset;
 
 		int outputs = 0;
-		for (int i = 1; i < be.inventory.getSlots(); i++)
+		for (int i = 1; i < be.inventory.getSlotCount(); i++)
 			if (!be.inventory.getStackInSlot(i)
 				.isEmpty())
 				outputs++;

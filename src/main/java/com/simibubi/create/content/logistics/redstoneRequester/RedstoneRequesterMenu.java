@@ -73,7 +73,7 @@ public class RedstoneRequesterMenu extends GhostItemMenu<RedstoneRequesterBlockE
 	protected void saveData(RedstoneRequesterBlockEntity contentHolder) {
 		List<BigItemStack> stacks = contentHolder.encodedRequest.stacks();
 		ArrayList<BigItemStack> list = new ArrayList<>();
-		for (int i = 0; i < ghostInventory.getSlots(); i++)
+		for (int i = 0; i < ghostInventory.getSlotCount(); i++)
 			list.add(new BigItemStack(ghostInventory.getStackInSlot(i)
 				.copyWithCount(1), i < stacks.size() ? stacks.get(i).count : 1));
 

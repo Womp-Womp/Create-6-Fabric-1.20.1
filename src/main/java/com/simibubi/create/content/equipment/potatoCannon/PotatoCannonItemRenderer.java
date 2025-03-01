@@ -25,12 +25,12 @@ public class PotatoCannonItemRenderer extends CustomRenderedItemModelRenderer {
 	public static final RenderItemDecorationsCallback DECORATOR = (guiGraphics, font, stack, xOffset, yOffset) -> {
 		LocalPlayer player = Minecraft.getInstance().player;
 		if (player == null) {
-			return false;
+			return;
 		}
 
 		Ammo ammo = PotatoCannonItem.getAmmo(player, stack);
 		if (ammo == null || AllItems.POTATO_CANNON.is(ammo.stack())) {
-			return false;
+			return;
 		}
 
 		PoseStack poseStack = guiGraphics.pose();
@@ -39,7 +39,6 @@ public class PotatoCannonItemRenderer extends CustomRenderedItemModelRenderer {
 		poseStack.scale(.5f, .5f, .5f);
 		guiGraphics.renderItem(ammo.stack(), 0, 0);
 		poseStack.popPose();
-		return false;
 	};
 
 	protected static final PartialModel COG = PartialModel.of(Create.asResource("item/potato_cannon/cog"));

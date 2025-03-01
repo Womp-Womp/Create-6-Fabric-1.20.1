@@ -10,6 +10,14 @@ import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.utility.CreateLang;
 
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
+
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
@@ -17,6 +25,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -68,11 +77,17 @@ public class StockTickerBlock extends HorizontalDirectionalBlock implements IBE<
 				return InteractionResult.SUCCESS;
 
 			if (!pLevel.isClientSide() && !stbe.receivedPayments.isEmpty()) {
-				for (int i = 0; i < stbe.receivedPayments.getSlots(); i++)
-					pPlayer.getInventory()
-						.placeItemBackInInventory(
-							stbe.receivedPayments.extractItem(i, stbe.receivedPayments.getStackInSlot(i)
-								.getCount(), false));
+				try (Transaction t = Transaction.openOuter()) {
+					for (StorageView<ItemVariant> view : stbe.receivedPayments.nonEmptyViews()) {
+						ItemVariant resource = view.getResource();
+						long extracted = view.extract(resource, view.getAmount(), t);
+						if (extracted > 0) {
+							ItemStack stack = resource.toStack(TransferUtil.truncateLong(extracted));
+							pPlayer.getInventory().placeItemBackInInventory(stack);
+						}
+					}
+					t.commit();
+				}
 				AllSoundEvents.playItemPickup(pPlayer);
 				return InteractionResult.SUCCESS;
 			}

@@ -76,7 +76,7 @@ public class AllPortalTracks {
 		if (!minecraftServer.isNetherEnabled())
 			return null;
 
-		return PortalTrackProvider.fromTeleporter(level, face, Level.OVERWORLD, Level.NETHER, ServerLevel::getPortalForcer);
+		return PortalTrackProvider.fromTeleporter(level, face, Level.OVERWORLD, Level.NETHER, l -> (ITeleporter) l.getPortalForcer());
 	}
 
 	private static PortalTrackProvider.Exit aether(ServerLevel level, BlockFace face) {
@@ -89,7 +89,7 @@ public class AllPortalTracks {
 			} catch (Exception e) {
 				Create.LOGGER.error("Failed to create Aether teleporter: ", e);
 			}
-			return serverLevel.getPortalForcer();
+			return (ITeleporter) serverLevel.getPortalForcer();
 		});
 	}
 

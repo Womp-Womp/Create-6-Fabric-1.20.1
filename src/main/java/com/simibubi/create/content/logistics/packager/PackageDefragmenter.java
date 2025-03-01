@@ -65,7 +65,7 @@ public class PackageDefragmenter {
 					.getCompound("Fragment")
 					.getCompound("OrderContext"));
 			ItemStackHandler contents = PackageItem.getContents(box);
-			Slots: for (int slot = 0; slot < contents.getSlots(); slot++) {
+			Slots: for (int slot = 0; slot < contents.getSlotCount(); slot++) {
 				ItemStack stackInSlot = contents.getStackInSlot(slot);
 				for (BigItemStack existing : allItems) {
 					if (!ItemHandlerHelper.canItemStacksStack(stackInSlot, existing.stack))
@@ -85,7 +85,7 @@ public class PackageDefragmenter {
 				originalContext.add(new BigItemStack(stack.stack, stack.count));
 			}
 		}
-		
+
 		List<ItemStack> outputSlots = new ArrayList<>();
 
 		Repack: while (true) {
@@ -135,7 +135,7 @@ public class PackageDefragmenter {
 			currentSlot = 0;
 		}
 
-		for (int slot = 0; slot < target.getSlots(); slot++)
+		for (int slot = 0; slot < target.getSlotCount(); slot++)
 			if (!target.getStackInSlot(slot)
 				.isEmpty()) {
 				exportingPackages.add(PackageItem.containing(target));
@@ -150,7 +150,7 @@ public class PackageDefragmenter {
 			boolean isfinal = i == exportingPackages.size() - 1;
 			PackageItem.setOrder(box, orderId, 0, true, 0, true, isfinal ? new PackageOrder(originalContext) : null);
 		}
-		
+
 		return exportingPackages;
 	}
 

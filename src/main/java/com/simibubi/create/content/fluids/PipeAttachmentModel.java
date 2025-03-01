@@ -90,16 +90,6 @@ public class PipeAttachmentModel extends ForwardingBakedModel {
 	}
 
 	@Override
-	public boolean useAmbientOcclusion(BlockState state, RenderType renderType) {
-		return ao;
-	}
-
-	@Override
-	public boolean useAmbientOcclusion(BlockState state) {
-		return ao;
-	}
-
-	@Override
 	public boolean useAmbientOcclusion() {
 		return ao;
 	}

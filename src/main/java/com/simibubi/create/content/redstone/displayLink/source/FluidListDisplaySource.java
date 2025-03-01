@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import net.createmod.catnip.data.LongAttached;
+
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.simibubi.create.content.redstone.displayLink.DisplayLinkContext;
@@ -18,7 +20,6 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.TankManipu
 import com.simibubi.create.foundation.gui.ModularGuiLineBuilder;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.foundation.utility.FluidFormatter;
-import com.simibubi.create.foundation.utility.LongAttached;
 
 import net.createmod.catnip.data.Couple;
 import net.minecraft.network.chat.MutableComponent;

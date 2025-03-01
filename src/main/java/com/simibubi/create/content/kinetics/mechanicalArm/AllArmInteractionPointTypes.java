@@ -2,6 +2,12 @@ package com.simibubi.create.content.kinetics.mechanicalArm;
 
 import java.util.Optional;
 
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
 import com.simibubi.create.AllBlocks;
@@ -593,15 +599,17 @@ public class AllArmInteractionPointTypes {
 				return stack;
 			if (!jukeboxBE.getFirstItem().isEmpty())
 				return stack;
-			ItemStack remainder = stack.copy();
-			ItemStack toInsert = remainder.split(1);
-			level.updateSnapshots(ctx);
-			level.setBlock(pos, cachedState.setValue(JukeboxBlock.HAS_RECORD, true), 2);
-			TransactionCallback.onSuccess(ctx, () -> {
-				jukeboxBE.setItem(0, toInsert);
-				level.levelEvent(null, 1010, pos, Item.getId(item));
-			});
-			return remainder;
+			Storage<ItemVariant> storage = ItemStorage.SIDED.find(level, pos, Direction.UP);
+			if (storage == null)
+				return stack;
+			try (Transaction transaction = ctx.openNested()) {
+				long inserted = storage.insert(ItemVariant.of(stack), 1, ctx);
+				if (inserted != 1)
+					return stack;
+				transaction.commit();
+			}
+
+			return stack.copyWithCount(stack.getCount() - 1);
 		}
 
 		@Override

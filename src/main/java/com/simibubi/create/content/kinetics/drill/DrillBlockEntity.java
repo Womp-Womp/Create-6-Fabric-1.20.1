@@ -6,6 +6,13 @@ import com.simibubi.create.content.kinetics.drill.CobbleGenOptimisation.CobbleGe
 import com.simibubi.create.content.logistics.chute.ChuteBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -47,7 +54,7 @@ public class DrillBlockEntity extends BlockBreakingKineticBlockEntity {
 		if (inv == null && !(blockEntityBelow instanceof HopperBlockEntity)
 			&& !(blockEntityAbove instanceof ChuteBlockEntity chute && chute.getItemMotion() > 0))
 			return false;
-		
+
 		CobbleGenBlockConfiguration config =
 			CobbleGenOptimisation.getConfig(level, worldPosition, getBlockState().getValue(DrillBlock.FACING));
 		if (config == null)
@@ -68,11 +75,12 @@ public class DrillBlockEntity extends BlockBreakingKineticBlockEntity {
 			for (ItemStack stack : Block.getDrops(stateToBreak, sl, breakingPos, null))
 				inv.handleInsertion(stack, Direction.UP, false);
 		else if (blockEntityBelow instanceof HopperBlockEntity hbe) {
-			IItemHandler handler = hbe.getCapability(ForgeCapabilities.ITEM_HANDLER)
-				.orElse(null);
-			if (handler != null)
-				for (ItemStack stack : Block.getDrops(stateToBreak, sl, breakingPos, null))
-					ItemHandlerHelper.insertItemStacked(handler, stack, false);
+			Storage<ItemVariant> storage = TransferUtil.getItemStorage(blockEntityBelow);
+			if (storage != null) {
+				for (ItemStack stack : Block.getDrops(stateToBreak, sl, breakingPos, null)) {
+					TransferUtil.insertItem(storage, stack);
+				}
+			}
 		} else if (blockEntityAbove instanceof ChuteBlockEntity chute && chute.getItemMotion() > 0) {
 			for (ItemStack stack : Block.getDrops(stateToBreak, sl, breakingPos, null))
 				if (chute.getItem()

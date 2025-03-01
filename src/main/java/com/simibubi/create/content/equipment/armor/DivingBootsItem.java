@@ -1,5 +1,6 @@
 package com.simibubi.create.content.equipment.armor;
 
+import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.world.entity.Entity;
@@ -67,7 +68,7 @@ public class DivingBootsItem extends BaseArmorItem {
 			return false;
 		}
 
-		net.createmod.catnip.utility.NBTHelper.putMarker(entity.getCustomData(), "HeavyBoots");
+		NBTHelper.putMarker(entity.getCustomData(), "HeavyBoots");
 		if (!entity.isInWater())
 			return false;
 		if (entity.getPose() == Pose.SWIMMING)

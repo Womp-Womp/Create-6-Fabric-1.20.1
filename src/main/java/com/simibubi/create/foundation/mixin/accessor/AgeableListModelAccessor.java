@@ -1,6 +1,7 @@
 package com.simibubi.create.foundation.mixin.accessor;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
 import net.minecraft.client.model.AgeableListModel;
@@ -13,4 +14,18 @@ public interface AgeableListModelAccessor {
 
 	@Invoker("bodyParts")
 	Iterable<ModelPart> create$callBodyParts();
+
+	// fabric: additional fields needed
+
+	@Accessor
+	boolean getScaleHead();
+
+	@Accessor
+	float getBabyHeadScale();
+
+	@Accessor
+	float getBabyYHeadOffset();
+
+	@Accessor
+	float getBabyZHeadOffset();
 }

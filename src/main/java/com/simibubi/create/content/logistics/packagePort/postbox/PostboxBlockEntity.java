@@ -100,7 +100,7 @@ public class PostboxBlockEntity extends PackagePortBlockEntity {
 		if (!station.connectedPorts.containsKey(worldPosition))
 			return;
 		GlobalPackagePort globalPackagePort = station.connectedPorts.get(worldPosition);
-		for (int i = 0; i < inventory.getSlots(); i++) {
+		for (int i = 0; i < inventory.getSlotCount(); i++) {
 			globalPackagePort.offlineBuffer.setStackInSlot(i, inventory.getStackInSlot(i));
 			inventory.setStackInSlot(i, ItemStack.EMPTY);
 		}

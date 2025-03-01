@@ -3,6 +3,8 @@ package com.simibubi.create.content.logistics.item.filter.attribute.attributes;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import net.minecraft.core.registries.Registries;
+
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +55,7 @@ public class InTagAttribute implements ItemAttribute {
 
 	@Override
 	public void load(CompoundTag nbt) {
-		tag = ItemTags.create(NBTHelper.readResourceLocation(nbt, "tag"));
+		tag = TagKey.create(Registries.ITEM, NBTHelper.readResourceLocation(nbt, "tag"));
 	}
 
 	public static class Type implements ItemAttributeType {

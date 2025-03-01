@@ -15,10 +15,16 @@ import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.item.TooltipHelper;
 
+import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
+
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.animation.LerpedFloat.Chaser;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.nbt.NBTHelper;
+
+import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.BlockParticleOption;
@@ -178,8 +184,8 @@ public class FrogportBlockEntity extends PackagePortBlockEntity implements IHave
 		}
 
 		if (!currentlyDepositing) {
-			if (!ItemHandlerHelper.insertItem(inventory, animatedPackage.copy(), false)
-				.isEmpty())
+			long inserted = TransferUtil.insertItem(this.inventory, animatedPackage.copy());
+			if (inserted <= 0)
 				drop(animatedPackage);
 		}
 
@@ -227,32 +233,38 @@ public class FrogportBlockEntity extends PackagePortBlockEntity implements IHave
 
 	protected void tryPushingToAdjacentInventories() {
 		failedLastExport = false;
-		IItemHandler inventory = itemHandler.orElse(null);
+		Storage<ItemVariant> inventory = this.exposedInventory;
 
 		if (inventory == null)
 			return;
 
-		boolean empty = true;
-		for (int i = 0; i < inventory.getSlots(); i++)
-			if (!inventory.getStackInSlot(i)
-				.isEmpty())
-				empty = false;
-		if (empty)
+		if (!inventory.nonEmptyViews().iterator().hasNext())
 			return;
-		IItemHandler handler = getAdjacentInventory(Direction.DOWN);
+
+		Storage<ItemVariant> handler = getAdjacentInventory(Direction.DOWN);
 		if (handler == null)
 			return;
 
-		for (int i = 0; i < inventory.getSlots(); i++) {
-			ItemStack stackInSlot = inventory.extractItem(i, 1, true);
-			if (stackInSlot.isEmpty())
-				continue;
-			ItemStack remainder = ItemHandlerHelper.insertItemStacked(handler, stackInSlot, false);
-			if (remainder.isEmpty()) {
-				inventory.extractItem(i, 1, false);
-				level.blockEntityChanged(worldPosition);
-			} else
+		try (Transaction t = Transaction.openOuter()) {
+			boolean failed = false;
+			for (StorageView<ItemVariant> view : inventory.nonEmptyViews()) {
+				ItemVariant resource = view.getResource();
+				long extracted = view.extract(resource, view.getAmount(), t);
+				if (extracted <= 0)
+					continue;
+
+				long inserted = handler.insert(resource, extracted, t);
+				if (inserted != extracted) {
+					failed = true;
+					break;
+				}
+			}
+			if (failed) {
 				failedLastExport = true;
+			} else {
+				t.commit();
+				level.blockEntityChanged(worldPosition);
+			}
 		}
 	}
 

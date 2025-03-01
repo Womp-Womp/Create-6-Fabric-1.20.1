@@ -247,7 +247,7 @@ public class PotatoCannonItem extends ProjectileWeaponItem implements CustomArmP
 			return true;
 		if (enchantment == AllEnchantments.POTATO_RECOVERY.get())
 			return true;
-		return super.canApplyAtEnchantingTable(stack, enchantment);
+		return CustomEnchantingBehaviorItem.super.canApplyAtEnchantingTable(stack, enchantment);
 	}
 
 	@Override
