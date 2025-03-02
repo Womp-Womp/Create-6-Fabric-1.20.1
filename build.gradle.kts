@@ -237,10 +237,6 @@ tasks.named<ProcessResources>("processResources") {
     filesMatching("fabric.mod.json") {
         expand(properties)
     }
-
-    filesMatching("create.mixins.json") {
-        expand("archivesBaseName" to base.archivesName)
-    }
 }
 
 java {
