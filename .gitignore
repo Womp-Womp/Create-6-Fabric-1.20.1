@@ -54,4 +54,5 @@ local.properties
 
 # don't push local Ponder
 .gitmodules
+Ponder
 Ponder/
