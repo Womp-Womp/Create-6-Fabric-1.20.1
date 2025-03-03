@@ -260,5 +260,10 @@ publishing {
             name = "devOsReleases"
             credentials(PasswordCredentials::class)
         }
+
+        maven("https://mvn.devos.one/snapshots") {
+            name = "devOsSnapshots"
+            credentials(PasswordCredentials::class)
+        }
     }
 }

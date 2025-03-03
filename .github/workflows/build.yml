@@ -38,8 +38,15 @@ jobs:
       # - name: Run Gametests
       #   run: ./gradlew runGametestServer
 
-      - name: Publish to Maven
+      - name: Publish to Maven [Releases]
         if: ${{ github.event.inputs.release }}
+        run: >-
+          ./gradlew publishAllPublicationsToDevOsReleasesRepository
+          -PdevOsReleasesUsername="${{ secrets.MAVEN_USER }}"
+          -PdevOsReleasesPassword="${{ secrets.MAVEN_PASS }}"
+
+      - name: Publish to Maven [Snapshots]
+        if: ${{ !github.event.inputs.release }}
         run: >-
           ./gradlew publishAllPublicationsToDevOsReleasesRepository
           -PdevOsReleasesUsername="${{ secrets.MAVEN_USER }}"
