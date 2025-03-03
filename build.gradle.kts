@@ -222,6 +222,15 @@ loom {
     }
 }
 
+configurations {
+    // this avoids remapping ponder when it's local
+    named("runtimeClasspath") {
+        attributes {
+            attribute(Attribute.of("create.marker", String::class.java), "h")
+        }
+    }
+}
+
 tasks.named<ProcessResources>("processResources") {
     exclude("**/*.bbmodel", "**/*.lnk")
 
