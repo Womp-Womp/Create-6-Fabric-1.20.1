@@ -37,8 +37,9 @@ import com.simibubi.create.content.redstone.displayLink.source.TimeOfDayDisplayS
 import com.simibubi.create.content.redstone.displayLink.source.TrainStatusDisplaySource;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 
+import net.minecraftforge.registries.ForgeRegistries;
+
 import net.minecraft.Util;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.DyeColor;
@@ -88,11 +89,14 @@ public class AllDisplaySources {
 
 	public static final RegistryEntry<ComputerDisplaySource> COMPUTER = REGISTRATE.displaySource("computer", ComputerDisplaySource::new)
 		.onRegisterAfter(Registries.BLOCK_ENTITY_TYPE, source -> {
+			if (!Mods.COMPUTERCRAFT.isLoaded())
+				return;
+
 			List<String> types = List.of("wired_modem_full", "computer_normal", "computer_advanced", "computer_command");
 			for (String name : types) {
 				ResourceLocation id = Mods.COMPUTERCRAFT.rl(name);
-				if (BuiltInRegistries.BLOCK_ENTITY_TYPE.containsKey(id)) {
-					BlockEntityType<?> type = BuiltInRegistries.BLOCK_ENTITY_TYPE.get(id);
+				if (ForgeRegistries.BLOCK_ENTITY_TYPES.containsKey(id)) {
+					BlockEntityType<?> type = ForgeRegistries.BLOCK_ENTITY_TYPES.getValue(id);
 					DisplaySource.BY_BLOCK_ENTITY.add(type, source);
 				} else {
 					Create.LOGGER.warn("Could not find block entity type {}. Outdated compat?", id);

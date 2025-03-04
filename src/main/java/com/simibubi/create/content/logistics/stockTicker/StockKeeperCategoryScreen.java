@@ -25,6 +25,8 @@ import com.simibubi.create.foundation.gui.widget.IconButton;
 import com.simibubi.create.foundation.gui.widget.ScrollInput;
 import com.simibubi.create.foundation.utility.CreateLang;
 
+import net.minecraftforge.items.SlotItemHandler;
+
 import net.createmod.catnip.animation.LerpedFloat;
 import net.createmod.catnip.animation.LerpedFloat.Chaser;
 import net.createmod.catnip.gui.UIRenderHelper;
@@ -251,10 +253,14 @@ public class StockKeeperCategoryScreen extends AbstractSimiContainerScreen<Stock
 		return cardHeight;
 	}
 
-	private Component clickToEdit = CreateLang.translateDirect("gui.schedule.lmb_edit")
+	private final Component clickToEdit = CreateLang.translateDirect("gui.schedule.lmb_edit")
 		.withStyle(ChatFormatting.DARK_GRAY, ChatFormatting.ITALIC);
 
 	public boolean action(@Nullable GuiGraphics graphics, double mouseX, double mouseY, int click) {
+		// Prevent actions outside the window for them
+		if (mouseX < leftPos || mouseX >= leftPos + imageWidth || mouseY < topPos + 15 || mouseY >= topPos + 99)
+			return false;
+
 		if (editingItem != null)
 			return false;
 

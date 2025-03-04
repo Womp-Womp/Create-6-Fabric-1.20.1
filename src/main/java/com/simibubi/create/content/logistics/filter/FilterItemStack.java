@@ -8,6 +8,9 @@ import com.simibubi.create.content.fluids.transfer.GenericItemEmptying;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.item.filter.attribute.ItemAttribute;
 
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.items.ItemStackHandler;
+
 import net.createmod.catnip.data.Pair;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -20,7 +23,7 @@ import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandle
 
 public class FilterItemStack {
 
-	private ItemStack filterItemStack;
+	private final ItemStack filterItemStack;
 	private boolean fluidExtracted;
 	private FluidStack filterFluidStack;
 
