@@ -18,7 +18,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
@@ -34,7 +34,7 @@ public class DispenserMountedStorage extends SimpleMountedStorage {
 		this(AllMountedStorageTypes.DISPENSER.get(), handler);
 	}
 
-	public DispenserMountedStorage(Storage<ItemVariant> storage) {
+	public DispenserMountedStorage(SlottedStorage<ItemVariant> storage) {
 		this(copyToItemStackHandler(storage));
 	}
 

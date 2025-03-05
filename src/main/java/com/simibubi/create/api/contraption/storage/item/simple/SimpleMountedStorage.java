@@ -48,7 +48,7 @@ public class SimpleMountedStorage extends WrapperMountedItemStorage<ItemStackHan
 		this(AllMountedStorageTypes.SIMPLE.get(), handler);
 	}
 
-	public SimpleMountedStorage(Storage<ItemVariant> storage) {
+	public SimpleMountedStorage(SlottedStorage<ItemVariant> storage) {
 		this(copyToItemStackHandler(storage));
 	}
 
@@ -64,7 +64,9 @@ public class SimpleMountedStorage extends WrapperMountedItemStorage<ItemStackHan
 					}
 
 					ItemStack stack = this.getStackInSlot(i);
-					slot.insert(ItemVariant.of(stack), stack.getCount(), t);
+					if (!stack.isEmpty()) {
+						slot.insert(ItemVariant.of(stack), stack.getCount(), t);
+					}
 				}
 
 				t.commit();

@@ -5,12 +5,10 @@ import java.util.List;
 
 import org.jetbrains.annotations.UnmodifiableView;
 
-import com.simibubi.create.foundation.item.ItemSlots;
-
 import net.minecraft.world.item.ItemStack;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
 import net.fabricmc.fabric.api.transfer.v1.storage.base.SingleSlotStorage;
 import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
@@ -116,18 +114,18 @@ public abstract class WrapperMountedItemStorage<T extends SlottedStackStorage> e
 		return this.wrapped.getSlots();
 	}
 
-	public static ItemStackHandler copyToItemStackHandler(Storage<ItemVariant> storage) {
-		ItemSlots slots = new ItemSlots();
-		int i = 0;
-		for (StorageView<ItemVariant> view : storage) {
-			if (!view.isResourceBlank()) {
-				int amount = TransferUtil.truncateLong(view.getAmount());
-				ItemStack stack = view.getResource().toStack(amount);
-				slots.set(i, stack);
+	public static ItemStackHandler copyToItemStackHandler(SlottedStorage<ItemVariant> storage) {
+		ItemStack[] array = new ItemStack[storage.getSlotCount()];
+		for (int i = 0; i < array.length; i++) {
+			SingleSlotStorage<ItemVariant> slot = storage.getSlot(i);
+			if (slot.isResourceBlank()) {
+				array[i] = ItemStack.EMPTY;
+			} else {
+				int amount = TransferUtil.truncateLong(slot.getAmount());
+				ItemStack stack = slot.getResource().toStack(amount);
+				array[i] = stack;
 			}
-			i++;
 		}
-
-		return slots.toHandler(ItemStackHandler::new);
+		return new ItemStackHandler(array);
 	}
 }

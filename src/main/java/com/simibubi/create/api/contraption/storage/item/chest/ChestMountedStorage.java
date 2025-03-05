@@ -27,7 +27,7 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 import net.minecraft.world.phys.Vec3;
 
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
+import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
 
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 import io.github.fabricators_of_create.porting_lib.transfer.item.SlottedStackStorage;
@@ -46,7 +46,7 @@ public class ChestMountedStorage extends SimpleMountedStorage {
 		this(AllMountedStorageTypes.CHEST.get(), handler);
 	}
 
-	public ChestMountedStorage(Storage<ItemVariant> storage) {
+	public ChestMountedStorage(SlottedStorage<ItemVariant> storage) {
 		this(copyToItemStackHandler(storage));
 	}
 
