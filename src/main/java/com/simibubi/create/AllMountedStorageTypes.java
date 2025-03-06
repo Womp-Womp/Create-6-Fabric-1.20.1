@@ -1,7 +1,5 @@
 package com.simibubi.create;
 
-import static com.simibubi.create.Create.REGISTRATE;
-
 import java.util.function.Supplier;
 
 import com.simibubi.create.api.contraption.storage.fluid.MountedFluidStorageType;
@@ -15,11 +13,14 @@ import com.simibubi.create.content.fluids.tank.storage.creative.CreativeFluidTan
 import com.simibubi.create.content.logistics.crate.CreativeCrateMountedStorageType;
 import com.simibubi.create.content.logistics.depot.storage.DepotMountedStorageType;
 import com.simibubi.create.content.logistics.vault.ItemVaultMountedStorageType;
+import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 
 import net.minecraft.world.level.block.Blocks;
 
 public class AllMountedStorageTypes {
+	private static final CreateRegistrate REGISTRATE = Create.registrate();
+
 	// fabric: no fallback, there is no common simple implementation
 
 	// registrations for these are handled by the blocks, not the types

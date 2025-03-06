@@ -4,21 +4,24 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import javax.annotation.ParametersAreNonnullByDefault;
 
 import org.jetbrains.annotations.NotNull;
 
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
+import com.simibubi.create.foundation.fluid.FluidIngredient;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.utility.CreateLang;
 import com.simibubi.create.infrastructure.config.AllConfigs;
 
 import mezz.jei.api.fabric.constants.FabricTypes;
-import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
+import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
+import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotRichTooltipCallback;
+import mezz.jei.api.gui.ingredient.IRecipeSlotView;
+import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
@@ -121,71 +124,22 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IReci
 		};
 	}
 
-	public static List<FluidStack> withImprovedVisibility(List<FluidStack> stacks) {
-		return stacks.stream()
-			.map(CreateRecipeCategory::withImprovedVisibility)
-			.collect(Collectors.toList());
+	public static IRecipeSlotBuilder addFluidSlot(IRecipeLayoutBuilder builder, int x, int y, FluidIngredient ingredient) {
+		int amount = ingredient.getRequiredAmount();
+		return builder.addSlot(RecipeIngredientRole.OUTPUT, x, y)
+			.setBackground(getRenderedSlot(), -1, -1)
+			.addIngredients(FabricTypes.FLUID_STACK, toJei(ingredient.getMatchingFluidStacks()))
+			.setFluidRenderer(amount, false, 16, 16); // make fluid take up the full slot
 	}
 
-	public static FluidStack withImprovedVisibility(FluidStack stack) {
-		FluidStack display = stack.copy();
-		long displayedAmount = (long) (stack.getAmount() * .75f) + 250;
-		display.setAmount(displayedAmount);
-		return display;
+	public static IRecipeSlotBuilder addFluidSlot(IRecipeLayoutBuilder builder, int x, int y, FluidStack stack) {
+		return builder.addSlot(RecipeIngredientRole.OUTPUT, x, y)
+			.setBackground(getRenderedSlot(), -1, -1)
+			.addIngredient(FabricTypes.FLUID_STACK, toJei(stack))
+			.setFluidRenderer(stack.getAmount(), false, 16, 16); // make fluid take up the full slot
 	}
 
-	public static FluidStack fromJei(IJeiFluidIngredient jei) {
-		return new FluidStack(jei.getFluid(), jei.getAmount(), jei.getTag().orElse(null));
-	}
-
-	public static IJeiFluidIngredient toJei(FluidStack stack) {
-		return new IJeiFluidIngredient() {
-			@Override
-			public Fluid getFluid() {
-				return stack.getFluid();
-			}
-
-			@Override
-			public long getAmount() {
-				return stack.getAmount();
-			}
-
-			@Override
-			public Optional<CompoundTag> getTag() {
-				return Optional.ofNullable(stack.getTag());
-			}
-		};
-	}
-
-	public static List<FluidStack> fromJei(List<IJeiFluidIngredient> stacks) {
-		return stacks.stream().map(CreateRecipeCategory::fromJei).toList();
-	}
-
-	public static List<IJeiFluidIngredient> toJei(Collection<FluidStack> stacks) {
-		return stacks.stream().map(CreateRecipeCategory::toJei).toList();
-	}
-
-	public static IRecipeSlotRichTooltipCallback addFluidTooltip() {
-		return addFluidTooltip(-1);
-	}
-
-	public static IRecipeSlotRichTooltipCallback addFluidTooltip(long mbAmount) {
-		return (view, tooltip) -> {
-			Optional<IJeiFluidIngredient> displayed = view.getDisplayedIngredient(FabricTypes.FLUID_STACK);
-			if (displayed.isEmpty())
-				return;
-
-			FluidStack fluidStack = fromJei(displayed.get());
-
-			// fabric: don't need potion tooltip stuff, handled by attribute handler
-
-			long amount = mbAmount == -1 ? fluidStack.getAmount() : mbAmount;
-			FluidUnit unit = AllConfigs.client().fluidUnitType.get();
-			String amountText = FluidTextUtil.getUnicodeMillibuckets(amount, unit, AllConfigs.client().simplifyFluidUnit.get());
-			Component text = Component.literal(amountText).append(CreateLang.translateDirect(unit.getTranslationKey())).withStyle(ChatFormatting.GOLD);
-			tooltip.add(text);
-		};
-	}
+	// fabric: don't need potion tooltip stuff, handled by attribute handler
 
 	protected static IDrawable asDrawable(AllGuiTextures texture) {
 		return new IDrawable() {

@@ -350,4 +350,15 @@ public class ItemHelper {
 			to.setItem(i, from.getStackInSlot(i).copy());
 		}
 	}
+
+	public static List<ItemStack> getNonEmptyStacks(ItemStackHandler handler) {
+		List<ItemStack> stacks = new ArrayList<>();
+		for (int i = 0; i < handler.getSlots(); i++) {
+			ItemStack stack = handler.getStackInSlot(i);
+			if (!stack.isEmpty()) {
+				stacks.add(stack);
+			}
+		}
+		return stacks;
+	}
 }

@@ -114,11 +114,9 @@ public class SpoutCategory extends CreateRecipeCategory<FillingRecipe> {
 				.addSlot(RecipeIngredientRole.INPUT, 27, 51)
 				.setBackground(getRenderedSlot(), -1, -1)
 				.addIngredients(recipe.getIngredients().get(0));
-		builder
-				.addSlot(RecipeIngredientRole.INPUT, 27, 32)
-				.setBackground(getRenderedSlot(), -1, -1)
-				.addIngredients(FabricTypes.FLUID_STACK, toJei(withImprovedVisibility(recipe.getRequiredFluid().getMatchingFluidStacks())))
-				.addRichTooltipCallback(addFluidTooltip(recipe.getRequiredFluid().getRequiredAmount()));
+
+		addFluidSlot(builder, 27, 32, recipe.getRequiredFluid());
+
 		builder
 				.addSlot(RecipeIngredientRole.OUTPUT, 132, 51)
 				.setBackground(getRenderedSlot(), -1, -1)

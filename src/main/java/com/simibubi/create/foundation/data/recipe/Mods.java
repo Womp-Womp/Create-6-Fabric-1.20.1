@@ -6,6 +6,15 @@ import net.minecraft.resources.ResourceLocation;
 
 public enum Mods {
 
+	// Fabric Mods. Put up here to avoid them conflicting every merge
+	TR("techreborn"),
+	MI("modern_industrialization"),
+	MTM("mythicmetals"),
+	ALG("alloygery"),
+	BC("bitsandchisels"),
+	BE("betterend"),
+	BWT("bewitchment"),
+
 	MEK("mekanism", b -> b.reverseMetalPrefix()),
 	TH("thermal"),
 	IE("immersiveengineering", b -> b.reverseMetalPrefix()),
@@ -57,15 +66,14 @@ public enum Mods {
 	HH("hauntedharvest"),
 	VMP("vampirism"),
 	WSP("windswept"),
-
-	// Fabric Mods
-	TR("techreborn"),
-	MI("modern_industrialization"),
-	MTM("mythicmetals"),
-	ALG("alloygery"),
-	BC("bitsandchisels"),
-	BE("betterend"),
-	BWT("bewitchment")
+	D_AET("deep_aether"),
+	A_AET("ancient_aether"),
+	AET_R("aether_redux"),
+	GOTD("gardens_of_the_dead"),
+	UUE("unusualend"),
+	UG("undergarden"),
+	DD("deeperdarker"),
+	ARS_E("ars_elemental", b -> b.omitWoodSuffix())
 
 	;
 

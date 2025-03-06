@@ -544,4 +544,7 @@ public class MechanicalCrafterBlockEntity extends KineticBlockEntity implements 
 		this.scriptedResult = scriptedResult;
 	}
 
+	public ConnectedInput getInput() {
+		return input;
+	}
 }

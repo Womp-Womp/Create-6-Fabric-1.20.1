@@ -25,6 +25,15 @@ import com.tterrag.registrate.util.entry.ItemEntry;
 import com.tterrag.registrate.util.entry.ItemProviderEntry;
 import com.tterrag.registrate.util.entry.RegistryEntry;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.RegistryObject;
+
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ReferenceArrayList;
@@ -123,41 +132,41 @@ public class AllCreativeModeTabs {
 			Set<Item> exclusions = new ReferenceOpenHashSet<>();
 
 			List<ItemProviderEntry<?>> simpleExclusions = List.of(
-					AllItems.INCOMPLETE_PRECISION_MECHANISM,
-					AllItems.INCOMPLETE_REINFORCED_SHEET,
-					AllItems.INCOMPLETE_TRACK,
-					AllItems.CHROMATIC_COMPOUND,
-					AllItems.SHADOW_STEEL,
-					AllItems.REFINED_RADIANCE,
-					AllItems.COPPER_BACKTANK_PLACEABLE,
-					AllItems.NETHERITE_BACKTANK_PLACEABLE,
-					AllItems.MINECART_CONTRAPTION,
-					AllItems.FURNACE_MINECART_CONTRAPTION,
-					AllItems.CHEST_MINECART_CONTRAPTION,
-					AllItems.SCHEMATIC,
-					AllItems.SHOPPING_LIST,
-					AllBlocks.ANDESITE_ENCASED_SHAFT,
-					AllBlocks.BRASS_ENCASED_SHAFT,
-					AllBlocks.ANDESITE_ENCASED_COGWHEEL,
-					AllBlocks.BRASS_ENCASED_COGWHEEL,
-					AllBlocks.ANDESITE_ENCASED_LARGE_COGWHEEL,
-					AllBlocks.BRASS_ENCASED_LARGE_COGWHEEL,
-					AllBlocks.MYSTERIOUS_CUCKOO_CLOCK,
-					AllBlocks.ELEVATOR_CONTACT,
-					AllBlocks.SHADOW_STEEL_CASING,
-					AllBlocks.REFINED_RADIANCE_CASING
+				AllItems.INCOMPLETE_PRECISION_MECHANISM,
+				AllItems.INCOMPLETE_REINFORCED_SHEET,
+				AllItems.INCOMPLETE_TRACK,
+				AllItems.CHROMATIC_COMPOUND,
+				AllItems.SHADOW_STEEL,
+				AllItems.REFINED_RADIANCE,
+				AllItems.COPPER_BACKTANK_PLACEABLE,
+				AllItems.NETHERITE_BACKTANK_PLACEABLE,
+				AllItems.MINECART_CONTRAPTION,
+				AllItems.FURNACE_MINECART_CONTRAPTION,
+				AllItems.CHEST_MINECART_CONTRAPTION,
+				AllItems.SCHEMATIC,
+				AllItems.SHOPPING_LIST,
+				AllBlocks.ANDESITE_ENCASED_SHAFT,
+				AllBlocks.BRASS_ENCASED_SHAFT,
+				AllBlocks.ANDESITE_ENCASED_COGWHEEL,
+				AllBlocks.BRASS_ENCASED_COGWHEEL,
+				AllBlocks.ANDESITE_ENCASED_LARGE_COGWHEEL,
+				AllBlocks.BRASS_ENCASED_LARGE_COGWHEEL,
+				AllBlocks.MYSTERIOUS_CUCKOO_CLOCK,
+				AllBlocks.ELEVATOR_CONTACT,
+				AllBlocks.SHADOW_STEEL_CASING,
+				AllBlocks.REFINED_RADIANCE_CASING
 			);
 
 			List<ItemEntry<TagDependentIngredientItem>> tagDependentExclusions = List.of(
-					AllItems.CRUSHED_OSMIUM,
-					AllItems.CRUSHED_PLATINUM,
-					AllItems.CRUSHED_SILVER,
-					AllItems.CRUSHED_TIN,
-					AllItems.CRUSHED_LEAD,
-					AllItems.CRUSHED_QUICKSILVER,
-					AllItems.CRUSHED_BAUXITE,
-					AllItems.CRUSHED_URANIUM,
-					AllItems.CRUSHED_NICKEL
+				AllItems.CRUSHED_OSMIUM,
+				AllItems.CRUSHED_PLATINUM,
+				AllItems.CRUSHED_SILVER,
+				AllItems.CRUSHED_TIN,
+				AllItems.CRUSHED_LEAD,
+				AllItems.CRUSHED_QUICKSILVER,
+				AllItems.CRUSHED_BAUXITE,
+				AllItems.CRUSHED_URANIUM,
+				AllItems.CRUSHED_NICKEL
 			);
 
 			exclusions.addAll(PackageStyles.RARE_BOXES);
@@ -182,12 +191,12 @@ public class AllCreativeModeTabs {
 			List<ItemOrdering> orderings = new ReferenceArrayList<>();
 
 			Map<ItemProviderEntry<?>, ItemProviderEntry<?>> simpleBeforeOrderings = Map.of(
-					AllItems.EMPTY_BLAZE_BURNER, AllBlocks.BLAZE_BURNER,
-					AllItems.SCHEDULE, AllBlocks.TRACK_STATION
+				AllItems.EMPTY_BLAZE_BURNER, AllBlocks.BLAZE_BURNER,
+				AllItems.SCHEDULE, AllBlocks.TRACK_STATION
 			);
 
 			Map<ItemProviderEntry<?>, ItemProviderEntry<?>> simpleAfterOrderings = Map.of(
-					AllItems.VERTICAL_GEARBOX, AllBlocks.GEARBOX
+				AllItems.VERTICAL_GEARBOX, AllBlocks.GEARBOX
 			);
 
 			simpleBeforeOrderings.forEach((entry, otherEntry) -> {
@@ -209,16 +218,16 @@ public class AllCreativeModeTabs {
 			Map<Item, Function<Item, ItemStack>> factories = new Reference2ReferenceOpenHashMap<>();
 
 			Map<ItemProviderEntry<?>, Function<Item, ItemStack>> simpleFactories = Map.of(
-					AllItems.COPPER_BACKTANK, item -> {
-						ItemStack stack = new ItemStack(item);
-						stack.getOrCreateTag().putInt("Air", BacktankUtil.maxAirWithoutEnchants());
-						return stack;
-					},
-					AllItems.NETHERITE_BACKTANK, item -> {
-						ItemStack stack = new ItemStack(item);
-						stack.getOrCreateTag().putInt("Air", BacktankUtil.maxAirWithoutEnchants());
-						return stack;
-					}
+				AllItems.COPPER_BACKTANK, item -> {
+					ItemStack stack = new ItemStack(item);
+					stack.getOrCreateTag().putInt("Air", BacktankUtil.maxAirWithoutEnchants());
+					return stack;
+				},
+				AllItems.NETHERITE_BACKTANK, item -> {
+					ItemStack stack = new ItemStack(item);
+					stack.getOrCreateTag().putInt("Air", BacktankUtil.maxAirWithoutEnchants());
+					return stack;
+				}
 			);
 
 			simpleFactories.forEach((entry, factory) -> {
@@ -238,7 +247,7 @@ public class AllCreativeModeTabs {
 			Map<Item, TabVisibility> visibilities = new Reference2ObjectOpenHashMap<>();
 
 			Map<ItemProviderEntry<?>, TabVisibility> simpleVisibilities = Map.of(
-					AllItems.BLAZE_CAKE_BASE, TabVisibility.SEARCH_TAB_ONLY
+				AllItems.BLAZE_CAKE_BASE, TabVisibility.SEARCH_TAB_ONLY
 			);
 
 			simpleVisibilities.forEach((entry, factory) -> {
@@ -308,7 +317,7 @@ public class AllCreativeModeTabs {
 
 		private List<Item> collectBlocks(Predicate<Item> exclusionPredicate) {
 			List<Item> items = new ReferenceArrayList<>();
-			for (RegistryEntry<Block> entry : Create.REGISTRATE.getAll(Registries.BLOCK)) {
+			for (RegistryEntry<Block> entry : Create.registrate().getAll(Registries.BLOCK)) {
 				if (!CreateRegistrate.isInCreativeTab(entry, tabFilter.get().key()))
 					continue;
 				Item item = entry.get()
@@ -324,7 +333,7 @@ public class AllCreativeModeTabs {
 
 		private List<Item> collectItems(Predicate<Item> exclusionPredicate) {
 			List<Item> items = new ReferenceArrayList<>();
-			for (RegistryEntry<Item> entry : Create.REGISTRATE.getAll(Registries.ITEM)) {
+			for (RegistryEntry<Item> entry : Create.registrate().getAll(Registries.ITEM)) {
 				if (!CreateRegistrate.isInCreativeTab(entry, tabFilter.get().key()))
 					continue;
 				Item item = entry.get();

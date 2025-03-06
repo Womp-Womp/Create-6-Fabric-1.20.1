@@ -15,7 +15,6 @@ import com.simibubi.create.foundation.mixin.accessor.ItemStackLinkedSetAccessor;
 
 import it.unimi.dsi.fastutil.objects.ObjectOpenCustomHashSet;
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.fabric.constants.FabricTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.recipe.IFocusGroup;
@@ -100,11 +99,9 @@ public class ItemDrainCategory extends CreateRecipeCategory<EmptyingRecipe> {
 				.addSlot(RecipeIngredientRole.INPUT, 27, 8)
 				.setBackground(getRenderedSlot(), -1, -1)
 				.addIngredients(recipe.getIngredients().get(0));
-		builder
-				.addSlot(RecipeIngredientRole.OUTPUT, 132, 8)
-				.setBackground(getRenderedSlot(), -1, -1)
-				.addIngredient(FabricTypes.FLUID_STACK, toJei(withImprovedVisibility(recipe.getResultingFluid())))
-				.addRichTooltipCallback(addFluidTooltip(recipe.getResultingFluid().getAmount()));
+
+		addFluidSlot(builder, 132, 8, recipe.getResultingFluid());
+
 		builder
 				.addSlot(RecipeIngredientRole.OUTPUT, 132, 27)
 				.setBackground(getRenderedSlot(), -1, -1)

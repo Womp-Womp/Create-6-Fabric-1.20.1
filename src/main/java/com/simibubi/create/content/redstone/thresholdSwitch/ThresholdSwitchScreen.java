@@ -77,6 +77,10 @@ public class ThresholdSwitchScreen extends AbstractSimiScreen {
 			.calling(state -> {
 				lastModification = 0;
 				int valueStep = getValueStep();
+
+				if (onAbove.getState() / valueStep == 0 && state / valueStep == 0)
+					return;
+				
 				if (onAbove.getState() / valueStep <= state / valueStep) {
 					onAbove.setState((state + valueStep) / valueStep * valueStep);
 					onAbove.onChanged();
@@ -91,6 +95,10 @@ public class ThresholdSwitchScreen extends AbstractSimiScreen {
 			.calling(state -> {
 				lastModification = 0;
 				int valueStep = getValueStep();
+
+				if (offBelow.getState() / valueStep == 0 && state / valueStep == 0)
+					return;
+
 				if (offBelow.getState() / valueStep >= state / valueStep) {
 					offBelow.setState((state - valueStep) / valueStep * valueStep);
 					offBelow.onChanged();

@@ -1,6 +1,5 @@
 package com.simibubi.create;
 
-import static com.simibubi.create.Create.REGISTRATE;
 import static com.simibubi.create.api.behaviour.display.DisplaySource.displaySource;
 import static com.simibubi.create.api.behaviour.display.DisplayTarget.displayTarget;
 import static com.simibubi.create.api.behaviour.interaction.MovingInteractionBehaviour.interactionBehaviour;
@@ -275,6 +274,11 @@ import com.tterrag.registrate.providers.loot.RegistrateBlockLootTables;
 import com.tterrag.registrate.util.DataIngredient;
 import com.tterrag.registrate.util.entry.BlockEntry;
 
+import net.minecraftforge.client.model.generators.ConfiguredModel;
+import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.common.Tags;
+import net.minecraftforge.common.util.ForgeSoundType;
+
 import net.createmod.catnip.data.Couple;
 
 import net.fabricmc.fabric.api.registry.FlammableBlockRegistry;
@@ -325,6 +329,7 @@ import io.github.fabricators_of_create.porting_lib.tags.Tags;
 
 @SuppressWarnings("removal")
 public class AllBlocks {
+	private static final CreateRegistrate REGISTRATE = Create.registrate();
 
 	static {
 		REGISTRATE.setCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.key());

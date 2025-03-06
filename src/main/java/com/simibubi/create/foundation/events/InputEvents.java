@@ -57,6 +57,7 @@ public class InputEvents {
 
 		boolean pressed = action == Action.PRESS;
 
+		RadialWrenchHandler.onKeyInput(button, pressed);
 		if (CreateClient.SCHEMATIC_HANDLER.onMouseInput(button, pressed))
 			return true;
 		else if (CreateClient.SCHEMATIC_AND_QUILL_HANDLER.onMouseInput(button, pressed))

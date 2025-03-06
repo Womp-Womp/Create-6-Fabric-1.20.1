@@ -12,9 +12,8 @@ import org.jetbrains.annotations.Nullable;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
+import com.simibubi.create.api.unpacking.UnpackingHandler;
 import com.simibubi.create.content.contraptions.actors.psi.PortableStorageInterfaceBlockEntity;
-import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity;
-import com.simibubi.create.content.kinetics.crafter.MechanicalCrafterBlockEntity.Inventory;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.crate.BottomlessItemHandler;
@@ -29,7 +28,6 @@ import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlockEntit
 import com.simibubi.create.content.logistics.packagerLink.RequestPromiseQueue;
 import com.simibubi.create.content.logistics.packagerLink.WiFiEffectPacket;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
-import com.simibubi.create.content.processing.basin.BasinBlockEntity;
 import com.simibubi.create.foundation.advancement.AdvancementBehaviour;
 import com.simibubi.create.foundation.advancement.AllAdvancements;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
@@ -344,51 +342,29 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 		if (animationTicks > 0)
 			return false;
 
+		Objects.requireNonNull(this.level);
+
 		ItemStackHandler contents = PackageItem.getContents(box);
+		List<ItemStack> items = ItemHelper.getNonEmptyStacks(contents);
+		if (items.isEmpty())
+			return true;
+
 		PackageOrder orderContext = PackageItem.getOrderContext(box);
-		Storage<ItemVariant> targetInv = targetInventory.getInventory();
-		BlockEntity targetBE =
-			level.getBlockEntity(worldPosition.relative(getBlockState().getOptionalValue(PackagerBlock.FACING)
-				.orElse(Direction.UP)
-				.getOpposite()));
 
-		if (targetInv == null)
-			return false;
+		Direction facing = getBlockState().getOptionalValue(PackagerBlock.FACING).orElse(Direction.UP);
+		BlockPos target = worldPosition.relative(facing.getOpposite());
+		BlockState targetState = level.getBlockState(target);
 
-		if (targetBE instanceof BasinBlockEntity basin)
-			basin.inputInventory.packagerMode = true;
+			UnpackingHandler handler = UnpackingHandler.REGISTRY.get(targetState);
+		UnpackingHandler toUse = handler != null ? handler : UnpackingHandler.DEFAULT;
+		// note: handler may modify the passed items
+		boolean unpacked = toUse.unpack(level, target, targetState, facing, items, orderContext, simulate);
 
-		// Follow crafting arrangement
-		if (targetBE instanceof MechanicalCrafterBlockEntity crafter && orderContext != null) {
-			return this.unwrapIntoCrafter(crafter, contents, orderContext, ctx);
-		}
-
-		try (Transaction t = ctx.openNested()) {
-			for (int i = 0; i < contents.getSlotCount(); i++) {
-				ItemStack stack = contents.getStackInSlot(i);
-				if (stack.isEmpty())
-					continue;
-
-				long inserted = targetInv.insert(ItemVariant.of(stack), stack.getCount(), t);
-				if (inserted != stack.getCount()) {
-					return false;
-				}
-			}
-			t.commit();
-		} finally {
-			if (targetBE instanceof BasinBlockEntity basin) {
-				basin.inputInventory.packagerMode = false;
-			}
-		}
-
-		TransactionCallback.onSuccess(ctx, () -> {
-			if (targetBE instanceof MechanicalCrafterBlockEntity mcbe)
-				mcbe.checkCompletedRecipe(true);
-
-			previouslyUnwrapped = box;
+		if (unpacked && !simulate) {previouslyUnwrapped = box;
 			animationInward = true;
 			animationTicks = CYCLE;
-			notifyUpdate();
+			notifyUpdate();}
+
 		});
 
 		return true;
@@ -425,7 +401,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 			t.commit();
 		}
 
-		return true;
+		return unpacked;
 	}
 
 	public void attemptToSend(List<PackagingRequest> queuedRequests) {

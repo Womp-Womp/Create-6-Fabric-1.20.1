@@ -20,6 +20,9 @@ import com.simibubi.create.foundation.ponder.CreatePonderPlugin;
 import com.simibubi.create.foundation.utility.FilesHelper;
 import com.tterrag.registrate.providers.ProviderType;
 
+import net.minecraftforge.common.data.ExistingFileHelper;
+import net.minecraftforge.data.event.GatherDataEvent;
+
 import net.createmod.ponder.foundation.PonderIndex;
 import net.minecraft.core.RegistrySetBuilder;
 
@@ -69,7 +72,7 @@ public class CreateDatagen implements DataGeneratorEntrypoint {
 	private static void addExtraRegistrateData() {
 		CreateRegistrateTags.addGenerators();
 
-		Create.REGISTRATE.addDataGenerator(ProviderType.LANG, provider -> {
+		Create.registrate().addDataGenerator(ProviderType.LANG, provider -> {
 			BiConsumer<String, String> langConsumer = provider::add;
 
 			provideDefaultLang("interface", langConsumer);

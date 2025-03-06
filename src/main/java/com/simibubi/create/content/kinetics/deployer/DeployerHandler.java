@@ -427,7 +427,7 @@ public class DeployerHandler {
 		if (honeyLevel < 5)
 			return InteractionResult.PASS;
 
-		if (prevHeldItem.getItem() == Items.SHEARS) {
+		if (prevHeldItem.canPerformAction(ToolActions.SHEARS_HARVEST)) {
 			world.playSound(player, player.getX(), player.getY(), player.getZ(), SoundEvents.BEEHIVE_SHEAR,
 				SoundSource.NEUTRAL, 1.0F, 1.0F);
 			// <> BeehiveBlock#dropHoneycomb
