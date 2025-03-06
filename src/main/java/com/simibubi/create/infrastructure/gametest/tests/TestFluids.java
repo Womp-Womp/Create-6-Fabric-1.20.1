@@ -283,21 +283,21 @@ public class TestFluids {
 		helper.succeedWhen(() -> {
 			if (!helper.getBlockState(leftValve).getValue(FluidValveBlock.ENABLED)) { // step 1
 				helper.getBlockEntity(AllBlockEntityTypes.VALVE_HANDLE.get(), leftHandle)
-						.activate(false); // open the valve, fill 4 buckets
+					.activate(false); // open the valve, fill 4 buckets
 				helper.fail("Entering step 2");
 			} else if (!helper.getBlockState(rightValve).getValue(FluidValveBlock.ENABLED)) { // step 2
 				helper.assertFluidPresent(FluidStack.EMPTY, leftTank); // wait for left tank to drain
 				helper.assertBlockProperty(lamp, RedstoneLampBlock.LIT, false); // should not be on yet
 				helper.getBlockEntity(AllBlockEntityTypes.VALVE_HANDLE.get(), rightHandle)
-						.activate(false); // fill another 4 buckets
+					.activate(false); // fill another 4 buckets
 				helper.fail("Entering step 3");
 			} else if (!helper.getBlockState(drainValve).getValue(FluidValveBlock.ENABLED)) { // step 3
 				helper.assertFluidPresent(FluidStack.EMPTY, rightTank); // wait for right tank to drain
-				// 16 buckets inserted. tank full, lamp on.
+				// 8 buckets inserted. tank full, lamp on.
 				helper.assertBlockProperty(lamp, RedstoneLampBlock.LIT, true);
 				// drain what's filled so far
 				helper.getBlockEntity(AllBlockEntityTypes.VALVE_HANDLE.get(), drainHandle)
-						.activate(false); // drain all 8 buckets
+					.activate(false); // drain all 8 buckets
 				helper.fail("Entering step 4");
 			} else {
 				helper.assertTankEmpty(tank); // wait for it to empty
@@ -314,8 +314,8 @@ public class TestFluids {
 		BlockPos firstSeat = new BlockPos(4, 2, 1);
 		BlockPos secondSeat = firstSeat.south(2);
 
-		Zombie firstZombie = helper.spawn(EntityType.ZOMBIE, firstSeat);
-		Zombie secondZombie = helper.spawn(EntityType.ZOMBIE, secondSeat);
+		Zombie firstZombie = helper.spawnSeated(EntityType.ZOMBIE, firstSeat);
+		Zombie secondZombie = helper.spawnSeated(EntityType.ZOMBIE, secondSeat);
 
 		helper.pullLever(effects);
 

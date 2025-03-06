@@ -12,6 +12,7 @@ import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.content.contraptions.Contraption;
 import com.simibubi.create.content.contraptions.actors.contraptionControls.ContraptionControlsMovement;
 import com.simibubi.create.content.contraptions.actors.contraptionControls.ContraptionControlsMovingInteraction;
+import com.simibubi.create.content.contraptions.actors.seat.SeatBlock;
 import com.simibubi.create.content.contraptions.behaviour.MovementContext;
 import com.simibubi.create.content.kinetics.gauge.SpeedGaugeBlockEntity;
 import com.simibubi.create.content.kinetics.gauge.StressGaugeBlockEntity;
@@ -213,6 +214,12 @@ public class CreateGameTestHelper extends GameTestHelper {
 		ItemEntity item = new ItemEntity(level, spawn.x, spawn.y, spawn.z, stack, 0, 0, 0);
 		level.addFreshEntity(item);
 		return item;
+	}
+
+	public <T extends Entity> T spawnSeated(EntityType<T> type, BlockPos pos) {
+		T entity = this.spawn(type, pos);
+		SeatBlock.sitDown(this.getLevel(), this.absolutePos(pos), entity);
+		return entity;
 	}
 
 	/**

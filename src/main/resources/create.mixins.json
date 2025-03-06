@@ -46,8 +46,9 @@
     "fabric.EntityMixin",
     "fabric.ServerGamePacketListenerImplAccessor",
     "fabric.SortedArraySetAccessor",
-    "fabric.StructureUtilsMixin",
     "fabric.TagAppenderAccessor",
+    "fabric.gametest.StructureBlockEntityMixin",
+    "fabric.gametest.StructureUtilsMixin",
     "fabric.infra.ServerPlayerGameModeMixin"
   ],
   "client": [

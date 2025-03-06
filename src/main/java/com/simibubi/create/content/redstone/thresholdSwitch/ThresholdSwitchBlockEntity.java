@@ -210,14 +210,6 @@ public class ThresholdSwitchBlockEntity extends SmartBlockEntity {
 						currentLevel += count;
 				}
 			}
-
-			// fabric: since fluid amounts are 81x larger, we lose floating point precision. Let's just round a little.
-			if (currentLevel > 0.999) {
-				currentLevel = 1;
-			} else if (currentLevel < 0.001) {
-				currentLevel = 0;
-			}
-
 		} else {
 			// No compatible inventories found
 			currentMinLevel = -1;

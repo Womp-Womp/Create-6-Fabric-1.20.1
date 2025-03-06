@@ -31,6 +31,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
 
+import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
+
 public class ThresholdSwitchScreen extends AbstractSimiScreen {
 
 	private ScrollInput offBelow;
@@ -147,7 +149,7 @@ public class ThresholdSwitchScreen extends AbstractSimiScreen {
 		int valueStep = 1;
 		boolean stacks = inStacks.getState() == 1;
 		if (typeOfCurrentTarget == ThresholdType.FLUID)
-			valueStep = 1000;
+			valueStep = (int) FluidConstants.BUCKET;
 
 		if (forItems) {
 			Component suffix =
@@ -322,7 +324,7 @@ public class ThresholdSwitchScreen extends AbstractSimiScreen {
 		boolean stacks = inStacks.getState() == 1;
 		int valueStep = 1;
 		if (blockEntity.getTypeOfCurrentTarget() == ThresholdType.FLUID)
-			valueStep = 1000;
+			valueStep = (int) FluidConstants.BUCKET;
 		else if (stacks)
 			valueStep = 64;
 		return valueStep;

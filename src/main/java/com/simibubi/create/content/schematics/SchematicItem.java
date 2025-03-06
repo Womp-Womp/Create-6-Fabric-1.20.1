@@ -12,8 +12,6 @@ import java.util.zip.GZIPInputStream;
 
 import javax.annotation.Nonnull;
 
-import net.minecraft.core.registries.Registries;
-
 import org.slf4j.Logger;
 
 import com.mojang.logging.LogUtils;
@@ -26,6 +24,7 @@ import net.createmod.catnip.gui.ScreenOpener;
 import net.createmod.catnip.nbt.NBTHelper;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.NbtIo;
@@ -47,7 +46,6 @@ import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemp
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.fabricmc.loader.api.FabricLoader;
 
 public class SchematicItem extends Item {
 
@@ -123,14 +121,7 @@ public class SchematicItem extends Item {
 		Path dir;
 		Path file;
 
-//		if (!level.isClientSide()) {
-//			dir = Paths.get("schematics", "uploaded").toAbsolutePath();
-//			file = Paths.get(owner, schematic);
-//		} else {
-//			dir = Paths.get("schematics").toAbsolutePath();
-//			file = Paths.get(schematic);
-//		}
-		if (FabricLoader.getInstance().getEnvironmentType() == EnvType.SERVER) {
+		if (!level.isClientSide()) {
 			dir = Paths.get("schematics", "uploaded").toAbsolutePath();
 			file = Paths.get(owner, schematic);
 		} else {

@@ -1,5 +1,7 @@
 package com.simibubi.create.content.fluids.tank.storage;
 
+import java.util.Objects;
+
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.Codec;
@@ -26,7 +28,7 @@ import io.github.fabricators_of_create.porting_lib.transfer.fluid.FluidTank;
 public class FluidTankMountedStorage extends WrapperMountedFluidStorage<Handler> implements SyncedMountedStorage {
 	public static final Codec<FluidTankMountedStorage> CODEC = RecordCodecBuilder.create(i -> i.group(
 		CreateCodecs.NON_NEGATIVE_LONG.fieldOf("capacity").forGetter(FluidTankMountedStorage::getCapacity),
-		FluidStack.CODEC.fieldOf("fluid").forGetter(FluidTankMountedStorage::getFluid)
+		CreateCodecs.FLUID_STACK.fieldOf("fluid").forGetter(FluidTankMountedStorage::getFluid)
 	).apply(i, FluidTankMountedStorage::new));
 
 	private boolean dirty;
@@ -50,7 +52,7 @@ public class FluidTankMountedStorage extends WrapperMountedFluidStorage<Handler>
 	}
 
 	public FluidStack getFluid() {
-		return this.wrapped.getFluid();
+		return Objects.requireNonNull(this.wrapped.getFluid());
 	}
 
 	public long getCapacity() {
@@ -99,6 +101,7 @@ public class FluidTankMountedStorage extends WrapperMountedFluidStorage<Handler>
 
 		public Handler(long capacity, FluidStack stack) {
 			super(capacity);
+			Objects.requireNonNull(stack);
 			this.setFluid(stack);
 		}
 

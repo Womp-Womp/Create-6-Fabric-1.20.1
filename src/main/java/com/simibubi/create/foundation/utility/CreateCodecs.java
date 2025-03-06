@@ -12,6 +12,7 @@ import com.google.common.primitives.UnsignedBytes;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.MapLike;
@@ -21,11 +22,15 @@ import com.simibubi.create.foundation.item.ItemSlots;
 import com.simibubi.create.foundation.mixin.accessor.MobEffectInstanceAccessor;
 
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffectInstance.FactorData;
 import net.minecraft.world.food.FoodProperties;
 
+import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
 
 public class CreateCodecs {
@@ -47,6 +52,20 @@ public class CreateCodecs {
 
 	public static final Codec<ItemStackHandler> ITEM_STACK_HANDLER = ItemSlots.CODEC.xmap(
 		slots -> slots.toHandler(ItemStackHandler::new), ItemSlots::fromHandler
+	);
+
+	public static final Codec<CompoundTag> COMPOUND_TAG = Codec.PASSTHROUGH.comapFlatMap(
+		dynamic -> {
+			Tag converted = dynamic.convert(NbtOps.INSTANCE).getValue();
+			return converted instanceof CompoundTag compound ? DataResult.success(compound) : DataResult.error(() -> "Not a compound: " + converted);
+		},
+		tag -> new Dynamic<>(NbtOps.INSTANCE, tag)
+	);
+
+	// the codec included in PortingLib is causing some absurd errors with its null default for nbt
+	public static final Codec<FluidStack> FLUID_STACK = COMPOUND_TAG.xmap(
+		FluidStack::loadFluidStackFromNBT,
+		stack -> stack.writeToNBT(new CompoundTag())
 	);
 
 	public static Codec<Integer> boundedIntStr(int min) {

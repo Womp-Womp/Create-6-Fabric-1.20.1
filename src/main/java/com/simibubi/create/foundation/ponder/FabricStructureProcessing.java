@@ -2,6 +2,7 @@ package com.simibubi.create.foundation.ponder;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.NotNull;
@@ -15,6 +16,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.LevelReader;
@@ -29,9 +31,9 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
 import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
 
 /**
- * Processing for Ponder schematics to allow using the same ones on Forge and Fabric.
+ * Processing for structures exported on Forge to allow using the same ones on Forge and Fabric.
  */
-public class FabricPonderProcessing {
+public class FabricStructureProcessing {
 	public static final Codec<Processor> PROCESSOR_CODEC = ResourceLocation.CODEC
 			.fieldOf("structureId")
 			.xmap(Processor::new, processor -> processor.structureId)
@@ -39,7 +41,7 @@ public class FabricPonderProcessing {
 
 	public static final StructureProcessorType<Processor> PROCESSOR_TYPE = Registry.register(
 			BuiltInRegistries.STRUCTURE_PROCESSOR,
-			Create.asResource("fabric_ponder_processor"),
+			Create.asResource("fabric_structure_processor"),
 			() -> PROCESSOR_CODEC
 	);
 
@@ -67,17 +69,13 @@ public class FabricPonderProcessing {
 		return predicate;
 	}
 
-	public static StructurePlaceSettings makePlaceSettings(ResourceLocation structureId) {
-		return new StructurePlaceSettings().addProcessor(new Processor(structureId));
-	}
-
 	@Internal
 	public static void init() {
 		register(Create.ID, ALWAYS);
 	}
 
 	public enum Process {
-		FLUID_TANK_AMOUNTS
+		FLUID_AMOUNTS
 	}
 
 	@FunctionalInterface
@@ -103,20 +101,36 @@ public class FabricPonderProcessing {
 				return relativeBlockInfo;
 
 			CompoundTag nbt = relativeBlockInfo.nbt();
-			if (nbt != null
-					&& AllBlocks.FLUID_TANK.has(relativeBlockInfo.state())
-					&& nbt.contains("TankContent", Tag.TAG_COMPOUND)
-					&& predicate.shouldApplyProcess(structureId, Process.FLUID_TANK_AMOUNTS)) {
+			if (nbt == null)
+				return relativeBlockInfo;
 
-				FluidStack content = FluidStack.loadFluidStackFromNBT(nbt.getCompound("TankContent"));
-				long amount = content.getAmount();
-				float buckets = amount / 1000f;
-				long fixedAmount = (long) (buckets * FluidConstants.BUCKET);
-				content.setAmount(fixedAmount);
+			if (!predicate.shouldApplyProcess(structureId, Process.FLUID_AMOUNTS))
+				return relativeBlockInfo;
 
-				CompoundTag newNbt = nbt.copy();
-				newNbt.put("TankContent", content.writeToNBT(new CompoundTag()));
-				return new StructureBlockInfo(relativeBlockInfo.pos(), relativeBlockInfo.state(), newNbt);
+			if (AllBlocks.FLUID_TANK.has(relativeBlockInfo.state()) && nbt.contains("TankContent", Tag.TAG_COMPOUND)) {
+				CompoundTag copy = nbt.copy();
+				fixTankContent(copy.getCompound("TankContent"));
+				return new StructureBlockInfo(relativeBlockInfo.pos(), relativeBlockInfo.state(), copy);
+			} else if (AllBlocks.BASIN.has(relativeBlockInfo.state())) {
+				CompoundTag copy = nbt.copy();
+				ListTag inputTanks = copy.getList("InputTanks", Tag.TAG_COMPOUND);
+				if (!inputTanks.isEmpty()) {
+					for (int i = 0; i < inputTanks.size(); i++) {
+						CompoundTag compound = inputTanks.getCompound(i);
+						CompoundTag content = compound.getCompound("TankContent");
+						fixTankContent(content);
+					}
+				}
+				ListTag outputTanks = copy.getList("OutputTanks", Tag.TAG_COMPOUND);
+				if (!outputTanks.isEmpty()) {
+					for (int i = 0; i < outputTanks.size(); i++) {
+						CompoundTag compound = outputTanks.getCompound(i);
+						CompoundTag content = compound.getCompound("TankContent");
+						fixTankContent(content);
+					}
+				}
+
+				return new StructureBlockInfo(relativeBlockInfo.pos(), relativeBlockInfo.state(), copy);
 			}
 
 			// no processes were applied
@@ -128,5 +142,18 @@ public class FabricPonderProcessing {
 		protected StructureProcessorType<?> getType() {
 			return PROCESSOR_TYPE;
 		}
+	}
+
+	private static void fixTankContent(CompoundTag content) {
+		if (content.contains("FluidName", Tag.TAG_STRING) && content.getString("FluidName").equals("minecraft:milk")) {
+			content.putString("FluidName", "milk:still_milk");
+		}
+		FluidStack stack = FluidStack.loadFluidStackFromNBT(content);
+		long amount = stack.getAmount();
+		double buckets = amount / 1000d;
+		long fixedAmount = Math.round(buckets * FluidConstants.BUCKET);
+		stack.setAmount(fixedAmount);
+		Set.copyOf(content.getAllKeys()).forEach(content::remove);
+		stack.writeToNBT(content);
 	}
 }

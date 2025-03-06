@@ -44,7 +44,15 @@ public class MountedStorageSyncPacket extends SimplePacketBase {
 
 	@SuppressWarnings("deprecation")
 	private static <T> Map<BlockPos, T> read(FriendlyByteBuf buf, Codec<T> codec) {
-		return buf.readMap(FriendlyByteBuf::readBlockPos, (b) -> b.readWithCodec(NbtOps.INSTANCE, codec));
+		return buf.readMap(FriendlyByteBuf::readBlockPos, (b) -> {
+			int i = b.readerIndex();
+			try {
+				return b.readWithCodec(NbtOps.INSTANCE, codec);
+			} catch (NullPointerException ignored) {
+				b.readerIndex(i);
+				return b.readWithCodec(NbtOps.INSTANCE, codec);
+			}
+		});
 	}
 
 	@Override

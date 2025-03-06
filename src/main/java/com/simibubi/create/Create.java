@@ -35,7 +35,7 @@ import com.simibubi.create.foundation.events.CommonEvents;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
-import com.simibubi.create.foundation.ponder.FabricPonderProcessing;
+import com.simibubi.create.foundation.ponder.FabricStructureProcessing;
 import com.simibubi.create.foundation.recipe.AllIngredients;
 import com.simibubi.create.impl.registry.CreateRegistriesImpl;
 import com.simibubi.create.infrastructure.command.ServerLagger;
@@ -148,7 +148,7 @@ public class Create implements ModInitializer {
 		AllIngredients.register();
 		CommonEvents.register();
 		AllPackets.getChannel().initServerListener();
-		FabricPonderProcessing.init();
+		FabricStructureProcessing.init();
 		AllBiomeModifiers.bootstrap(); // moved out of datagen
 		CreateRegistriesImpl.registerDatapackRegistries();
 		AllInventoryIdentifiers.registerDefaults();
