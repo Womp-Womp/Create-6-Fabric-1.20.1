@@ -3,6 +3,7 @@ package com.simibubi.create.content.logistics.packager;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -161,6 +162,12 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 			wakeTheFrogs();
 			setChanged();
 		}
+	}
+
+	// fabric: cannot check stock from a transaction close callback
+	public void scheduleStockCheck() {
+		Objects.requireNonNull(this.level);
+		this.level.scheduleTick(this.worldPosition, this.getBlockState().getBlock(), 1);
 	}
 
 	public void triggerStockCheck() {
@@ -464,23 +471,24 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 
 				for (StorageView<ItemVariant> view : targetInv.nonEmptyViews()) {
 					try (Transaction t = Transaction.openOuter()) {
-						int initialCount = requestQueue ? Math.min(64, nextRequest.getCount()) : 64;
 						ItemVariant resource = view.getResource();
+						boolean bulky = !resource.getItem().canFitInsideContainerItems();
+						if (bulky && anyItemPresent)
+							continue;
+
+						int initialCount = requestQueue ? Math.min(64, nextRequest.getCount()) : 64;
 						long extractedAmount = view.extract(resource, initialCount, t);
 						if (extractedAmount == 0)
 							continue;
+
 						ItemStack extracted = resource.toStack((int) extractedAmount);
 						if (requestQueue && !ItemHandlerHelper.canItemStacksStack(extracted, nextRequest.item()))
 							continue;
 
-						boolean bulky = !extracted.getItem()
-							.canFitInsideContainerItems();
-						if (bulky && anyItemPresent)
-							continue;
-
-						anyItemPresent = true;
 						long inserted = extractedItems.insert(resource, extractedAmount, t);
-						long transferred = extractedAmount - inserted;
+						if (inserted != extractedAmount)
+							continue;
+						anyItemPresent = true;
 						t.commit();
 
 						if (extracted.getItem() instanceof PackageItem)
@@ -492,7 +500,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 							continue;
 						}
 
-						nextRequest.subtract((int) transferred);
+						nextRequest.subtract((int) inserted);
 
 						if (!nextRequest.isEmpty()) {
 							if (bulky)

@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 
-import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.foundation.utility.RaycastHelper;
+import com.simibubi.create.foundation.utility.fabric.ReachUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -30,8 +30,7 @@ public class ChainPackageInteractionHandler {
 					.expandTowards(0, 0.5, 0)
 					.inflate(0.45);
 
-				double range = mc.player.getAttribute(ReachEntityAttributes.REACH)
-					.getValue() + 1;
+				double range = ReachUtil.reach(mc.player) + 1;
 				Vec3 from = RaycastHelper.getTraceOrigin(mc.player);
 				Vec3 to = RaycastHelper.getTraceTarget(mc.player, range, from);
 

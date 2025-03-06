@@ -28,7 +28,7 @@ public class PackagerItemHandler implements SingleSlotStorage<ItemVariant> {
 			return 0;
 		ItemStack stack = resource.toStack(1);
 		if (blockEntity.unwrapBox(stack, transaction)) {
-			TransactionCallback.onSuccess(transaction, blockEntity::triggerStockCheck);
+			TransactionCallback.onSuccess(transaction, blockEntity::scheduleStockCheck);
 			return 1;
 		} else {
 			return 0;

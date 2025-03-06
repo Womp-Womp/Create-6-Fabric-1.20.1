@@ -6,7 +6,6 @@ import java.util.Map.Entry;
 import javax.annotation.Nullable;
 
 import com.google.common.cache.Cache;
-import com.jamieswhiteshirt.reachentityattributes.ReachEntityAttributes;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.simibubi.create.AllBlocks;
@@ -17,6 +16,7 @@ import com.simibubi.create.content.logistics.packagePort.PackagePortTarget;
 import com.simibubi.create.content.logistics.packagePort.PackagePortTargetSelectionHandler;
 import com.simibubi.create.foundation.utility.RaycastHelper;
 import com.simibubi.create.foundation.utility.TickBasedCache;
+import com.simibubi.create.foundation.utility.fabric.ReachUtil;
 
 import net.createmod.catnip.data.WorldAttached;
 import net.createmod.catnip.outliner.Outliner;
@@ -53,8 +53,7 @@ public class ChainConveyorInteractionHandler {
 		ItemStack mainHandItem = mc.player.getMainHandItem();
 		boolean isWrench = AllItemTags.CHAIN_RIDEABLE.matches(mainHandItem);
 		boolean dismantling = isWrench && mc.player.isShiftKeyDown();
-		double range = mc.player.getAttribute(ReachEntityAttributes.REACH)
-			.getValue() + 1;
+		double range = ReachUtil.reach(mc.player) + 1;
 
 		Vec3 from = RaycastHelper.getTraceOrigin(mc.player);
 		Vec3 to = RaycastHelper.getTraceTarget(mc.player, range, from);

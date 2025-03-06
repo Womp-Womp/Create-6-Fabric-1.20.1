@@ -13,6 +13,8 @@ import com.simibubi.create.foundation.utility.CreateLang;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -161,7 +163,13 @@ public class PackagerBlock extends WrenchableDirectionalBlock implements IBE<Pac
 		if (neighbor.relative(state.getOptionalValue(FACING)
 				.orElse(Direction.UP))
 			.equals(pos))
-			withBlockEntityDo(level, pos, PackagerBlockEntity::triggerStockCheck);
+			withBlockEntityDo(level, pos, PackagerBlockEntity::scheduleStockCheck);
+	}
+
+	// fabric: stock checks may be scheduled instead of immediate to avoid opening transactions at the wrong time
+	@Override
+	public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+		withBlockEntityDo(level, pos, PackagerBlockEntity::triggerStockCheck);
 	}
 
 	@Override
