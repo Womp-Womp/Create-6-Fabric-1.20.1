@@ -18,19 +18,18 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 public enum CrafterUnpackingHandler implements UnpackingHandler {
 	INSTANCE;
 
 	@Override
-	public boolean unpack(Level level, BlockPos pos, BlockState state, Direction side, List<ItemStack> items, @Nullable PackageOrder order, boolean simulate) {
-		if (order == null) {
+	public boolean unpack(Level level, BlockPos pos, BlockState state, Direction side, List<ItemStack> items, @Nullable PackageOrderWithCrafts orderContext, boolean simulate) {
+		if (!PackageOrderWithCrafts.hasCraftingInformation(orderContext))
 			return DEFAULT.unpack(level, pos, state, side, items, null, simulate);
-		}
+
+		// Get item placement
+		List<BigItemStack> craftingContext = orderContext.getCraftingInformation();
 
 		BlockEntity be = level.getBlockEntity(pos);
 		if (!(be instanceof MechanicalCrafterBlockEntity crafter))
@@ -43,9 +42,9 @@ public enum CrafterUnpackingHandler implements UnpackingHandler {
 
 		try (Transaction t = Transaction.openOuter()) {
 			// insert in the order's defined ordering
-			int max = Math.min(inventories.size(), order.stacks().size());
+			int max = Math.min(inventories.size(), craftingContext.size());
 			outer: for (int i = 0; i < max; i++) {
-				BigItemStack targetStack = order.stacks().get(i);
+				BigItemStack targetStack = craftingContext.get(i);
 				if (targetStack.stack.isEmpty())
 					continue;
 

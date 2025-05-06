@@ -1,9 +1,10 @@
 package com.simibubi.create.content.processing.burner;
 
-import org.jetbrains.annotations.Nullable;
+import java.util.Random;
 
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllItems;
+import com.simibubi.create.Create;
 import com.simibubi.create.content.equipment.wrench.IWrenchable;
 
 import net.createmod.catnip.lang.Lang;
@@ -12,7 +13,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.RandomSource;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -30,10 +30,9 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.block.BlockPickInteractionAware;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ToolAction;
 
 public class LitBlazeBurnerBlock extends Block implements IWrenchable, BlockPickInteractionAware {
 
@@ -90,6 +89,7 @@ public class LitBlazeBurnerBlock extends Block implements IWrenchable, BlockPick
 		return AllItems.EMPTY_BLAZE_BURNER.asStack();
 	}
 
+	@Override
 	@Environment(EnvType.CLIENT)
 	public void animateTick(BlockState state, Level world, BlockPos pos, RandomSource random) {
 		world.addAlwaysVisibleParticle(ParticleTypes.LARGE_SMOKE, true,

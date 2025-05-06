@@ -1,6 +1,6 @@
 package com.simibubi.create.compat.jei.category;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -9,17 +9,19 @@ import javax.annotation.ParametersAreNonnullByDefault;
 
 import org.jetbrains.annotations.NotNull;
 
+import com.simibubi.create.AllFluids;
+import com.simibubi.create.content.fluids.potion.PotionFluidHandler;
 import com.simibubi.create.content.processing.recipe.ProcessingOutput;
 import com.simibubi.create.foundation.fluid.FluidIngredient;
 import com.simibubi.create.foundation.gui.AllGuiTextures;
 import com.simibubi.create.foundation.utility.CreateLang;
 
-import mezz.jei.api.fabric.constants.FabricTypes;
-import mezz.jei.api.fabric.ingredients.fluids.IJeiFluidIngredient;
+import mezz.jei.api.forge.ForgeTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotRichTooltipCallback;
+import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
@@ -30,13 +32,11 @@ import net.minecraft.MethodsReturnNonnullByDefault;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.level.material.Fluid;
 
-import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidStack;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -122,18 +122,19 @@ public abstract class CreateRecipeCategory<T extends Recipe<?>> implements IReci
 	}
 
 	public static IRecipeSlotBuilder addFluidSlot(IRecipeLayoutBuilder builder, int x, int y, FluidIngredient ingredient) {
-		long amount = ingredient.getRequiredAmount();
-		return builder.addSlot(RecipeIngredientRole.OUTPUT, x, y)
-			.setBackground(getRenderedSlot(), -1, -1)
-			.addIngredients(FabricTypes.FLUID_STACK, toJei(ingredient.getMatchingFluidStacks()))
-			.setFluidRenderer(amount, false, 16, 16); // make fluid take up the full slot
+		return addFluidSlot(builder, x, y, RecipeIngredientRole.INPUT)
+			.addIngredients(FabricTypes.FLUID_STACK, toJei(ingredient.getMatchingFluidStacks()));
 	}
 
 	public static IRecipeSlotBuilder addFluidSlot(IRecipeLayoutBuilder builder, int x, int y, FluidStack stack) {
-		return builder.addSlot(RecipeIngredientRole.OUTPUT, x, y)
+		return addFluidSlot(builder, x, y, RecipeIngredientRole.OUTPUT)
+			.addIngredient(FabricTypes.FLUID_STACK, toJei(stack));
+	}
+
+	public static IRecipeSlotBuilder addFluidSlot(IRecipeLayoutBuilder builder, int x, int y, RecipeIngredientRole role) {
+		return builder.addSlot(role, x, y)
 			.setBackground(getRenderedSlot(), -1, -1)
-			.addIngredient(FabricTypes.FLUID_STACK, toJei(stack))
-			.setFluidRenderer(stack.getAmount(), false, 16, 16); // make fluid take up the full slot
+			.setFluidRenderer(1, false, 16, 16); // make fluid take up the full slot
 	}
 
 	// fabric: don't need potion tooltip stuff, handled by attribute handler

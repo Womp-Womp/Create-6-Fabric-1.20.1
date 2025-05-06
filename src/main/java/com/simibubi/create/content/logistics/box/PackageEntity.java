@@ -315,6 +315,9 @@ public class PackageEntity extends LivingEntity implements IEntityAdditionalSpaw
 			return false;
 		}
 
+		if (!box.getItem().canBeHurtBy(source))
+			return false;
+
 		if (source.equals(damageSources().inWall()) && (isPassenger() || insertionDelay < 20))
 			return false;
 
@@ -473,5 +476,10 @@ public class PackageEntity extends LivingEntity implements IEntityAdditionalSpaw
 	@Override
 	public boolean isAffectedByPotions() {
 		return false;
+	}
+
+	@Override
+	public boolean fireImmune() {
+		return box.getItem().isFireResistant() || super.fireImmune();
 	}
 }

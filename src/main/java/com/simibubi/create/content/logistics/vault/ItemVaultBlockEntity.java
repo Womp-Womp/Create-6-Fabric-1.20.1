@@ -1,15 +1,9 @@
 package com.simibubi.create.content.logistics.vault;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nullable;
 
 import com.simibubi.create.AllBlockEntityTypes;
 import com.simibubi.create.api.connectivity.ConnectivityHandler;
-import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
-import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier.MultiBlock;
 import com.simibubi.create.foundation.blockEntity.IMultiBlockEntityContainer;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -26,15 +20,15 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.base.CombinedStorage;
-import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
-
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.wrapper.CombinedInvWrapper;
 
 public class ItemVaultBlockEntity extends SmartBlockEntity implements IMultiBlockEntityContainer.Inventory, SidedStorageBlockEntity {
+
 	protected Storage<ItemVariant> itemCapability;
 	protected InventoryIdentifier invId;
 
@@ -240,6 +234,12 @@ public class ItemVaultBlockEntity extends SmartBlockEntity implements IMultiBloc
 		return inventory;
 	}
 
+	public InventoryIdentifier getInvId() {
+		// ensure capability is up to date first, which sets the ID
+		this.initCapability();
+		return this.invId;
+	}
+
 	public void applyInventoryToBlock(ItemStackHandler handler) {
 		for (int i = 0; i < inventory.getSlotCount(); i++)
 			inventory.setStackInSlot(i, i < handler.getSlotCount() ? handler.getStackInSlot(i) : ItemStack.EMPTY);
@@ -261,7 +261,7 @@ public class ItemVaultBlockEntity extends SmartBlockEntity implements IMultiBloc
 				return;
 			controllerBE.initCapability();
 			itemCapability = controllerBE.itemCapability;
-			this.invId = controllerBE.invId;
+			invId = controllerBE.invId;
 			return;
 		}
 
@@ -285,7 +285,13 @@ public class ItemVaultBlockEntity extends SmartBlockEntity implements IMultiBloc
 		Storage<ItemVariant> combinedInvWrapper = new CombinedStorage<>(List.of(invs));
 		combinedInvWrapper = new VersionedInventoryWrapper(combinedInvWrapper);
 		itemCapability = combinedInvWrapper;
-		this.invId = new MultiBlock(vaultPositions);
+
+		// build an identifier encompassing all component vaults
+		BlockPos farCorner = alongZ
+			? worldPosition.offset(radius, radius, length)
+			: worldPosition.offset(length, radius, radius);
+		BoundingBox bounds = BoundingBox.fromCorners(this.worldPosition, farCorner);
+		this.invId = new InventoryIdentifier.Bounds(bounds);
 	}
 
 	public static int getMaxLength(int radius) {

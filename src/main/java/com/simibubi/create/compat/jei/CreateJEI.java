@@ -77,7 +77,7 @@ import com.simibubi.create.infrastructure.config.CRecipes;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
-import mezz.jei.api.fabric.constants.FabricTypes;
+import mezz.jei.api.forge.ForgeTypes;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.helpers.IPlatformFluidHelper;
 import mezz.jei.api.recipe.category.IRecipeCategory;
@@ -89,12 +89,9 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IRecipeTransferRegistration;
 import mezz.jei.api.registration.ISubtypeRegistration;
 import mezz.jei.api.runtime.IIngredientManager;
-import mezz.jei.fabric.ingredients.fluid.JeiFluidIngredient;
-import net.createmod.catnip.config.ConfigBase;
+import net.createmod.catnip.config.ConfigBase.ConfigBool;
 import net.minecraft.client.Minecraft;
-import net.minecraft.core.IdMap;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.item.ItemStack;
@@ -104,13 +101,12 @@ import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.SmokingRecipe;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Blocks;
-
-import io.github.fabricators_of_create.porting_lib.fluids.FluidStack;
-import io.github.fabricators_of_create.porting_lib.mixin.accessors.common.accessor.RecipeManagerAccessor;
+import net.minecraftforge.common.crafting.IShapedRecipe;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.registries.ForgeRegistries;
 
 @JeiPlugin
 @SuppressWarnings("unused")
@@ -121,6 +117,8 @@ public class CreateJEI implements IModPlugin {
 
 	private final List<CreateRecipeCategory<?>> allCategories = new ArrayList<>();
 	private IIngredientManager ingredientManager;
+
+	public static IJeiRuntime runtime;
 
 	private void loadCategories() {
 		allCategories.clear();
@@ -623,5 +621,10 @@ public class CreateJEI implements IModPlugin {
 		RegistryAccess registryAccess = Minecraft.getInstance().level.registryAccess();
 		return ItemHelper.sameItem(recipe1.getResultItem(registryAccess), recipe2.getResultItem(registryAccess));
 	}
+
+	@Override
+    public void onRuntimeAvailable(IJeiRuntime runtime) {
+        CreateJEI.runtime = runtime;
+    }
 
 }

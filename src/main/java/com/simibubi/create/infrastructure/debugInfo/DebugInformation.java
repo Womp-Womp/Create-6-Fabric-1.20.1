@@ -11,10 +11,16 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.platform.GlUtil;
 import com.simibubi.create.Create;
+import com.simibubi.create.CreateBuildInfo;
 import com.simibubi.create.foundation.mixin.accessor.SystemReportAccessor;
 import com.simibubi.create.infrastructure.debugInfo.element.DebugInfoSection;
 import com.simibubi.create.infrastructure.debugInfo.element.InfoElement;
 import com.simibubi.create.infrastructure.debugInfo.element.InfoEntry;
+
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
+import net.minecraftforge.forgespi.language.IModInfo;
 
 import dev.engine_room.flywheel.api.Flywheel;
 import dev.engine_room.flywheel.api.backend.Backend;
@@ -25,12 +31,6 @@ import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.resources.language.I18n;
 import oshi.SystemInfo;
-
-import net.fabricmc.api.EnvType;
-import net.fabricmc.loader.api.FabricLoader;
-import net.fabricmc.loader.api.metadata.ModMetadata;
-
-import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
 
 /**
  * Allows for providing easily accessible debugging information.
@@ -71,10 +71,11 @@ public class DebugInformation {
 
 	static {
 		DebugInfoSection.builder(Create.NAME)
-				.put("Mod Version", getVersionOfMod("create")) // fabric: We use this here so that we get the full version
-				.put("Fabric API Version", getVersionOfMod("fabric-api"))
-				.put("Minecraft Version", SharedConstants.getCurrentVersion().getName())
-				.buildTo(DebugInformation::registerBothInfo);
+			.put("Mod Version", getVersionOfMod("create")) // fabric: We use this here so that we get the full version
+			.put("Fabric API Version", getVersionOfMod("fabric-api"))
+			.put("Ponder Version", getVersionOfMod("ponder"))
+			.put("Minecraft Version", SharedConstants.getCurrentVersion().getName())
+			.buildTo(DebugInformation::registerBothInfo);
 
 		EnvExecutor.runWhenOn(EnvType.CLIENT, () -> () -> {
 			DebugInfoSection.builder("Graphics")
@@ -117,7 +118,7 @@ public class DebugInformation {
 		FabricLoader.getInstance().getAllMods().forEach(mod -> {
 			ModMetadata meta = mod.getMetadata();
 			String id = meta.getId();
-			if (!id.equals(Create.ID) && !id.equals("fabric-api") && !id.equals("minecraft") && !id.equals("flywheel")) {
+			if (!id.equals(Create.ID) && !id.equals("fabric-api") && !id.equals("minecraft") && !id.equals("flywheel") && !id.equals("ponder")) {
 				String name = meta.getName();
 				String version = meta.getVersion().toString();
 				mods.add(new InfoEntry(name, version));
@@ -142,10 +143,11 @@ public class DebugInformation {
 	}
 
 	public static String getTotalRam() {
-		long availableMemory = new SystemInfo().getHardware().getMemory().getAvailable();
-		long totalMemory = new SystemInfo().getHardware().getMemory().getTotal();
+		Runtime runtime = Runtime.getRuntime();
+		long availableMemory = runtime.freeMemory();
+		long totalMemory = runtime.totalMemory();
 		long usedMemory = totalMemory - availableMemory;
-		return String.format("%s bytes (%s MiB) / %s bytes (%s MiB)", usedMemory, usedMemory / 1049000, totalMemory, totalMemory / 1049000);
+		return String.format("%s bytes (%s MiB) / %s bytes (%s MiB)", usedMemory, usedMemory / 1048576L, totalMemory, totalMemory / 1048576L);
 	}
 
 	public static String getCpuInfo() {

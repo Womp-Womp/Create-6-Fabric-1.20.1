@@ -41,11 +41,8 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-
-import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.ItemStackHandler;
 
 public class PackageItem extends Item {
 
@@ -114,7 +111,7 @@ public class PackageItem extends Item {
 	}
 
 	public static void setOrder(ItemStack box, int orderId, int linkIndex, boolean isFinalLink, int fragmentIndex,
-								boolean isFinal, @Nullable PackageOrder orderContext) {
+		boolean isFinal, @Nullable PackageOrderWithCrafts orderContext) {
 		CompoundTag tag = new CompoundTag();
 		tag.putInt("OrderId", orderId);
 		tag.putInt("LinkIndex", linkIndex);
@@ -143,17 +140,22 @@ public class PackageItem extends Item {
 			.getInt("OrderId");
 	}
 
-	public static PackageOrder getOrderContext(ItemStack box) {
+	@Nullable
+	/**
+	 * Ordered items and their amount in the original, combined request\n
+	 * (Present in all non-redstone packages)
+	 */
+	public static PackageOrderWithCrafts getOrderContext(ItemStack box) {
 		CompoundTag tag = box.getTag();
 		if (tag == null || !tag.contains("Fragment"))
 			return null;
 		CompoundTag frag = tag.getCompound("Fragment");
 		if (!frag.contains("OrderContext"))
 			return null;
-		return PackageOrder.read(frag.getCompound("OrderContext"));
+		return PackageOrderWithCrafts.read(frag.getCompound("OrderContext"));
 	}
 
-	public static void addOrderContext(ItemStack box, PackageOrder orderContext) {
+	public static void addOrderContext(ItemStack box, PackageOrderWithCrafts orderContext) {
 		CompoundTag tag = box.getOrCreateTagElement("Fragment");
 		if (orderContext != null)
 			tag.put("OrderContext", orderContext.write());

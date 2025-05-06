@@ -16,16 +16,11 @@ import com.simibubi.create.content.trains.track.CurvedTrackInteraction;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
-import net.minecraft.world.phys.HitResult;
-
-import net.fabricmc.api.EnvType;
-
-import io.github.fabricators_of_create.porting_lib.event.client.InteractEvents;
-import io.github.fabricators_of_create.porting_lib.event.client.KeyInputCallback;
-import io.github.fabricators_of_create.porting_lib.event.client.MouseInputEvents;
-import io.github.fabricators_of_create.porting_lib.event.client.MouseInputEvents.Action;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 public class InputEvents {
 
@@ -88,8 +83,14 @@ public class InputEvents {
 			return InteractionResult.SUCCESS;
 		}
 
-		if (ChainPackageInteractionHandler.onUse()) {
-			return InteractionResult.SUCCESS;
+		if (mc.player != null) {
+			ItemStack itemInHand = mc.player.getItemInHand(hand);
+			if (!AllItemTags.WRENCH.matches(itemInHand)
+				&& !itemInHand.is(Items.CHAIN)
+				&& !AllBlocks.PACKAGE_FROGPORT.isIn(itemInHand)
+				&& ChainPackageInteractionHandler.onUse()) {
+				return InteractionResult.SUCCESS;
+			}
 		}
 
 		return cancel ? InteractionResult.SUCCESS : InteractionResult.PASS;

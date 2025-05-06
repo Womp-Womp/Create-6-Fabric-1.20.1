@@ -1,17 +1,29 @@
 package com.simibubi.create.content.equipment.tool;
 
+import java.util.function.Consumer;
+
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.simibubi.create.AllItems;
 import com.simibubi.create.AllPackets;
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.foundation.item.render.SimpleCustomRenderer;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock.Action;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.LogicalSide;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.network.PacketDistributor;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
@@ -27,10 +39,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
-import net.minecraft.world.level.Level;
-
-import io.github.fabricators_of_create.porting_lib.enchant.CustomEnchantingBehaviorItem;
-import io.github.fabricators_of_create.porting_lib.entity.events.LivingAttackEvent;
 
 public class CardboardSwordItem extends SwordItem implements CustomEnchantingBehaviorItem {
 
@@ -41,6 +49,16 @@ public class CardboardSwordItem extends SwordItem implements CustomEnchantingBeh
 	@Override
 	public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
 		return enchantment == Enchantments.KNOCKBACK;
+	}
+
+	@Override
+	public boolean isBookEnchantable(ItemStack stack, ItemStack book) {
+		Map<Enchantment, Integer> enchants = EnchantmentHelper.getEnchantments(book);
+		for (Enchantment enchantment : enchants.keySet()) {
+			if (enchantment != Enchantments.KNOCKBACK)
+				return false;
+		}
+		return true;
 	}
 
 	@Override

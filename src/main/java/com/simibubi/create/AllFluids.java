@@ -1,55 +1,44 @@
 package com.simibubi.create;
 
-import static net.minecraft.world.item.Items.BUCKET;
-import static net.minecraft.world.item.Items.GLASS_BOTTLE;
-import static net.minecraft.world.item.Items.HONEY_BOTTLE;
-
-import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import org.jetbrains.annotations.NotNull;
+import org.joml.Vector3f;
+
+import com.mojang.blaze3d.shaders.FogShape;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.simibubi.create.AllTags.AllFluidTags;
 import com.simibubi.create.content.decoration.palettes.AllPaletteStoneTypes;
 import com.simibubi.create.content.fluids.VirtualFluid;
 import com.simibubi.create.content.fluids.potion.PotionFluid;
-import com.simibubi.create.content.fluids.potion.PotionFluid.BottleType;
-import com.simibubi.create.content.fluids.potion.PotionFluidHandler;
+import com.simibubi.create.content.fluids.potion.PotionFluid.PotionFluidType;
 import com.simibubi.create.foundation.data.CreateRegistrate;
-import com.simibubi.create.foundation.fluid.FluidHelper;
-import com.tterrag.registrate.fabric.SimpleFlowableFluid;
+import com.simibubi.create.infrastructure.config.AllConfigs;
+import com.tterrag.registrate.builders.FluidBuilder.FluidTypeFactory;
 import com.tterrag.registrate.util.entry.FluidEntry;
 
-import net.createmod.catnip.data.Iterate;
-import net.createmod.catnip.nbt.NBTHelper;
+import net.minecraftforge.client.extensions.common.IClientFluidTypeExtensions;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.fluids.FluidInteractionRegistry;
+import net.minecraftforge.fluids.FluidInteractionRegistry.InteractionInformation;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.FluidType;
+import net.minecraftforge.fluids.ForgeFlowingFluid;
+
+import net.createmod.catnip.theme.Color;
+import net.minecraft.client.Camera;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.FogRenderer.FogMode;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
-import net.minecraft.tags.FluidTags;
-import net.minecraft.world.item.TooltipFlag;
-import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.ItemLike;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
-
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRenderHandler;
-import net.fabricmc.fabric.api.transfer.v1.client.fluid.FluidVariantRendering;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidConstants;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
-import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributeHandler;
-import net.fabricmc.fabric.api.transfer.v1.fluid.base.EmptyItemFluidStorage;
-import net.fabricmc.fabric.api.transfer.v1.fluid.base.FullItemFluidStorage;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-
-import io.github.fabricators_of_create.porting_lib.event.common.FluidPlaceBlockCallback;
 
 @SuppressWarnings("UnstableApiUsage")
 public class AllFluids {
@@ -84,49 +73,55 @@ public class AllFluids {
 			.register();
 
 	public static final FluidEntry<SimpleFlowableFluid.Flowing> HONEY =
-			REGISTRATE.standardFluid("honey")
-					.lang("Honey")
-					.fluidProperties(p -> p.levelDecreasePerBlock(2)
-							.tickRate(25)
-							.flowSpeed(3)
-							.blastResistance(100f))
-					.fluidAttributes(() -> new CreateAttributeHandler("block.create.honey", 2000, 1400))
-					.tag(AllFluidTags.HONEY.tag, FluidTags.WATER) // fabric: water tag controls physics
-					.source(SimpleFlowableFluid.Source::new) // TODO: remove when Registrate fixes FluidBuilder
-					.bucket()
-					.tag(AllTags.forgeItemTag("honey_buckets"))
-					.build()
-					.onRegisterAfter(Registries.ITEM, honey -> {
-						Fluid source = honey.getSource();
-						FluidStorage.combinedItemApiProvider(HONEY_BOTTLE).register(context ->
-								new FullItemFluidStorage(context, bottle -> ItemVariant.of(GLASS_BOTTLE), FluidVariant.of(source), HONEY_BOTTLE_AMOUNT));
-						FluidStorage.combinedItemApiProvider(GLASS_BOTTLE).register(context ->
-								new EmptyItemFluidStorage(context, bottle -> ItemVariant.of(HONEY_BOTTLE), source, HONEY_BOTTLE_AMOUNT));
-						FluidStorage.combinedItemApiProvider(source.getBucket()).register(context ->
-								new FullItemFluidStorage(context, bucket -> ItemVariant.of(BUCKET), FluidVariant.of(source), FluidConstants.BUCKET));
-						FluidStorage.combinedItemApiProvider(BUCKET).register(context ->
-								new EmptyItemFluidStorage(context, bucket -> ItemVariant.of(source.getBucket()), source, FluidConstants.BUCKET));
-					})
-					.register();
+		REGISTRATE.standardFluid("honey")
+			.lang("Honey")
+			.fluidProperties(p -> p.levelDecreasePerBlock(2)
+				.tickRate(25)
+				.flowSpeed(3)
+				.blastResistance(100f))
+			.fluidAttributes(() -> new CreateAttributeHandler("block.create.honey", 2000, 1400))
+			.tag(AllFluidTags.HONEY.tag, FluidTags.WATER) // fabric: water tag controls physics
+			.source(SimpleFlowableFluid.Source::new) // TODO: remove when Registrate fixes FluidBuilder
+			.block()
+			.properties(p -> p.mapColor(MapColor.TERRACOTTA_YELLOW))
+			.build()
+			.bucket()
+			.tag(AllTags.forgeItemTag("honey_buckets"))
+			.build()
+			.onRegisterAfter(Registries.ITEM, honey -> {
+				Fluid source = honey.getSource();
+				FluidStorage.combinedItemApiProvider(HONEY_BOTTLE).register(context ->
+					new FullItemFluidStorage(context, bottle -> ItemVariant.of(GLASS_BOTTLE), FluidVariant.of(source), HONEY_BOTTLE_AMOUNT));
+				FluidStorage.combinedItemApiProvider(GLASS_BOTTLE).register(context ->
+					new EmptyItemFluidStorage(context, bottle -> ItemVariant.of(HONEY_BOTTLE), source, HONEY_BOTTLE_AMOUNT));
+				FluidStorage.combinedItemApiProvider(source.getBucket()).register(context ->
+					new FullItemFluidStorage(context, bucket -> ItemVariant.of(BUCKET), FluidVariant.of(source), FluidConstants.BUCKET));
+				FluidStorage.combinedItemApiProvider(BUCKET).register(context ->
+					new EmptyItemFluidStorage(context, bucket -> ItemVariant.of(source.getBucket()), source, FluidConstants.BUCKET));
+			})
+			.register();
 
 	public static final FluidEntry<SimpleFlowableFluid.Flowing> CHOCOLATE =
-			REGISTRATE.standardFluid("chocolate")
-					.lang("Chocolate")
-					.tag(AllTags.forgeFluidTag("chocolate"), FluidTags.WATER) // fabric: water tag controls physics
-					.fluidProperties(p -> p.levelDecreasePerBlock(2)
-							.tickRate(25)
-							.flowSpeed(3)
-							.blastResistance(100f))
-					.fluidAttributes(() -> new CreateAttributeHandler("block.create.chocolate", 1500, 1400))
-					.onRegisterAfter(Registries.ITEM, chocolate -> {
-						Fluid source = chocolate.getSource();
-						// transfer values
-						FluidStorage.combinedItemApiProvider(source.getBucket()).register(context ->
-								new FullItemFluidStorage(context, bucket -> ItemVariant.of(BUCKET), FluidVariant.of(source), FluidConstants.BUCKET));
-						FluidStorage.combinedItemApiProvider(BUCKET).register(context ->
-								new EmptyItemFluidStorage(context, bucket -> ItemVariant.of(source.getBucket()), source, FluidConstants.BUCKET));
-					})
-					.register();
+		REGISTRATE.standardFluid("chocolate")
+			.lang("Chocolate")
+			.tag(AllTags.forgeFluidTag("chocolate"), FluidTags.WATER) // fabric: water tag controls physics
+			.fluidProperties(p -> p.levelDecreasePerBlock(2)
+				.tickRate(25)
+				.flowSpeed(3)
+				.blastResistance(100f))
+			.fluidAttributes(() -> new CreateAttributeHandler("block.create.chocolate", 1500, 1400))
+			.block()
+			.properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN))
+			.build()
+			.onRegisterAfter(Registries.ITEM, chocolate -> {
+				Fluid source = chocolate.getSource();
+				// transfer values
+				FluidStorage.combinedItemApiProvider(source.getBucket()).register(context ->
+					new FullItemFluidStorage(context, bucket -> ItemVariant.of(BUCKET), FluidVariant.of(source), FluidConstants.BUCKET));
+				FluidStorage.combinedItemApiProvider(BUCKET).register(context ->
+					new EmptyItemFluidStorage(context, bucket -> ItemVariant.of(source.getBucket()), source, FluidConstants.BUCKET));
+			})
+			.register();
 
 	// Load this class
 

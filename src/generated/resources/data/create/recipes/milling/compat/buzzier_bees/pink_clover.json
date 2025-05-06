@@ -10,7 +10,7 @@
   "type": "create:milling",
   "ingredients": [
     {
-      "item": "buzzier_bees:buttercup"
+      "item": "buzzier_bees:pink_clover"
     }
   ],
   "processingTime": 50,

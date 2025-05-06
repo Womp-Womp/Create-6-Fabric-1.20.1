@@ -21,6 +21,10 @@ import com.simibubi.create.content.processing.burner.BlazeBurnerBlock.HeatLevel;
 import com.simibubi.create.foundation.blockEntity.IMergeableBE;
 import com.simibubi.create.foundation.blockEntity.IMultiBlockEntityContainer;
 
+import net.minecraftforge.common.IPlantable;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.level.BlockEvent;
+
 import net.createmod.catnip.nbt.NBTProcessors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -39,7 +43,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.GameRules;
@@ -61,14 +64,6 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.material.FluidState;
-
-import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.item.PlayerInventoryStorage;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-
-import io.github.fabricators_of_create.porting_lib.common.util.IPlantable;
-import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
 
 public class BlockHelper {
 	private static final List<IntegerProperty> COUNT_STATES = List.of(
@@ -216,20 +211,15 @@ public class BlockHelper {
 				droppedItemCallback.accept(itemStack);
 			}
 
-			// Simulating IceBlock#playerDestroy. Not calling method directly as it would drop item
-			// entities as a side-effect
-			if (state.getBlock() instanceof IceBlock
-				&& EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, usedTool) == 0) {
-				if (world.dimensionType()
-					.ultraWarm())
-					return;
-
-				BlockState blockstate = world.getBlockState(pos.below());
-				if (blockstate.blocksMotion() || blockstate.liquid()) {
-					world.setBlockAndUpdate(pos, Blocks.WATER.defaultBlockState());
-					afterBreak(world, player, pos, state, blockEntity);
+			// Simulating IceBlock#playerDestroy. Not calling method directly as
+			// it would roll the loot table (or crash if the player is null)
+			if (state.getBlock() instanceof IceBlock && EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, usedTool) == 0) {
+				if (!world.dimensionType().ultraWarm()) {
+					BlockState below = world.getBlockState(pos.below());
+					if (below.blocksMotion() || below.liquid()) {
+						fluidState = IceBlock.meltsInto().getFluidState();
+					}
 				}
-				return;
 			}
 
 			state.spawnAfterBreak((ServerLevel) world, pos, ItemStack.EMPTY, true);

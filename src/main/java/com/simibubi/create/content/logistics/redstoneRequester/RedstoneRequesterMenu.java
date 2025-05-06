@@ -14,14 +14,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.MenuType;
-
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.SlottedStorage;
-
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
-import io.github.fabricators_of_create.porting_lib.transfer.item.SlotItemHandler;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.SlotItemHandler;
 
 public class RedstoneRequesterMenu extends GhostItemMenu<RedstoneRequesterBlockEntity> {
 
@@ -75,11 +72,17 @@ public class RedstoneRequesterMenu extends GhostItemMenu<RedstoneRequesterBlockE
 	protected void saveData(RedstoneRequesterBlockEntity contentHolder) {
 		List<BigItemStack> stacks = contentHolder.encodedRequest.stacks();
 		ArrayList<BigItemStack> list = new ArrayList<>();
-		for (int i = 0; i < ghostInventory.getSlotCount(); i++)
-			list.add(new BigItemStack(ghostInventory.getStackInSlot(i)
-				.copyWithCount(1), i < stacks.size() ? stacks.get(i).count : 1));
+		for (int i = 0; i < ghostInventory.getSlotCount(); i++) {
+			ItemStack stackInSlot = ghostInventory.getStackInSlot(i);
+			if (stackInSlot.isEmpty())
+				continue;
+			list.add(new BigItemStack(stackInSlot.copyWithCount(1), i < stacks.size() ? stacks.get(i).count : 1));
+		}
 
-		contentHolder.encodedRequest = new PackageOrder(list);
+		PackageOrderWithCrafts newRequest = new PackageOrderWithCrafts(new PackageOrder(list), contentHolder.encodedRequest.orderedCrafts());
+		if (!newRequest.orderedStacksMatchOrderedRecipes())
+			newRequest = PackageOrderWithCrafts.simple(newRequest.stacks());
+		contentHolder.encodedRequest = newRequest;
 		contentHolder.sendData();
 	}
 

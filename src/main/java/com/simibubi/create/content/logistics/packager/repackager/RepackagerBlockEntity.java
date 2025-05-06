@@ -13,24 +13,16 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-
-import io.github.fabricators_of_create.porting_lib.transfer.TransferUtil;
-import io.github.fabricators_of_create.porting_lib.transfer.callbacks.TransactionCallback;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
 
 public class RepackagerBlockEntity extends PackagerBlockEntity {
 
-	public PackageDefragmenter defragmenter;
+	public PackageRepackageHelper repackageHelper;
 
 	public RepackagerBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
 		super(typeIn, pos, state);
-		defragmenter = new PackageDefragmenter();
+		repackageHelper = new PackageRepackageHelper();
 	}
 
 	public boolean unwrapBox(ItemStack box, TransactionContext ctx) {
@@ -60,7 +52,8 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 	}
 
 	@Override
-	public void recheckIfLinksPresent() {}
+	public void recheckIfLinksPresent() {
+	}
 
 	@Override
 	public boolean redstoneModeActive() {
@@ -68,14 +61,16 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 	}
 
 	public void attemptToSend(List<PackagingRequest> queuedRequests) {
-		if (queuedRequests == null && (!heldBox.isEmpty() || animationTicks != 0))
+		if (!heldBox.isEmpty() || animationTicks != 0 || buttonCooldown > 0)
+			return;
+		if (!queuedExitingPackages.isEmpty())
 			return;
 
 		Storage<ItemVariant> targetInv = targetInventory.getInventory();
 		if (targetInv == null || targetInv instanceof PackagerItemHandler)
 			return;
 
-		attemptToDefrag(targetInv);
+		attemptToRepackage(targetInv);
 		if (heldBox.isEmpty())
 			return;
 
@@ -84,8 +79,8 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 			PackageItem.addAddress(heldBox, signBasedAddress);
 	}
 
-	protected void attemptToDefrag(Storage<ItemVariant> targetInv) {
-		defragmenter.clear();
+	protected void attemptToRepackage(Storage<ItemVariant> targetInv) {
+		repackageHelper.clear();
 		int completedOrderId = -1;
 
 		for (StorageView<ItemVariant> view : targetInv.nonEmptyViews()) {
@@ -93,7 +88,7 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 			if (!PackageItem.isPackage(resource))
 				continue;
 
-			if (!defragmenter.isFragmented(resource)) {
+			if (!repackageHelper.isFragmented(resource)) {
 				try (Transaction t = Transaction.openOuter()) {
 					if (view.extract(resource, 1, t) == 1) {
 						t.commit();
@@ -107,7 +102,7 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 			}
 
 			ItemStack stack = resource.toStack(TransferUtil.truncateLong(view.getAmount()));
-			completedOrderId = defragmenter.addPackageFragment(stack);
+			completedOrderId = repackageHelper.addPackageFragment(stack);
 			if (completedOrderId != -1)
 				break;
 		}
@@ -115,7 +110,7 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 		if (completedOrderId == -1)
 			return;
 
-		List<ItemStack> boxesToExport = defragmenter.repack(completedOrderId);
+		List<BigItemStack> boxesToExport = repackageHelper.repack(completedOrderId, level.getRandom());
 
 		try (Transaction t = Transaction.openOuter()) {
 			for (StorageView<ItemVariant> view : targetInv.nonEmptyViews()) {
@@ -132,18 +127,7 @@ public class RepackagerBlockEntity extends PackagerBlockEntity {
 				return;
 			}
 
-			heldBox = boxesToExport.get(0)
-				.copy();
-			animationInward = false;
-			animationTicks = CYCLE;
-
-			for (int i = 1; i < boxesToExport.size(); i++) {
-				ItemStack stack = boxesToExport.get(i);
-				if (targetInv.insert(ItemVariant.of(stack), stack.getCount(), t) != stack.getCount()) {
-					return;
-				}
-			}
-
+			queuedExitingPackages.addAll(boxesToExport);
 			t.commit();
 		}
 

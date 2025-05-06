@@ -7,8 +7,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.Create;
@@ -21,7 +19,6 @@ import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBehaviour;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlock;
 import com.simibubi.create.content.logistics.factoryBoard.FactoryPanelBlockEntity;
 import com.simibubi.create.content.logistics.packagePort.frogport.FrogportBlockEntity;
-import com.simibubi.create.content.logistics.packager.fabric.InventoryIdentifier;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour.RequestType;
 import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlock;
 import com.simibubi.create.content.logistics.packagerLink.PackagerLinkBlockEntity;
@@ -38,8 +35,10 @@ import com.simibubi.create.foundation.blockEntity.behaviour.inventory.VersionedI
 import com.simibubi.create.foundation.item.ItemHelper;
 
 import net.createmod.catnip.data.Iterate;
-import net.createmod.catnip.math.BlockFace;
 import net.createmod.catnip.nbt.NBTHelper;
+
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -56,17 +55,12 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 
-import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
-import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
-import net.fabricmc.fabric.api.transfer.v1.storage.StorageView;
-import net.fabricmc.fabric.api.transfer.v1.storage.base.SidedStorageBlockEntity;
-import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
-import net.fabricmc.fabric.api.transfer.v1.transaction.TransactionContext;
-
-import io.github.fabricators_of_create.porting_lib.transfer.callbacks.TransactionCallback;
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemHandlerHelper;
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
-import io.github.fabricators_of_create.porting_lib.util.StorageProvider;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.ItemStackHandler;
 
 public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorageBlockEntity {
 
@@ -78,7 +72,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 	public ItemStack heldBox;
 	public ItemStack previouslyUnwrapped;
 
-	public List<ItemStack> queuedExitingPackages;
+	public List<BigItemStack> queuedExitingPackages;
 
 	public PackagerItemHandler inventory;
 
@@ -136,7 +130,13 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 			previouslyUnwrapped = ItemStack.EMPTY;
 
 			if (!level.isClientSide() && !queuedExitingPackages.isEmpty() && heldBox.isEmpty()) {
-				heldBox = queuedExitingPackages.remove(0);
+				BigItemStack entry = queuedExitingPackages.get(0);
+				heldBox = entry.stack.copy();
+
+				entry.count--;
+				if (entry.count <= 0)
+					queuedExitingPackages.remove(0);
+
 				animationInward = false;
 				animationTicks = CYCLE;
 				notifyUpdate();
@@ -316,9 +316,9 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 	public boolean isTooBusyFor(RequestType type) {
 		int queue = queuedExitingPackages.size();
 		return queue >= switch (type) {
-		case PLAYER -> 50;
-		case REDSTONE -> 20;
-		case RESTOCK -> 10;
+			case PLAYER -> 50;
+			case REDSTONE -> 20;
+			case RESTOCK -> 10;
 		};
 	}
 
@@ -348,8 +348,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 		if (items.isEmpty())
 			return true;
 
-		PackageOrder orderContext = PackageItem.getOrderContext(box);
-
+		PackageOrderWithCrafts orderContext = PackageItem.getOrderContext(box);
 		Direction facing = getBlockState().getOptionalValue(PackagerBlock.FACING).orElse(Direction.UP);
 		BlockPos target = worldPosition.relative(facing.getOpposite());
 		BlockState targetState = level.getBlockState(target);
@@ -396,7 +395,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 		boolean finalLinkInOrder = false;
 		int packageIndexAtLink = 0;
 		boolean finalPackageAtLink = false;
-		PackageOrder orderContext = null;
+		PackageOrderWithCrafts orderContext = null;
 		boolean requestQueue = queuedRequests != null;
 
 		if (requestQueue && !queuedRequests.isEmpty()) {
@@ -411,7 +410,8 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 			orderContext = nextRequest.context();
 		}
 
-		Outer: for (int i = 0; i < PackageItem.SLOTS; i++) {
+		Outer:
+		for (int i = 0; i < PackageItem.SLOTS; i++) {
 			boolean continuePacking = true;
 
 			while (continuePacking) {
@@ -507,7 +507,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 			plbe.behaviour.deductFromAccurateSummary(extractedItems);
 
 		if (!heldBox.isEmpty() || animationTicks != 0) {
-			queuedExitingPackages.add(createdBox);
+			queuedExitingPackages.add(new BigItemStack(createdBox, 1));
 			return;
 		}
 
@@ -536,11 +536,14 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 			return null;
 		for (boolean front : Iterate.trueAndFalse) {
 			SignText text = sign.getText(front);
+			String address = "";
 			for (Component component : text.getMessages(false)) {
-				String address = component.getString();
-				if (!address.isBlank())
-					return address;
+				String string = component.getString();
+				if (!string.isBlank())
+					address += string.trim() + " ";
 			}
+			if (!address.isBlank())
+				return address.trim();
 		}
 		return null;
 	}
@@ -561,7 +564,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 		previouslyUnwrapped = ItemStack.of(compound.getCompound("InsertedBox"));
 		if (clientPacket)
 			return;
-		queuedExitingPackages = NBTHelper.readItemList(compound.getList("QueuedPackages", Tag.TAG_COMPOUND));
+		queuedExitingPackages = NBTHelper.readCompoundList(compound.getList("QueuedExitingPackages", Tag.TAG_COMPOUND), BigItemStack::read);
 		if (compound.contains("LastSummary"))
 			availableItems = InventorySummary.read(compound.getCompound("LastSummary"));
 	}
@@ -577,7 +580,7 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 		compound.put("InsertedBox", previouslyUnwrapped.serializeNBT());
 		if (clientPacket)
 			return;
-		compound.put("QueuedPackages", NBTHelper.writeItemList(queuedExitingPackages));
+		compound.put("QueuedExitingPackages", NBTHelper.writeCompoundList(queuedExitingPackages, BigItemStack::write));
 		if (availableItems != null)
 			compound.put("LastSummary", availableItems.write());
 	}
@@ -586,8 +589,11 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 	public void destroy() {
 		super.destroy();
 		ItemHelper.dropContents(level, worldPosition, inventory);
-		queuedExitingPackages.forEach(stack -> Containers.dropItemStack(level, worldPosition.getX(),
-			worldPosition.getY(), worldPosition.getZ(), stack));
+		queuedExitingPackages.forEach(bigStack -> {
+			for (int i = 0; i < bigStack.count; i++)
+				Containers.dropItemStack(level, worldPosition.getX(), worldPosition.getY(), worldPosition.getZ(),
+					bigStack.stack.copy());
+		});
 		queuedExitingPackages.clear();
 	}
 
@@ -610,12 +616,21 @@ public class PackagerBlockEntity extends SmartBlockEntity implements SidedStorag
 		return animationTicks >= CYCLE / 2 ? ItemStack.EMPTY : heldBox;
 	}
 
-	// fabric: forge's approach is not viable. Introduced InventoryIdentifier. Will upstream soon
-	public boolean isTargetingSameInventory(@Nullable InventoryIdentifier identifier) {
-		if (identifier == null || !this.targetInventory.hasInventory())
+	public boolean isTargetingSameInventory(@Nullable IdentifiedInventory inventory) {
+		if (inventory == null)
 			return false;
-		BlockFace target = this.targetInventory.getTarget();
-		return identifier.contains(target);
+
+		Storage<ItemVariant> targetHandler = this.targetInventory.getInventory();
+		if (targetHandler == null)
+			return false;
+
+		if (inventory.identifier() != null) {
+			BlockFace face = this.targetInventory.getTarget().getOpposite();
+			return inventory.identifier().contains(face);
+		} else {
+			// fabric: forge's fallback approach is not viable.
+			return false;
+		}
 	}
 
 }

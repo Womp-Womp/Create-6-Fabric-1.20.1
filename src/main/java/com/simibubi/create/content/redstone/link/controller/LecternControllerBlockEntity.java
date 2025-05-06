@@ -7,13 +7,6 @@ import com.simibubi.create.AllItems;
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import com.simibubi.create.foundation.utility.fabric.ReachUtil;
-
-import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
-
-import net.fabricmc.api.EnvType;
-
-import net.fabricmc.api.Environment;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -30,10 +23,10 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
-
-import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.fml.DistExecutor;
 
 public class LecternControllerBlockEntity extends SmartBlockEntity {
 
@@ -157,7 +150,7 @@ public class LecternControllerBlockEntity extends SmartBlockEntity {
 
 	public void setController(ItemStack newController) {
 		if (newController != null) {
-			controllerNbt = newController.getTag();
+			controllerNbt = newController.getOrCreateTag();
 			AllSoundEvents.CONTROLLER_PUT.playOnServer(level, worldPosition);
 		}
 	}
@@ -196,7 +189,7 @@ public class LecternControllerBlockEntity extends SmartBlockEntity {
 
 	private ItemStack createLinkedController() {
 		ItemStack stack = AllItems.LINKED_CONTROLLER.asStack();
-		stack.setTag(controllerNbt);
+		stack.setTag(controllerNbt.copy());
 		return stack;
 	}
 

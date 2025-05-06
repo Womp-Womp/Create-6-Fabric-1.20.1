@@ -37,12 +37,10 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
-
-import net.fabricmc.api.EnvType;
-
-import io.github.fabricators_of_create.porting_lib.transfer.item.ItemStackHandler;
-import io.github.fabricators_of_create.porting_lib.transfer.item.RecipeWrapper;
-import io.github.fabricators_of_create.porting_lib.util.EnvExecutor;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.items.ItemStackHandler;
+import net.minecraftforge.items.wrapper.RecipeWrapper;
 
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
@@ -125,8 +123,13 @@ public class StockKeeperTransferHandler implements IRecipeTransferHandler<StockK
 		if (!doTransfer)
 			return null;
 
-		CraftableBigItemStack cbis = new CraftableBigItemStack(recipe.getResultItem(player.level()
-			.registryAccess()), recipe);
+		ItemStack result = recipe.getResultItem(player.level()
+			.registryAccess());
+
+		if (result.isEmpty())
+			return null;
+
+		CraftableBigItemStack cbis = new CraftableBigItemStack(result, recipe);
 
 		screen.recipesToOrder.add(cbis);
 		screen.searchBox.setValue("");

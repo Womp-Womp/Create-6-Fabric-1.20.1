@@ -1,10 +1,10 @@
-package com.simibubi.create.api.unpacking;
+package com.simibubi.create.api.packager.unpacking;
 
 import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
-import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
+import com.simibubi.create.content.logistics.stockTicker.PackageOrderWithCrafts;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,7 +19,7 @@ public enum VoidingUnpackingHandler implements UnpackingHandler {
 	INSTANCE;
 
 	@Override
-	public boolean unpack(Level level, BlockPos pos, BlockState state, Direction side, List<ItemStack> items, @Nullable PackageOrder order, boolean simulate) {
+	public boolean unpack(Level level, BlockPos pos, BlockState state, Direction side, List<ItemStack> items, @Nullable PackageOrderWithCrafts orderContext, boolean simulate) {
 		return true;
 	}
 }

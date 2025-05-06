@@ -194,6 +194,9 @@ public class OpenEndedPipe extends FlowSource {
 		if (waterlog && fluid.getFluid() != Fluids.WATER)
 			return false;
 
+		if (!AllConfigs.server().fluids.pipesPlaceFluidSourceBlocks.get())
+			return true;
+
 		if (world.dimensionType()
 			.ultraWarm() && FluidHelper.isTag(fluid, FluidTags.WATER)) {
 			int i = outputPos.getX();
@@ -210,9 +213,6 @@ public class OpenEndedPipe extends FlowSource {
 			TransactionCallback.onSuccess(ctx, () -> world.scheduleTick(outputPos, Fluids.WATER, 1));
 			return true;
 		}
-
-		if (!AllConfigs.server().fluids.pipesPlaceFluidSourceBlocks.get())
-			return true;
 
 		world.setBlock(outputPos, fluid.getFluid()
 			.defaultFluidState()

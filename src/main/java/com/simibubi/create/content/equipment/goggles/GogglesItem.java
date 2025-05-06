@@ -18,7 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.DispenserBlock;
 
-public class GogglesItem extends Item {
+public class GogglesItem extends Item implements Equipable {
 
 	private static final List<Predicate<Player>> IS_WEARING_PREDICATES = new ArrayList<>();
 	static {
@@ -30,22 +30,13 @@ public class GogglesItem extends Item {
 		DispenserBlock.registerBehavior(this, ArmorItem.DISPENSE_ITEM_BEHAVIOR);
 	}
 
-	// Set in properties
-	public static EquipmentSlot getEquipmentSlot(ItemStack stack) {
+	@Override
+	public EquipmentSlot getEquipmentSlot() {
 		return EquipmentSlot.HEAD;
 	}
 
 	public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
-		ItemStack itemstack = playerIn.getItemInHand(handIn);
-		EquipmentSlot equipmentslottype = Mob.getEquipmentSlotForItem(itemstack);
-		ItemStack itemstack1 = playerIn.getItemBySlot(equipmentslottype);
-		if (itemstack1.isEmpty()) {
-			playerIn.setItemSlot(equipmentslottype, itemstack.copy());
-			itemstack.setCount(0);
-			return new InteractionResultHolder<>(InteractionResult.SUCCESS, itemstack);
-		} else {
-			return new InteractionResultHolder<>(InteractionResult.FAIL, itemstack);
-		}
+		return swapWithEquipmentSlot(this, worldIn, playerIn, handIn);
 	}
 
 	public static boolean isWearingGoggles(Player player) {

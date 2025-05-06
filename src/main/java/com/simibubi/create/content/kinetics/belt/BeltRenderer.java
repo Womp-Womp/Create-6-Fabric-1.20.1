@@ -9,7 +9,6 @@ import com.mojang.math.Axis;
 import com.simibubi.create.AllBlocks;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.AllSpriteShifts;
-import com.simibubi.create.compat.Mods;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
 import com.simibubi.create.content.kinetics.belt.transport.BeltInventory;
 import com.simibubi.create.content.kinetics.belt.transport.TransportedItemStack;
@@ -20,14 +19,13 @@ import com.simibubi.create.foundation.render.ShadowRenderHelper;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.engine_room.flywheel.lib.model.baked.PartialModel;
 import dev.engine_room.flywheel.lib.transform.TransformStack;
-import io.github.foundationgames.sandwichable.items.ItemsRegistry;
 import net.createmod.catnip.animation.AnimationTickHolder;
-import net.createmod.catnip.data.Iterate;
-import net.createmod.catnip.levelWrappers.WrappedLevel;
-import net.createmod.catnip.math.AngleHelper;
 import net.createmod.catnip.render.CachedBuffers;
 import net.createmod.catnip.render.SpriteShiftEntry;
 import net.createmod.catnip.render.SuperByteBuffer;
+import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.levelWrappers.WrappedLevel;
+import net.createmod.catnip.math.AngleHelper;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -294,7 +292,7 @@ public class BeltRenderer extends SafeBlockEntityRenderer<BeltBlockEntity> {
 			if (sandwich)
 				blockItem = false;
 			int count = 0;
-			if (mc.player.getEyePosition(1.0F).distanceTo(itemPos) < 16)
+			if (be.getLevel() instanceof PonderLevel || mc.player.getEyePosition(1.0F).distanceTo(itemPos) < 16)
 				count = (int) (Mth.log2((int) (transported.stack.getCount()))) / 2;
 			Random r = new Random(transported.angle);
 
