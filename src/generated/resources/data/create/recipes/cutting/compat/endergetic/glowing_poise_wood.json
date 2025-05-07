@@ -3,20 +3,20 @@
     {
       "condition": "fabric:all_mods_loaded",
       "values": [
-        "ars_nouveau"
+        "endergetic"
       ]
     }
   ],
   "type": "create:cutting",
   "ingredients": [
     {
-      "item": "ars_nouveau:blue_archwood_wood"
+      "item": "endergetic:glowing_poise_wood"
     }
   ],
   "processingTime": 50,
   "results": [
     {
-      "item": "ars_nouveau:stripped_blue_archwood_wood"
+      "item": "endergetic:stripped_poise_wood"
     }
   ]
 }

@@ -3,14 +3,14 @@
     {
       "condition": "fabric:all_mods_loaded",
       "values": [
-        "ars_nouveau"
+        "ars_elemental"
       ]
     }
   ],
   "type": "create:cutting",
   "ingredients": [
     {
-      "item": "ars_nouveau:stripped_blue_archwood_wood"
+      "item": "ars_elemental:stripped_yellow_archwood_log"
     }
   ],
   "processingTime": 50,
