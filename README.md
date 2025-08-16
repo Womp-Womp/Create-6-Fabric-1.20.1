@@ -34,3 +34,8 @@ Looking to make an addon for Create? A template mod for a Fabric addon can be fo
 [here](https://github.com/Fabricators-of-Create/create-fabric-addon-template),
 and a template for a multi-loader addon with Architectury can be found
 [here](https://github.com/Fabricators-of-Create/create-multiloader-addon-template).
+
+### Repository Architecture
+
+A high-level overview of the project's package structure can be found in [docs/repo-architecture.md](docs/repo-architecture.md).
+
